@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(!.env.example)",
+      "Read(.npmrc)",
+      "Read(*.pem)",
+      "Read(*.key)",
+      "Read(*.p12)",
+      "Read(*.pfx)",
+      "Read(secrets/**)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(package-lock.json)",
+      "Read(dist/**)",
+      "Read(coverage/**)",
+      "Edit(.env)",
+      "Edit(.env.*)",
+      "Edit(!.env.example)",
+      "Edit(.npmrc)",
+      "Edit(*.pem)",
+      "Edit(*.key)",
+      "Edit(*.p12)",
+      "Edit(*.pfx)",
+      "Edit(secrets/**)"
+    ]
+  }
+}
