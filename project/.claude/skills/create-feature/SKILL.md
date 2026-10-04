@@ -15,10 +15,8 @@ Do not load it for inline work — follow Spec Rules and still run Quality Gates
 - NEVER edit `specs/current/` before the feature closes — deltas live in the change doc until the merge.
 - NEVER write code in Approach — names, types and responsibilities only.
 - NEVER expand scope without explicit user authorization.
-- NEVER mark a task `[x]` without gate results in its line.
 - ALWAYS explore existing code before proposing anything.
-- ALWAYS follow Working Protocol and Commit Authorship — NEVER restate or shorten them.
-- ALWAYS create branch `feat/<feature-name>` before the first staged change, unless there is no repo.
+- ALWAYS follow Working Protocol — NEVER restate or shorten it.
 
 ## Decision Gates
 
@@ -47,11 +45,11 @@ Do not load it for inline work — follow Spec Rules and still run Quality Gates
 4. Derive the tasks from Approach — every task lists the RFs it `covers`, every ADDED or MODIFIED RF is covered by a task.
 5. Create `specs/changes/<feature-name>.md` from `specs/changes/change-template.md` with deltas, Approach and tasks.
 6. Stop and wait for approval of the change doc.
-7. Create branch `feat/<feature-name>`.
+7. Create branch `feat/<feature-name>` before the first staged change, unless there is no repo.
 8. Implement ONE task → run the Working Protocol close sequence.
 9. Repeat step 8 only after explicit approval — per task or as a batch.
 10. When every task is `[x]` and every ADDED or MODIFIED RF `test:` is `✅`: merge the deltas into `specs/current/` — ADDED: append and advance `Next ID` · MODIFIED: replace the RF and its scenarios · REMOVED: delete the RF.
-11. Set Progress to `feature closed` and `Merged into specs: yes` → stage → propose `docs(specs): merge <feature-name> into specs` per Commit Authorship.
+11. Set Progress to `feature closed` and `Merged into specs: yes` → stage → propose `docs(specs): merge <feature-name> into specs` per Working Protocol.
 
 ## Output Contract
 
@@ -69,10 +67,3 @@ Final:
 Tasks: X/X · Commits: X · Files modified: X · RFs: X/X ✅
 Specs merged: <files>
 ```
-
-## References
-
-- `docs/architecture.md` — layers and constraints
-- `docs/decisions/000-template.md` — ADR for project-wide decisions
-- `specs/changes/change-template.md` — change doc structure
-- `specs/current/spec-template.md` — living spec structure

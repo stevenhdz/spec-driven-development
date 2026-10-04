@@ -10,13 +10,14 @@
 - App folder: [e.g. `app/` — run all commands from there]
 - Testing: [e.g. Vitest · Jest · pytest]
 - Lint: [e.g. oxlint · eslint · ruff]
+- Run locally: [e.g. `npm run dev` · `uvicorn app.main:app --reload`]
 
 ## Layer Structure — Vertical Slice
 ```
 [src]/
   [features]/
     [feature-name]/
-      [entry]          ← entry layer: UI component · HTTP route · CLI command — no business rules
+      [entry]          ← entry layer: UI component · HTTP route · CLI command
       [logic]          ← business rules and state: hook · service · use case
       [types]          ← types, schemas, contracts — no runtime logic
       [tests]          ← tests of the slice
@@ -27,8 +28,8 @@
 ## Conventions
 - Naming: [e.g. PascalCase components, camelCase functions · snake_case modules and functions]
 - One feature = one folder in `[features]/`
-- Each slice exports only through its public API file
 - NEVER import a slice's internal files — always through its public API
+- Every `.md` follows `docs/doc-rules.md`
 
 ## Hard Rules
 - NEVER use: [forbidden patterns — e.g. `any`, default exports, class components · global mutable state]
@@ -72,25 +73,17 @@ Classify every request before touching code.
 - TDD ON: NEVER keep a test that did not fail first.
 - A test fails because of a bug in the code: fix the code, NEVER the test.
 
-## Documentation Rules
-- Every `.md` follows `docs/doc-rules.md`.
-
 ## Chat Replies
 - Reply in the fewest words that stay unambiguous — no greeting, no restating the request, no closing summary.
 - When a skill has an Output Contract: emit it and add nothing around it.
 - NEVER shorten RFs, change docs, questions to the human, or the options after a failing gate.
-
-## Commit Authorship
-- NEVER run `git commit` — that is always the human's action
-- ALWAYS stage the files and propose the commit message
-- ALWAYS wait for the human to execute the commit
-- Commit message format: `type(scope): description` — type is one of `feat | fix | refactor | test | docs | chore`
 
 ## Working Protocol — STRICT
 These are Hard Rules. Any violation is a protocol breach.
 
 - NEVER start a new task without explicit approval — per task ("yes") or as a batch ("go up to ID-00N")
 - NEVER assume silence = approval — wait for a clear yes
+- Commit message format: `type(scope): description` — type is one of `feat | fix | refactor | test | docs | chore`
 - NEVER skip the task close sequence — it is mandatory after every task:
   ```
   1. Run Quality Gates
@@ -105,16 +98,12 @@ These are Hard Rules. Any violation is a protocol breach.
   ```
 - Active feature = the `specs/changes/*.md` (not the template) whose Progress is not `feature closed`
 - If something is unclear: ask ONE specific question — stop and wait
-- If a gate fails: report the exact error, propose options — NEVER self-fix silently
 
 ## Code Philosophy — KISS
-- NEVER over-engineer — the simplest solution that works is the right one
-- NEVER add abstractions for use cases that do not exist yet (YAGNI)
-- NEVER create a class/layer/pattern if a function is enough
-- NEVER add dependencies without explicit approval
+- NEVER over-engineer: the simplest solution that works — no abstraction, class or layer for a use case that does not exist yet (YAGNI)
 
 ## Quality Gates — Run in every task close
-Run in this exact order. Stop and report if any fails — NEVER continue with a failing gate.
+Run in this exact order. If any fails: stop, report the exact error, propose options — NEVER continue with a failing gate, NEVER self-fix silently.
 
 | Step | Command | Run when | Blocks if |
 |------|---------|----------|-----------|
@@ -123,12 +112,10 @@ Run in this exact order. Stop and report if any fails — NEVER continue with a 
 | 3. Tests | [e.g. `npm test -- --reporter=dot` · `pytest -q`] | always | any test fails |
 | 4. Audit | [e.g. `npm audit --audit-level=high` · `pip-audit`] | dependency manifest or lockfile changed | high or critical found |
 
+- Status: `✅` pass · `❌ <gate>` fail · `⏭️` skipped · `-` pending
+- Gates format: `lint ✅ · build ✅ · tests ✅ (X passing) · audit ⏭️`
 - No build step in the stack: mark Build `⏭️`.
 - Passing gate: report it in the Gates format only — NEVER paste its output.
 - Failing gate: quote only the failing lines.
 - Gate not run → mark it `⏭️` in the task line.
 - Docs-only change (`.md` files, comments): skip all gates, re-read the edited files against `docs/doc-rules.md`, mark Gates `⏭️`.
-
-## Key Commands
-- [Run locally — e.g. `npm run dev` · `uvicorn app.main:app --reload`]
-- Gate commands live in Quality Gates.
