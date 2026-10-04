@@ -14,7 +14,7 @@ The method is stack-agnostic: fill the `[placeholders]` with your stack (see [Ad
 
 ## Quick start
 1. Copy everything inside `project/` to the root of your repo — include the hidden `.claude/` folder.
-2. Fill the `[placeholders]` in `CLAUDE.md` — Product, Stack, Layer Structure, Conventions, Quality Gates, Key Commands.
+2. Fill the `[placeholders]` in `CLAUDE.md` — Product, Stack, Layer Structure, Conventions, Hard Rules, Spec Rules, Quality Gates.
 3. Review `docs/architecture.md` — map its layers to your stack and add your decisions.
 4. Add your sensitive and bulky paths to `.claude/settings.json` — the agent will never read them.
 5. Run `git init` if the repo has none — the agent stages, you commit.
@@ -28,8 +28,8 @@ Agent:  Size: full cycle — creates the first slice, adds 7 RFs and new depende
         Change doc written: specs/changes/tic-tac-toe-game.md — approve?
 You:    yes
 Agent:  [ID-001 done] Gates: lint ✅ · build ✅ · tests ✅ — Commit message: chore(app): …
-        ID-001 done. Move to ID-002?
-You:    yes          ← repeat per task, or "go up to ID-004" for all
+        Next: ID-002 — commit → /clear → go
+You:    (commit) /clear → go   ← repeat per task, or "go up to ID-004" for all
 Agent:  [Feature closed] Tasks: 4/4 · RFs: 7/7 ✅ — Specs merged: specs/current/game.md
 ```
 
@@ -39,7 +39,9 @@ Agent:  [Feature closed] Tasks: 4/4 · RFs: 7/7 ✅ — Specs merged: specs/curr
 | `<request>, inline` | Small change: no change doc, one commit |
 | `<request>, as a feature` | Full cycle: change doc → approval → tasks |
 | `yes` | Approve the change doc, or start the next task |
+| `go` | Run the active feature's next step — send it after the commit and `/clear` |
 | `go up to ID-003` | Run tasks up to ID-003 without asking between them |
+| `ok` | Inside a batch: you committed — the next task starts |
 | `fix: <what>` | Send the last task back after reviewing its diff |
 | `explain` | Get the long version — replies are short on purpose |
 
@@ -81,7 +83,7 @@ flowchart LR
     classDef human fill:#fde68a,stroke:#b45309,color:#1f2937
     class A,V human
 ```
-Yellow = you act. Inline changes skip 1–3 and 6: the agent edits the RF in `specs/current/`, then implements and verifies.
+Yellow = you act. Inline changes skip 1–3 and 6: the agent adds or edits the RF in `specs/current/`, then implements and verifies.
 
 | Phase | The agent | You | Result |
 |-------|-----------|-----|--------|
@@ -90,13 +92,13 @@ Yellow = you act. Inline changes skip 1–3 and 6: the agent edits the RF in `sp
 | 2 · Plan | Designs the solution and splits it into tasks | — | change doc |
 | 3 · Approve | Waits, then creates branch `feat/<feature>` | Read and approve the change doc | branch |
 | 4 · Implement | One task: failing test first, then the code that passes it | — | code + tests |
-| 5 · Verify | Runs lint → build → tests → audit, stages, proposes a commit message | Review the diff, commit, say "yes" | 1 commit per task |
-| 6 · Archive | Copies the new rules into the living spec | Commit | updated spec |
+| 5 · Verify | Runs lint → build → tests → audit, stages, proposes a commit message | Review the diff, commit, `/clear`, say "go" | 1 commit per task |
+| 6 · Archive | Copies the new rules into the living spec | Commit, `/clear` | updated spec |
 
 ### Inline or full cycle?
 | | Inline | Full cycle |
 |---|--------|------------|
-| When | Changes at most one rule, one slice, no new dependency | Adds or removes rules, changes 2+ rules, touches 2+ slices, or adds a dependency |
+| When | Adds or changes at most one rule in an existing spec, one slice, no new dependency | Removes rules, adds or changes 2+ rules, needs a new spec, touches 2+ slices, or adds a dependency |
 | Change doc and tasks | No | Yes |
 | Your approval before code | No | Yes |
 | Commits | One | One per task, plus the merge |
@@ -109,7 +111,7 @@ Yellow = you act. Inline changes skip 1–3 and 6: the agent edits the RF in `sp
 - Files denied in `.claude/settings.json` are never read.
 - No git repo: branch, staging and commit are skipped and reported as `no repo`.
 - Changing code by hand? Edit its RF in `specs/current/` first.
-- Clear the chat after each feature — the change doc holds the state to resume.
+- Clear the chat (`/clear`) after each task commit — the change doc holds the state, `go` resumes it.
 
 ## Glossary
 | Term | Meaning |
@@ -128,6 +130,7 @@ Yellow = you act. Inline changes skip 1–3 and 6: the agent edits the RF in `sp
 |------|---------|
 | `project/CLAUDE.md` | Global rules the agent follows — a template: fill the `[placeholders]` |
 | `project/.claude/settings.json` | Files the agent cannot read: secrets and bulky files |
+| `project/.claude/agents/explorer.md` | Read-only explorer — maps multi-slice code and returns only a summary |
 | `project/.claude/skills/create-feature/` | The full-cycle skill — specify → plan → approve → implement → verify → archive |
 | `project/.claude/skills/_shared/skill-template.md` | Template for adding your own skills |
 | `project/docs/architecture.md` | Layers (frontend · backend · CLI) and decisions |
@@ -142,5 +145,5 @@ Any stack:
 - Specs: living spec per capability + deltas per change · RFC 2119 `MUST` in RFs · inline Gherkin `GIVEN | WHEN | THEN` · global RF IDs · RF ↔ task ↔ test traceability
 - Code: Vertical Slice · ADRs · KISS / YAGNI · business rules out of the entry layer (components, routes, CLI handlers)
 - Tests: behavior not implementation · mock only external boundaries · Arrange / Act / Assert · test name starts with the RF ID
-- Tokens: short chat replies · skills loaded on demand · short gate output · subagent for wide exploration · bulky files denied
+- Tokens: short chat replies · `/clear` between tasks · skills loaded on demand · short gate output · read-only explorer that returns only a summary · bulky files denied
 - Process: Quality Gates · human approves tasks and commits · Conventional Commits

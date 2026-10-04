@@ -23,6 +23,7 @@
       [tests]          ← tests of the slice
       [public API]     ← the only file other slices import (e.g. index.ts · __init__.py)
   [shared]/            ← only code used by 2+ slices — create when first needed
+  [composition]        ← app composition: wires slices together, no feature logic (e.g. App.tsx · server.ts · main.py)
 ```
 
 ## Conventions
@@ -42,8 +43,9 @@ Classify every request before touching code.
 
 | Full cycle (`.claude/skills/create-feature/SKILL.md`) if ANY is true | Inline if ALL are true |
 |----------------------------------------------------------------------|------------------------|
-| Adds or removes an RF | Modifies at most one existing RF, or none |
-| Modifies more than one RF | Touches one slice only |
+| Removes an RF | Adds or modifies at most one RF, in an existing spec file — or none |
+| Adds or modifies more than one RF | Removes no RF |
+| Needs a new spec file | Touches one slice only |
 | Touches more than one slice | Creates no slice |
 | Creates a slice | Adds no dependency |
 | Adds a dependency | |
@@ -61,7 +63,7 @@ Classify every request before touching code.
 - RFs describe behavior observable from outside: what a user sees, what an API returns, what a command prints.
 - NEVER change observable behavior before its RF is written:
   - Full cycle: the RF goes in Requirement Deltas of the change doc — approved before any code.
-  - Inline: edit the RF in `specs/current/` first, then test, then code — stage all three together.
+  - Inline: add or edit the RF in `specs/current/` first — a new RF takes the file's `Next ID` and advances it — then test, then code — stage all three together.
 - No observable behavior change (refactor, styling, docs, chore): NEVER edit RFs.
 - ALWAYS start the name of a test that covers an RF with its RF ID, in the form the test runner allows: [e.g. `ORDER-01 should [result] when [condition]` · `test_order_01_[result]_when_[condition]`].
 - Check an RF with [test command filtered by name — e.g. `npm test -- -t "<RF-ID>"` · `pytest -k "<rf_id>"`] — mark `test: ✅` only when every GIVEN/WHEN/THEN has a passing test.
@@ -81,20 +83,24 @@ Classify every request before touching code.
 ## Working Protocol — STRICT
 These are Hard Rules. Any violation is a protocol breach.
 
-- NEVER start a new task without explicit approval — per task ("yes") or as a batch ("go up to ID-00N")
+- NEVER start a new task without explicit approval — per task ("yes" or "go") or as a batch ("go up to ID-00N")
 - NEVER assume silence = approval — wait for a clear yes
+- "go" = approval of the active feature's Progress → `Next step`
+- "go" or "go up to ID-00N" in a new session or after `/clear`: load `.claude/skills/create-feature/SKILL.md` first
 - Commit message format: `type(scope): description` — type is one of `feat | fix | refactor | test | docs | chore`
-- NEVER skip the task close sequence — it is mandatory after every task:
+- NEVER skip the task close sequence — it is mandatory after every task and every inline change (inline: steps 1 and 3 only):
   ```
   1. Run Quality Gates
   2. Update the task line in specs/changes/<feature>.md: [x] + gates
      - Covered RFs: set `test: ✅` in Requirement Deltas per Spec Rules
      - Only if the plan changed: add a sub-bullet `deviation: <what>`
+     - Progress → `Next step:` the next task ID, or `merge specs` after the last task
   3. git add <files> → propose the commit message — stop and wait
      The human reviews `git diff --staged` and commits, or replies "fix: <what>" → fix → back to step 1
-  4. After the commit: confirm it with `git log -1`
+  4. After the commit — on the human's next message: confirm it with `git log -1`
      - Inside an approved batch: continue with the next task
-     - Otherwise ask: "ID-00X done. Move to ID-00X+1?" — stop and wait
+     - "go": start Progress → `Next step`
+     - Anything else: reply `Next: <Next step> — /clear → go` — stop and wait
   ```
 - Active feature = the `specs/changes/*.md` (not the template) whose Progress is not `feature closed`
 - If something is unclear: ask ONE specific question — stop and wait

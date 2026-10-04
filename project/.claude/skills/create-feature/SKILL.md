@@ -1,11 +1,11 @@
 ---
 name: create-feature
-description: "Trigger: create feature, new feature, implement feature, HU. Run the SDD cycle for substantial work: explore, document, implement, close."
+description: "Trigger: create feature, new feature, implement feature, HU, go, resume feature. Run the SDD cycle for substantial work: explore, document, implement, close."
 ---
 
 ## Activation Contract
 
-Load this skill when Change Size classifies the work as full cycle.
+Load this skill when Change Size classifies the work as full cycle, or on "go" / "go up to ID-00N" to resume the active feature.
 
 Do not load it for inline work — follow Spec Rules and still run Quality Gates.
 
@@ -31,15 +31,16 @@ Do not load it for inline work — follow Spec Rules and still run Quality Gates
 | Accepted change mid-feature | Update deltas and tasks in the same change doc — wait for approval |
 | Capability has no spec file | Agree its prefix in step 2 — create the file from `specs/current/spec-template.md` at the merge |
 | RF is REMOVED | Add a task that deletes its tests |
-| Human approves a range ("go up to ID-00N") | Run it as a batch — each task keeps its own gates, task line and commit |
+| Human approves a range ("go up to ID-00N") | Run it as a batch — each task keeps its own gates, task line and commit — its Next line is `commit → ok`, no `/clear` |
 | Inside a batch: gate fails, deviation, question, scope change, or `git log -1` lacks the previous task's commit | Stop the batch — back to per-task approval |
-| Batch ends | Report tasks done / commits / next task — wait |
+| Batch ends | Report tasks done / commits — `Next: <Next step> — /clear → go` — wait |
+| "go" or "go up to ID-00N" in a new session or after `/clear` | Working Protocol close step 4 → read the change doc and `docs/architecture.md` → continue from Progress → `Next step` (step 8 or 10) |
 | Technical blocker | Report with options — NEVER assume a solution |
-| No git repo or user said `no commit` | Skip branch and staging — report `no repo` |
+| No git repo or user said `no commit` | Skip branch and staging — report `no repo` — Next line: `/clear → go` |
 
 ## Execution Steps
 
-1. Read `docs/architecture.md`, the `specs/current/` files the feature touches, and the related code — when the code spans more than one slice, explore it with a subagent and keep only its summary: files, public API, current behavior.
+1. Read `docs/architecture.md`, the `specs/current/` files the feature touches, and the related code — when the code spans more than one slice, explore it with the `explorer` subagent (`.claude/agents/explorer.md`) and keep only its summary.
 2. Confirm goal, scope IN/OUT, TDD ON/OFF, RF deltas (ADDED / MODIFIED / REMOVED — `<RF-ID> — The system MUST …` + GIVEN/WHEN/THEN) and constraints.
 3. Design Approach from the RF deltas and the explored code: slices, types, state, logic placement, non-obvious decisions — every ADDED or MODIFIED RF maps to a line.
 4. Derive the tasks from Approach — every task lists the RFs it `covers`, every ADDED or MODIFIED RF is covered by a task.
@@ -59,6 +60,7 @@ Per task:
 Gates: lint ✅ · build ✅ · tests ✅ (X passing) · audit ⏭️
 Staged: <files>
 Commit message: feat(<scope>): description
+Next: <Next step> — commit → /clear → go
 ```
 
 Final:
@@ -66,4 +68,5 @@ Final:
 [Feature closed] <feature-name>
 Tasks: X/X · Commits: X · Files modified: X · RFs: X/X ✅
 Specs merged: <files>
+Next: commit → /clear
 ```

@@ -25,7 +25,7 @@ What must work when this is closed, and why it is needed.
 - Slices: [touched or created]
 - Types: [new or changed types and where they live]
 - State: [what is stored, what is derived]
-- Logic: [which hook owns which rule — what the component only reads]
+- Logic: [which logic-layer unit owns which rule — what the entry layer only calls]
 - Decision: [non-obvious choice] — discarded: [alternative and why]
 
 ## Constraints
@@ -38,6 +38,5 @@ What must work when this is closed, and why it is needed.
 - [ ] ID-003 — [description] | covers: —          | criteria: [done when] | gates: -
 
 ## Progress
-- Approved up to:
-- Next step:
+- Next step: ID-001
 - Merged into specs: no
