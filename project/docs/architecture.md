@@ -6,6 +6,7 @@ input ─► [entry layer] ─► [logic layer] ─► result ─► [entry laye
                                │
                                └─ shapes from [types]
 
+slice = [the unit that holds one feature in the chosen architecture — e.g. feature folder · module · package]
 slice ── [public API] ──► other slices · app composition
 [shared] ◄── imported by 2+ slices
 ```
@@ -29,7 +30,7 @@ slice ── [public API] ──► other slices · app composition
 ## Decisions made
 | Decision | Why | Discarded alternative |
 |----------|-----|-----------------------|
-| Vertical Slice per feature | A feature changes inside one folder | Folders per type (`components/`, `controllers/`, `services/`) |
+| [Architecture — e.g. Vertical Slice per feature] | [why it fits this project] | [discarded alternative and why] |
 | Business rules in the logic layer | Each rule has one home and is testable without the transport | Logic inside components, routes or handlers |
 
 - Project-specific decisions: add a row here, or an ADR from `docs/decisions/000-template.md` when it needs context and options.

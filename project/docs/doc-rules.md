@@ -10,5 +10,7 @@ Applies to every `.md` in this project.
 ## Status legend and Gates format
 `CLAUDE.md` → Quality Gates.
 
-## Skills
-Sections follow `.claude/skills/_shared/skill-template.md` in its order — omit References if empty.
+## Templates
+`templates/` — `spec.md` · `change.md` · `skill.md`.
+ADRs — `docs/decisions/000-template.md`.
+Skill sections follow `templates/skill.md` in its order — omit References if empty.

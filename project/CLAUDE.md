@@ -12,11 +12,11 @@
 - Lint: [e.g. oxlint · eslint · ruff]
 - Run locally: [e.g. `npm run dev` · `uvicorn app.main:app --reload`]
 
-## Layer Structure — Vertical Slice
+## Layer Structure — [architecture — e.g. Vertical Slice · Layered · Hexagonal]
 ```
 [src]/
   [features]/
-    [feature-name]/
+    <feature-name>/
       [entry]          ← entry layer: UI component · HTTP route · CLI command
       [logic]          ← business rules and state: hook · service · use case
       [types]          ← types, schemas, contracts — no runtime logic
@@ -30,13 +30,25 @@
 - Naming: [e.g. PascalCase components, camelCase functions · snake_case modules and functions]
 - One feature = one folder in `[features]/`
 - NEVER import a slice's internal files — always through its public API
-- Every `.md` follows `docs/doc-rules.md`
+- Every `.md` follows `docs/doc-rules.md` — new docs start from their template
 
 ## Hard Rules
 - NEVER use: [forbidden patterns — e.g. `any`, default exports, class components · global mutable state]
 - NEVER put business rules in the entry layer — extract them to the logic layer
-- NEVER read, print, stage or work around a file denied in `.claude/settings.json` — if a task needs a value from one, ask the human
+- NEVER over-engineer (KISS · YAGNI): the simplest solution that works — a function before a class, no abstraction or layer for a use case that does not exist yet
+- NEVER add a dependency without explicit approval
+- ALWAYS search (grep / glob) before opening a file — read only the line range the task needs
+- NEVER read the internal files of a slice the task does not change — only its public API
+- NEVER read, print or work around a file denied in `.claude/settings.json` — if a task needs a value from one, ask the human
+- NEVER stage a denied file — except a lockfile: stage it by path, unread, together with its manifest
 - NEVER hardcode a secret — read it from an environment variable and document its name in `.env.example`
+
+## Testing Rules
+- Test observable behavior only — what a user sees, what an API returns — NEVER implementation details.
+- Mock only external boundaries (network, database, clock, file system) — use the real code everywhere else.
+- One test = one behavior, structured Arrange / Act / Assert.
+- TDD ON: NEVER keep a test that did not fail first.
+- A test fails because of a bug in the code: fix the code, NEVER the test.
 
 ## Change Size
 Classify every request before touching code.
@@ -56,8 +68,8 @@ Classify every request before touching code.
 - ALWAYS state the classification before starting: `Size: inline — <reason>` or `Size: full cycle — <reason>`.
 
 ## Spec Rules — SDD
-- `specs/current/<capability>.md` is the source of truth for current behavior — one file per capability, start from `specs/current/spec-template.md`.
-- `specs/changes/<feature>.md` records one change: RF deltas, tasks, progress — start from `specs/changes/change-template.md`.
+- `specs/current/<capability>.md` is the source of truth for current behavior — one file per capability, start from `templates/spec.md`.
+- `specs/changes/<feature>.md` records one change: RF deltas, tasks, progress — start from `templates/change.md`.
 - RF ID: `<PREFIX>-NN` (e.g. `ORDER-01`) — prefix unique per spec file, number taken from its `Next ID`.
 - NEVER reuse or renumber an RF ID.
 - RFs describe behavior observable from outside: what a user sees, what an API returns, what a command prints.
@@ -65,20 +77,8 @@ Classify every request before touching code.
   - Full cycle: the RF goes in Requirement Deltas of the change doc — approved before any code.
   - Inline: add or edit the RF in `specs/current/` first — a new RF takes the file's `Next ID` and advances it — then test, then code — stage all three together.
 - No observable behavior change (refactor, styling, docs, chore): NEVER edit RFs.
-- ALWAYS start the name of a test that covers an RF with its RF ID, in the form the test runner allows: [e.g. `ORDER-01 should [result] when [condition]` · `test_order_01_[result]_when_[condition]`].
+- ALWAYS start the name of a test that covers an RF with its RF ID, in the form the test runner allows: [e.g. `ORDER-01 should <result> when <condition>` · `test_order_01_<result>_when_<condition>`].
 - Check an RF with [test command filtered by name — e.g. `npm test -- -t "<RF-ID>"` · `pytest -k "<rf_id>"`] — mark `test: ✅` only when every GIVEN/WHEN/THEN has a passing test.
-
-## Testing Rules
-- Test observable behavior only — what a user sees, what an API returns — NEVER implementation details.
-- Mock only external boundaries (network, database, clock, file system) — use the real code everywhere else.
-- One test = one behavior, structured Arrange / Act / Assert.
-- TDD ON: NEVER keep a test that did not fail first.
-- A test fails because of a bug in the code: fix the code, NEVER the test.
-
-## Chat Replies
-- Reply in the fewest words that stay unambiguous — no greeting, no restating the request, no closing summary.
-- When a skill has an Output Contract: emit it and add nothing around it.
-- NEVER shorten RFs, change docs, questions to the human, or the options after a failing gate.
 
 ## Working Protocol — STRICT
 These are Hard Rules. Any violation is a protocol breach.
@@ -88,6 +88,7 @@ These are Hard Rules. Any violation is a protocol breach.
 - "go" = approval of the active feature's Progress → `Next step`
 - "go" or "go up to ID-00N" in a new session or after `/clear`: load `.claude/skills/create-feature/SKILL.md` first
 - Commit message format: `type(scope): description` — type is one of `feat | fix | refactor | test | docs | chore`
+- Commit once per change, never per task — full cycle: when the feature closes · inline: after its close sequence — propose the message, the human commits
 - NEVER skip the task close sequence — it is mandatory after every task and every inline change (inline: steps 1 and 3 only):
   ```
   1. Run Quality Gates
@@ -95,28 +96,25 @@ These are Hard Rules. Any violation is a protocol breach.
      - Covered RFs: set `test: ✅` in Requirement Deltas per Spec Rules
      - Only if the plan changed: add a sub-bullet `deviation: <what>`
      - Progress → `Next step:` the next task ID, or `merge specs` after the last task
-  3. git add <files> → propose the commit message — stop and wait
-     The human reviews `git diff --staged` and commits, or replies "fix: <what>" → fix → back to step 1
-  4. After the commit — on the human's next message: confirm it with `git log -1`
+  3. git add <files> — stop and wait
+     The human reviews `git diff --staged` and replies "go", or "fix: <what>" → fix → back to step 1
+  4. On the human's next message:
      - Inside an approved batch: continue with the next task
      - "go": start Progress → `Next step`
      - Anything else: reply `Next: <Next step> — /clear → go` — stop and wait
   ```
-- Active feature = the `specs/changes/*.md` (not the template) whose Progress is not `feature closed`
+- Active feature = the `specs/changes/*.md` whose Progress is not `feature closed`
 - If something is unclear: ask ONE specific question — stop and wait
-
-## Code Philosophy — KISS
-- NEVER over-engineer: the simplest solution that works — no abstraction, class or layer for a use case that does not exist yet (YAGNI)
 
 ## Quality Gates — Run in every task close
 Run in this exact order. If any fails: stop, report the exact error, propose options — NEVER continue with a failing gate, NEVER self-fix silently.
 
-| Step | Command | Run when | Blocks if |
-|------|---------|----------|-----------|
-| 1. Lint | [e.g. `npm run lint` · `ruff check .`] | always | any error or warning |
-| 2. Build / type check | [e.g. `npm run build` · `mypy .` · `go build ./...`] | always | build fails |
-| 3. Tests | [e.g. `npm test -- --reporter=dot` · `pytest -q`] | always | any test fails |
-| 4. Audit | [e.g. `npm audit --audit-level=high` · `pip-audit`] | dependency manifest or lockfile changed | high or critical found |
+| Step | Scoped — each task close | Full — feature close · inline change · scoped not possible | Run when | Blocks if |
+|------|-------------------------|-------------------------------------------------------------|----------|-----------|
+| 1. Lint | [e.g. `npx eslint <changed files>` · `ruff check <changed files>`] | [e.g. `npm run lint` · `ruff check .`] | always | any error or warning |
+| 2. Build / type check | same as Full | [e.g. `npm run build` · `mypy .` · `go build ./...`] | always | build fails |
+| 3. Tests | [e.g. `npx vitest related <changed files> --run` · `pytest <slice folder> -q`] | [e.g. `npm test -- --reporter=dot` · `pytest -q`] | always | any test fails |
+| 4. Audit | same as Full | [e.g. `npm audit --audit-level=high` · `pip-audit`] | dependency manifest or lockfile changed | high or critical found |
 
 - Status: `✅` pass · `❌ <gate>` fail · `⏭️` skipped · `-` pending
 - Gates format: `lint ✅ · build ✅ · tests ✅ (X passing) · audit ⏭️`
@@ -125,3 +123,8 @@ Run in this exact order. If any fails: stop, report the exact error, propose opt
 - Failing gate: quote only the failing lines.
 - Gate not run → mark it `⏭️` in the task line.
 - Docs-only change (`.md` files, comments): skip all gates, re-read the edited files against `docs/doc-rules.md`, mark Gates `⏭️`.
+
+## Chat Replies
+- Reply in the fewest words that stay unambiguous — no greeting, no restating the request, no closing summary.
+- When a skill has an Output Contract: emit it and add nothing around it.
+- NEVER shorten RFs, change docs, questions to the human, or the options after a failing gate.
