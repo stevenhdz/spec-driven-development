@@ -7,10 +7,10 @@ Applies to every `.md` in this project.
 - `CLAUDE.md` owns global rules. Other docs name its section (e.g. Quality Gates) — NEVER restate it.
 - Every path or layer named in a doc MUST exist in Layer Structure or on disk.
 
-## Status legend
-`✅` pass · `❌ <gate>` fail · `⏭️` skipped · `-` pending
+## Status legend and Gates format
+`CLAUDE.md` → Quality Gates.
 
-Gates format: `lint ✅ · build ✅ · tests ✅ (X passing) · audit ⏭️`
-
-## Skill sections — in this order
-Frontmatter (`name`, `description: "Trigger: …"`) → Activation Contract (Load / Do not load) → Hard Rules → Decision Gates → Execution Steps → Output Contract (code block) → References (omit if empty)
+## Templates
+`templates/` — `spec.md` · `change.md` · `skill.md`.
+ADRs — `docs/decisions/000-template.md`.
+Skill sections follow `templates/skill.md` in its order — omit References if empty.
