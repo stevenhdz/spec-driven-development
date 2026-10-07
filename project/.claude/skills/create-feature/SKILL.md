@@ -34,7 +34,7 @@ Do not load it for inline work — follow Spec Rules and still run Quality Gates
 | Human approves a range ("go up to ID-00N") | Run it as a batch — each task keeps its own gates, task line and staging — no `/clear` inside the batch |
 | Inside a batch: gate fails, deviation, question or scope change | Stop the batch — back to per-task approval |
 | Batch ends | Report tasks done — `Next: <Next step> — /clear → go` — wait |
-| "go" or "go up to ID-00N" in a new session or after `/clear` | Working Protocol close step 4 → read the change doc and `docs/architecture.md` → continue from Progress → `Next step` (step 8 or 10) |
+| Any reply about an active feature in a new session or after `/clear` | Read the active change doc (the `specs/changes/*.md` whose Progress is not `feature closed`) — its Approach replaces `docs/architecture.md`; open that only for a question Approach does not answer → "fix: <what>": fix the last task, back to close step 1 · otherwise: continue from Progress → `Next step` (step 8 or 10) |
 | Technical blocker | Report with options — NEVER assume a solution |
 | No git repo | Skip branch and staging — report `no repo` — Next line: `/clear → go` |
 
@@ -47,7 +47,9 @@ Do not load it for inline work — follow Spec Rules and still run Quality Gates
 5. Create `specs/changes/<feature-name>.md` from `templates/change.md` with deltas, Approach and tasks.
 6. Stop and wait for approval of the change doc.
 7. Create branch `feat/<feature-name>` before the first staged change, unless there is no repo.
-8. Implement ONE task → run the Working Protocol close sequence.
+8. Implement ONE task → run the Working Protocol close sequence, with:
+   - Step 2: update the task line in the change doc: `[x]` + gates · covered RFs: set `test: ✅` in Requirement Deltas per Spec Rules · only if the plan changed: add a sub-bullet `deviation: <what>` · Progress → `Next step:` the next task ID, or `merge specs` after the last task.
+   - Step 4: on the human's next message — inside an approved batch: continue with the next task · "go": approves and starts Progress → `Next step` · anything else: reply `Next: <Next step> — /clear → go` — stop and wait.
 9. Repeat step 8 only after explicit approval — per task or as a batch.
 10. When every task is `[x]` and every ADDED or MODIFIED RF `test:` is `✅`: run Quality Gates in Full mode — then merge the deltas into `specs/current/` — ADDED: append and advance `Next ID` · MODIFIED: replace the RF and its scenarios · REMOVED: delete the RF.
 11. Set Progress to `feature closed` and `Merged into specs: yes` → stage → propose the feature's single commit message per Working Protocol — one body line per task ID.

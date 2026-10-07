@@ -63,7 +63,6 @@ Classify every request before touching code.
 | Adds a dependency | |
 
 - The human's word wins: "as a feature" or "inline" overrides the table.
-- If the request cannot be classified: ask ONE question — stop and wait.
 - If inline work grows past the table: stop, report, switch to the full cycle.
 - ALWAYS state the classification before starting: `Size: inline — <reason>` or `Size: full cycle — <reason>`.
 
@@ -85,25 +84,17 @@ These are Hard Rules. Any violation is a protocol breach.
 
 - NEVER start a new task without explicit approval — per task ("yes" or "go") or as a batch ("go up to ID-00N")
 - NEVER assume silence = approval — wait for a clear yes
-- "go" = approval of the active feature's Progress → `Next step`
-- "go" or "go up to ID-00N" in a new session or after `/clear`: load `.claude/skills/create-feature/SKILL.md` first
+- Any reply about an active feature ("go", "yes", "fix: <what>", "go up to ID-00N") in a new session or after `/clear`: load `.claude/skills/create-feature/SKILL.md` first
 - Commit message format: `type(scope): description` — type is one of `feat | fix | refactor | test | docs | chore`
 - Commit once per change, never per task — full cycle: when the feature closes · inline: after its close sequence — propose the message, the human commits
-- NEVER skip the task close sequence — it is mandatory after every task and every inline change (inline: steps 1 and 3 only):
+- NEVER skip the task close sequence — it is mandatory after every task and every inline change:
   ```
   1. Run Quality Gates
-  2. Update the task line in specs/changes/<feature>.md: [x] + gates
-     - Covered RFs: set `test: ✅` in Requirement Deltas per Spec Rules
-     - Only if the plan changed: add a sub-bullet `deviation: <what>`
-     - Progress → `Next step:` the next task ID, or `merge specs` after the last task
+  2. Full cycle only: update the change doc — create-feature step 8
   3. git add <files> — stop and wait
      The human reviews `git diff --staged` and replies "go", or "fix: <what>" → fix → back to step 1
-  4. On the human's next message:
-     - Inside an approved batch: continue with the next task
-     - "go": start Progress → `Next step`
-     - Anything else: reply `Next: <Next step> — /clear → go` — stop and wait
+  4. Full cycle only: handle the human's next message — create-feature step 8
   ```
-- Active feature = the `specs/changes/*.md` whose Progress is not `feature closed`
 - If something is unclear: ask ONE specific question — stop and wait
 
 ## Quality Gates — Run in every task close
