@@ -22,9 +22,9 @@ Every change follows the same order: **written spec → your approval → tests 
 7. Open Claude Code at the repo root and describe the change you want in plain words.
 
 ### Existing project
-Do the same setup steps. In step 3, describe the layers your code already has — do not invent new ones.
+Copy `project/` into it, open Claude Code and say `adopt`. The agent asks you to confirm, then does steps 2–5 from your code — it changes no code.
 
-Code you never touch needs no spec. Run your first behavior change in each capability `as a feature` — the full cycle creates its spec when it closes.
+Your first behavior change in each area runs the full cycle — it creates that area's spec.
 
 ## Use it
 
@@ -48,6 +48,7 @@ You:    git commit
 | `<request>` | The agent picks the size and announces `Size: inline` or `Size: full cycle` |
 | `<request>, inline` | Force a small change: no change doc, one commit |
 | `<request>, as a feature` | Force the full cycle: change doc → approval → tasks |
+| `adopt` | Existing project: fill the setup from your code — no code changes |
 | `yes` | Approve the change doc, or start the next task |
 | `go` | Run the next task — send it after `/clear` |
 | `go up to ID-003` | Run every task up to ID-003 without stopping |
@@ -143,6 +144,7 @@ ORDER-01 — The system MUST reject an order with no items
 | `.claude/settings.json` | Blocks reading secrets and bulky files, `git commit`, `git push` and Claude attribution |
 | `.claude/agents/explorer.md` | Read-only explorer: maps code across slices, returns a summary |
 | `.claude/skills/create-feature/` | Full-cycle skill: specify → plan → approve → implement → verify → archive |
+| `.claude/skills/adopt-project/` | `adopt` skill: fits the setup to an existing project |
 | `docs/architecture.md` | Layers and architecture decisions |
 | `docs/decisions/` | ADRs — copy `000-template.md` |
 | `docs/doc-rules.md` | Format rules for every `.md` |
