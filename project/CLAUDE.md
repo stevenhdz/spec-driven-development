@@ -1,40 +1,39 @@
-# Tres en raya
+# [Project name]
 
 ## Product
-- Browser tic-tac-toe game for two players on one device.
+- [What the product does, in one line — e.g. "REST API for orders", "Browser tic-tac-toe game"]
 - Behavior lives as RFs in `specs/current/<capability>.md` — NEVER define it here.
 
 ## Stack
-- Language: TypeScript
-- Framework: React + Vite
-- App folder: `app/` — run all commands from there
-- Testing: Vitest + Testing Library (jsdom)
-- Lint: oxlint
-- Run locally: `npm run dev`
+- Language: [e.g. TypeScript · Python · Go]
+- Framework: [e.g. React + Vite · Express · FastAPI]
+- App folder: [e.g. `app/` — run all commands from there]
+- Testing: [e.g. Vitest + Testing Library · Jest · pytest]
+- Lint: [e.g. oxlint · eslint · ruff]
+- Run locally: [e.g. `npm run dev` · `uvicorn app.main:app --reload`]
 
 ## Layer Structure — Vertical Slice
 ```
-app/src/
-  features/
-    <feature-name>/
-      <Feature>.tsx        ← entry layer: UI component
-      use<Feature>.ts      ← logic layer: state hook
-      <rules>.ts           ← logic layer: pure business rules
-      types.ts             ← types — no runtime logic
-      <Feature>.test.tsx   ← tests of the slice
-      index.ts             ← public API: the only file other slices import
-  shared/                  ← only code used by 2+ slices — create when first needed
-  App.tsx                  ← app composition: wires slices together, no feature logic
+[src]/
+  [features]/
+    [feature-name]/
+      [entry]          ← entry layer: UI component · HTTP route · CLI command — no business rules
+      [logic]          ← logic layer: business rules and state — hook · service · use case
+      [types]          ← types, schemas, contracts — no runtime logic
+      [tests]          ← tests of the slice
+      [public API]     ← the only file other slices import (e.g. index.ts · __init__.py)
+  [shared]/            ← only code used by 2+ slices — create when first needed
+  [app entry]          ← app composition: wires slices together, no feature logic
 ```
 
 ## Conventions
-- Naming: PascalCase components and their files, camelCase functions, hooks and other files
-- One feature = one folder in `features/`
+- Naming: [e.g. PascalCase components, camelCase functions · snake_case modules and functions]
+- One feature = one folder in `[features]/`
 - NEVER import a slice's internal files — always through its public API
 - Every `.md` follows `docs/doc-rules.md` — new docs start from their template
 
 ## Hard Rules
-- NEVER use: `any`, default exports (except config files that require them), class components
+- NEVER use: [forbidden patterns — e.g. `any`, default exports, class components · global mutable state]
 - NEVER put business rules in the entry layer — extract them to the logic layer
 - NEVER over-engineer (KISS · YAGNI): the simplest solution that works — a function before a class, no abstraction or layer for a use case that does not exist yet
 - NEVER add a dependency without explicit approval
@@ -64,7 +63,6 @@ Classify every request before touching code.
 | Adds a dependency | |
 
 - The human's word wins: "as a feature" or "inline" overrides the table.
-- If the request cannot be classified: ask ONE question — stop and wait.
 - If inline work grows past the table: stop, report, switch to the full cycle.
 - ALWAYS state the classification before starting: `Size: inline — <reason>` or `Size: full cycle — <reason>`.
 
@@ -78,33 +76,25 @@ Classify every request before touching code.
   - Full cycle: the RF goes in Requirement Deltas of the change doc — approved before any code.
   - Inline: add or edit the RF in `specs/current/` first — a new RF takes the file's `Next ID` and advances it — then test, then code — stage all three together.
 - No observable behavior change (refactor, styling, docs, chore): NEVER edit RFs.
-- ALWAYS start the name of a test that covers an RF with its RF ID, in the form the test runner allows: `GAME-01 should <result> when <condition>`.
-- Check an RF with `npm test -- -t "<RF-ID>"` — mark `test: ✅` only when every GIVEN/WHEN/THEN has a passing test.
+- ALWAYS start the name of a test that covers an RF with its RF ID, in the form the test runner allows: [e.g. `ORDER-01 should <result> when <condition>` · `test_order_01_<result>_when_<condition>`].
+- Check an RF with [test command filtered by name — e.g. `npm test -- -t "<RF-ID>"` · `pytest -k "<rf_id>"`] — mark `test: ✅` only when every GIVEN/WHEN/THEN has a passing test.
 
 ## Working Protocol — STRICT
 These are Hard Rules. Any violation is a protocol breach.
 
 - NEVER start a new task without explicit approval — per task ("yes" or "go") or as a batch ("go up to ID-00N")
 - NEVER assume silence = approval — wait for a clear yes
-- "go" = approval of the active feature's Progress → `Next step`
-- "go" or "go up to ID-00N" in a new session or after `/clear`: load `.claude/skills/create-feature/SKILL.md` first
+- Any reply about an active feature ("go", "yes", "fix: <what>", "go up to ID-00N") in a new session or after `/clear`: load `.claude/skills/create-feature/SKILL.md` first
 - Commit message format: `type(scope): description` — type is one of `feat | fix | refactor | test | docs | chore`
 - Commit once per change, never per task — full cycle: when the feature closes · inline: after its close sequence — propose the message, the human commits
-- NEVER skip the task close sequence — it is mandatory after every task and every inline change (inline: steps 1 and 3 only):
+- NEVER skip the task close sequence — it is mandatory after every task and every inline change:
   ```
   1. Run Quality Gates
-  2. Update the task line in specs/changes/<feature>.md: [x] + gates
-     - Covered RFs: set `test: ✅` in Requirement Deltas per Spec Rules
-     - Only if the plan changed: add a sub-bullet `deviation: <what>`
-     - Progress → `Next step:` the next task ID, or `merge specs` after the last task
+  2. Full cycle only: update the change doc — create-feature step 8
   3. git add <files> — stop and wait
      The human reviews `git diff --staged` and replies "go", or "fix: <what>" → fix → back to step 1
-  4. On the human's next message:
-     - Inside an approved batch: continue with the next task
-     - "go": start Progress → `Next step`
-     - Anything else: reply `Next: <Next step> — /clear → go` — stop and wait
+  4. Full cycle only: handle the human's next message — create-feature step 8
   ```
-- Active feature = the `specs/changes/*.md` whose Progress is not `feature closed`
 - If something is unclear: ask ONE specific question — stop and wait
 
 ## Quality Gates — Run in every task close
@@ -112,10 +102,10 @@ Run in this exact order. If any fails: stop, report the exact error, propose opt
 
 | Step | Scoped — each task close | Full — feature close · inline change · scoped not possible | Run when | Blocks if |
 |------|-------------------------|-------------------------------------------------------------|----------|-----------|
-| 1. Lint | `npx oxlint <changed files>` | `npm run lint` | always | any error or warning |
-| 2. Build / type check | same as Full | `npm run build` | always | build fails |
-| 3. Tests | `npx vitest related <changed files> --run` | `npm test -- --reporter=dot` | always | any test fails |
-| 4. Audit | same as Full | `npm audit --audit-level=high` | dependency manifest or lockfile changed | high or critical found |
+| 1. Lint | [e.g. `npx oxlint <changed files>` · `ruff check <files>`] | [e.g. `npm run lint` · `ruff check .`] | always | any error or warning |
+| 2. Build / type check | same as Full | [e.g. `npm run build` · `mypy .` · `go build ./...`] | always | build fails |
+| 3. Tests | [e.g. `npx vitest related <changed files> --run` · `pytest <slice>`] | [e.g. `npm test -- --reporter=dot` · `pytest -q`] | always | any test fails |
+| 4. Audit | same as Full | [e.g. `npm audit --audit-level=high` · `pip-audit`] | dependency manifest or lockfile changed | high or critical found |
 
 - Status: `✅` pass · `❌ <gate>` fail · `⏭️` skipped · `-` pending
 - Gates format: `lint ✅ · build ✅ · tests ✅ (X passing) · audit ⏭️`
