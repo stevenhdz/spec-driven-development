@@ -35,6 +35,7 @@
 ## Hard Rules
 - NEVER use: [forbidden patterns — e.g. `any`, default exports, class components · global mutable state]
 - NEVER put business rules in the entry layer — extract them to the logic layer
+- NEVER add comments to the code you write or change — names and small functions must explain the intent; leave existing comments as they are
 - NEVER over-engineer (KISS · YAGNI): the simplest solution that works — a function before a class, no abstraction or layer for a use case that does not exist yet
 - NEVER add a dependency without explicit approval
 - ALWAYS search (grep / glob) before opening a file — read only the line range the task needs
@@ -64,7 +65,8 @@ Classify every request before touching code.
 
 - The human's word wins: "as a feature" or "inline" overrides the table.
 - If inline work grows past the table: stop, report, switch to the full cycle.
-- ALWAYS state the classification before starting: `Size: inline — <reason>` or `Size: full cycle — <reason>`.
+- No observable behavior change in code: skip the table — refactor: load `.claude/skills/refactor/SKILL.md` · optimization: load `.claude/skills/optimize/SKILL.md`.
+- ALWAYS state the classification before starting: `Size: inline — <reason>`, `Size: full cycle — <reason>`, `Size: refactor — <reason>` or `Size: optimize — <reason>`.
 
 ## Spec Rules — SDD
 - `specs/current/<capability>.md` is the source of truth for current behavior — one file per capability, start from `templates/spec.md`.
@@ -85,7 +87,7 @@ These are Hard Rules. Any violation is a protocol breach.
 - NEVER start a new task without explicit approval — per task ("yes" or "go") or as a batch ("go up to ID-00N")
 - NEVER assume silence = approval — wait for a clear yes
 - Any reply about an active feature ("go", "yes", "fix: <what>", "go up to ID-00N") in a new session or after `/clear`: load `.claude/skills/create-feature/SKILL.md` first
-- Commit message format: `type(scope): description` — type is one of `feat | fix | refactor | test | docs | chore`
+- Commit message format: `type(scope): description` — type is one of `feat | fix | refactor | perf | test | docs | chore`
 - Commit once per change, never per task — full cycle: when the feature closes · inline: after its close sequence — propose the message, the human commits
 - NEVER skip the task close sequence — it is mandatory after every task and every inline change:
   ```
@@ -113,7 +115,7 @@ Run in this exact order. If any fails: stop, report the exact error, propose opt
 - Passing gate: report it in the Gates format only — NEVER paste its output.
 - Failing gate: quote only the failing lines.
 - Gate not run → mark it `⏭️` in the task line.
-- Docs-only change (`.md` files, comments): skip all gates, re-read the edited files against `docs/doc-rules.md`, mark Gates `⏭️`.
+- Docs-only change (`.md` files): skip all gates, re-read the edited files against `docs/doc-rules.md`, mark Gates `⏭️`.
 
 ## Chat Replies
 - Reply in the fewest words that stay unambiguous — no greeting, no restating the request, no closing summary.

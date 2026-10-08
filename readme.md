@@ -48,6 +48,8 @@ You:    git commit
 | `<request>` | The agent picks the size and announces `Size: inline` or `Size: full cycle` |
 | `<request>, inline` | Force a small change: no change doc, one commit |
 | `<request>, as a feature` | Force the full cycle: change doc → approval → tasks |
+| `refactor: <what>` | Restructure code without changing behavior: plan → approval → small steps, tests untouched |
+| `optimize: <what>` | Improve performance without changing behavior: baseline → plan → approval → measured steps |
 | `adopt` | Existing project: fill the setup from your code — no code changes |
 | `yes` | Approve the change doc, or start the next task |
 | `go` | Run the next task — send it after `/clear` |
@@ -144,6 +146,8 @@ ORDER-01 — The system MUST reject an order with no items
 | `.claude/settings.json` | Blocks reading secrets and bulky files, `git commit`, `git push` and Claude attribution |
 | `.claude/agents/explorer.md` | Read-only explorer: maps code across slices, returns a summary |
 | `.claude/skills/create-feature/` | Full-cycle skill: specify → plan → approve → implement → verify → archive |
+| `.claude/skills/refactor/` | Refactor skill: green tests → plan → approve → small steps → verify |
+| `.claude/skills/optimize/` | Optimize skill: green tests → baseline → plan → approve → measured steps → verify |
 | `.claude/skills/adopt-project/` | `adopt` skill: fits the setup to an existing project |
 | `docs/architecture.md` | Layers and architecture decisions |
 | `docs/decisions/` | ADRs — copy `000-template.md` |
