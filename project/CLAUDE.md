@@ -1,7 +1,7 @@
 # [Project name]
 
 ## Product
-- [What the product does, in one line — e.g. "REST API for orders", "Browser tic-tac-toe game"]
+- [What the product does, in one line — e.g. "REST API for orders", "CLI that imports CSV files"]
 - Behavior lives as RFs in `specs/current/<capability>/spec.md` — NEVER define it here.
 
 ## Stack
@@ -41,7 +41,7 @@
 - NEVER over-engineer (KISS · YAGNI): the simplest solution that works — a function before a class, no abstraction or layer for a use case that does not exist yet
 - NEVER create a pass-through: a wrapper around a single call (e.g. a hook around one `useState`, a service around one query), a component that only renders another, a re-export other than the public API, a type used in one place — and NEVER write code no RF or caller can reach
 - NEVER export what no other file imports — types included
-- Model states that exclude each other as one tagged union — NEVER separate fields that can contradict each other (e.g. `winner` next to `nextPlayer`)
+- Model states that exclude each other as one tagged union — NEVER separate fields that can contradict each other (e.g. `isLoading` next to `error` and `data`)
 - NEVER silence the type checker — no casts, non-null assertions or ignore comments: fix the type — scaffold files exempt
 - UI: native semantic elements first — every control has an accessible name — an ARIA role only with the children its pattern requires
 - NEVER add a dependency without explicit approval
@@ -56,7 +56,7 @@
 - Find elements as a user does: role + accessible name, then visible text — NEVER by index, CSS class or test id.
 - Mock only external boundaries (network, database, clock, file system) — use the real code everywhere else.
 - One test = one behavior, structured Arrange / Act / Assert.
-- Every variant a THEN names gets its own test — e.g. "a row, column or diagonal" = 3 tests.
+- Every variant a THEN names gets its own test — e.g. "pays by card, PayPal or bank transfer" = 3 tests.
 - When TDD is ON — full cycle: the change's `proposal.md` → Scope · inline: always ON — NEVER keep a test that did not fail first.
 - A test fails because of a bug in the code: fix the code, NEVER the test.
 
@@ -83,7 +83,7 @@ Classify every request before touching code.
 - RF ID: `<PREFIX>-NN` (e.g. `ORDER-01`) — prefix unique per spec file, number taken from its `Next ID`.
 - NEVER reuse or renumber an RF ID.
 - RFs describe behavior observable from outside: what a user sees, what an API returns, what a command prints.
-- RFs cover everything the request makes visible — layout (e.g. "a 3x3 grid"), messages and controls — not only the logic.
+- RFs cover everything the request makes visible — layout (e.g. "a list sorted by date"), messages and controls — not only the logic.
 - NEVER change observable behavior before its RF is written:
   - Full cycle: the RF goes in the change folder's delta spec (`specs/<capability>/spec.md`) — approved before any code.
   - Inline: add or edit the RF in `specs/current/<capability>/spec.md` first — a new RF takes the file's `Next ID` and advances it — then test, then code — stage all three together.

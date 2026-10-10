@@ -5,7 +5,7 @@ Behavior (RFs): `specs/current/`. Folder pattern: `CLAUDE.md` → Layer Structur
 ## 1. Context
 | Item | Value |
 |------|-------|
-| Users | [Who uses it — e.g. "two players on one device" · "mobile app clients" · "developers in a terminal"] |
+| Users | [Who uses it — e.g. "shoppers on a web store" · "mobile app clients" · "developers in a terminal"] |
 | Runs in | [e.g. browser · Node server in Docker · CLI on the user's machine] |
 | Inbound | [How requests arrive — e.g. user clicks · HTTP REST · CLI arguments] |
 | Outbound | [External systems it calls — e.g. none · PostgreSQL · Stripe API] |
@@ -14,7 +14,7 @@ Behavior (RFs): `specs/current/`. Folder pattern: `CLAUDE.md` → Layer Structur
 ## 2. Slices
 | Slice | Responsibility | Public API |
 |-------|----------------|------------|
-| [slice-name] | [What it owns, in one line] | [What it exports — e.g. `Game` · `ordersRouter` · `runImport`] |
+| [slice-name] | [What it owns, in one line] | [What it exports — e.g. `OrderList` · `ordersRouter` · `runImport`] |
 
 - [App composition — e.g. `App.tsx` · `server.ts` · `main.py`] wires slices together — no feature logic.
 - [Shared folder] exists only when 2+ slices need the same code.
@@ -42,7 +42,7 @@ An arrow means "MAY import". Anything not drawn is forbidden.
 ## 4. Data model
 ```
 [Core types or tables of the domain — e.g.
-type Board = Cell[]   ·   orders(id, user_id, status, total)]
+type Order = { id: string; items: Item[]; status: Status }   ·   orders(id, user_id, status, total)]
 ```
 - Source of truth: [what is stored, and what is derived from it]
 

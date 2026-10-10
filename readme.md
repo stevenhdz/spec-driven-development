@@ -32,15 +32,15 @@ Your first behavior change in each area runs the full cycle — it creates that 
 
 ### Example session
 ```
-You:    Create a React tic-tac-toe app: 3x3 board, X and O, win on a line, draw restarts.
-Agent:  Size: full cycle — creates the first slice, adds 7 RFs and new dependencies.
-        Change folder written: specs/changes/tic-tac-toe-game/ — approve?
+You:    Create an orders API: create an order with items, reject an empty order, list a user's orders.
+Agent:  Size: full cycle — creates the first slice, adds 5 RFs and new dependencies.
+        Change folder written: specs/changes/orders-api/ — approve?
 You:    yes
-Agent:  [ID-001 done] RED: GAME-01 failed before code · Gates: lint ✅ · build ✅ · tests ✅ — Staged: app/ …
+Agent:  [ID-001 done] RED: ORDER-01 failed before code · Gates: lint ✅ · build ✅ · tests ✅ — Staged: app/ …
         Next: ID-002 — /clear → go
 You:    /clear, then: go
 Agent:  … (repeat per task)
-Agent:  [Feature closed] Tasks: 4/4 · RFs: 7/7 ✅ — Commit message: feat(game): …
+Agent:  [Feature closed] Tasks: 3/3 · RFs: 5/5 ✅ — Commit message: feat(orders): …
 You:    git commit
 ```
 
@@ -60,7 +60,7 @@ You:    git commit
 | `explain` | Get a detailed answer — replies are short by default |
 
 ### Cheapest way to run a feature
-Measured on the tic-tac-toe benchmark before the senior-quality rules: $1.11 vs $1.39 all-Opus (−20%), same quality — not re-measured since.
+Measured on the benchmark feature before the senior-quality rules: $1.11 vs $1.39 all-Opus (−20%), same quality — not re-measured since.
 1. Request the feature with Opus — it writes the change folder; review it.
 2. `/model sonnet`
 3. `go up to ID-00N` (the last task) — or `/clear → go` per task if you want to review each one (−15%).
@@ -127,7 +127,7 @@ Phases, docs and commands never change. Change only these:
 | Format | `.claude/gates.conf` | `prettier --write` | same | `ruff format` |
 | Full gates | `.claude/gates.conf` | `npm run lint` · `npm run build` · `npm test` · `npm audit` | same | `ruff check` · `mypy .` · `pytest` · `pip-audit` |
 | Scoped gates | `.claude/gates.conf` | `eslint <files>` · `vitest related <files>` | same | `ruff check <files>` · `pytest <slice>` |
-| Test name | `CLAUDE.md` → Spec Rules | `GAME-01 should …` | `ORDER-01 should …` | `test_order_01_…` |
+| Test name | `CLAUDE.md` → Spec Rules | `CART-01 should …` | `ORDER-01 should …` | `test_order_01_…` |
 | Denied files | `.claude/settings.json` | `package-lock.json`, `dist/` | `package-lock.json`, `dist/` | `.venv/`, `__pycache__/` |
 
 Write RFs as behavior seen from outside — UI on a frontend, HTTP responses on an API:
@@ -139,7 +139,7 @@ ORDER-01 — The system MUST reject an order with no items
 ## Glossary
 | Term | Meaning |
 |------|---------|
-| RF | Functional requirement: one rule the system MUST follow, with an ID like `GAME-04` |
+| RF | Functional requirement: one rule the system MUST follow, with an ID like `ORDER-04` |
 | GIVEN / WHEN / THEN | A concrete example of an RF; each one becomes a test |
 | Living spec | `specs/current/<capability>/spec.md` — what the system does today |
 | Change folder | `specs/changes/<feature>/` — `proposal.md` · `design.md` · `specs/<capability>/spec.md` (deltas) · `tasks.md` — what one change adds, modifies or removes |
@@ -188,7 +188,7 @@ Every method this setup applies, where it lives, and what it buys.
 | BDD scenarios in Gherkin style | Behavior-Driven Development · Gherkin `Given / When / Then` | `GIVEN \| WHEN \| THEN` inline under each RF | Each scenario becomes one test — one line instead of a `.feature` file, so no Cucumber runner needed |
 | Arrange / Act / Assert | xUnit test pattern | `CLAUDE.md` → Testing Rules | One behavior per test, same shape everywhere |
 | Query like a user | Testing Library guiding principles | `CLAUDE.md` → Testing Rules | Tests find elements by role + accessible name — they survive markup changes and enforce accessibility |
-| One test per THEN variant | Equivalence partitioning | `CLAUDE.md` → Testing Rules | "A row, column or diagonal" = 3 tests — no variant left untested |
+| One test per THEN variant | Equivalence partitioning | `CLAUDE.md` → Testing Rules | "Pays by card, PayPal or bank transfer" = 3 tests — no variant left untested |
 | Test behavior, mock only boundaries | Classic (Detroit) TDD | `CLAUDE.md` → Testing Rules | Tests survive refactors; only network, database, clock and file system are mocked |
 | Test name starts with its RF ID | RF ↔ task ↔ test traceability | Spec Rules · `gates.sh rf` | Every RF is checkable by name |
 | TDD with RED evidence | Test-Driven Development | `implementer` · `gates.sh rf` | A test must fail before the code exists; the task line reports it |
@@ -200,7 +200,7 @@ Every method this setup applies, where it lives, and what it buys.
 | Vertical slices | Vertical Slice Architecture | `CLAUDE.md` → Layer Structure | A feature changes inside one folder |
 | ADRs | Architecture Decision Records | `docs/decisions/` | Project-wide choices keep their reason |
 | KISS · YAGNI | — | `CLAUDE.md` → Hard Rules | No abstraction for a use case that does not exist |
-| Make illegal states unrepresentable | Typed functional design | `CLAUDE.md` → Hard Rules | Exclusive states are one tagged union — no `winner` next to `nextPlayer` |
+| Make illegal states unrepresentable | Typed functional design | `CLAUDE.md` → Hard Rules | Exclusive states are one tagged union — no `isLoading` next to `error` and `data` |
 | Minimal public surface | Information hiding | `CLAUDE.md` → Hard Rules | Export only what another file imports, types included — no dead exports |
 | Explore → plan → approve → code | Anthropic best practices | `create-feature` steps 1–6 | No code before the human approves the change folder |
 | Conventional Commits | conventionalcommits.org | Working Protocol | One readable commit per feature |
@@ -251,7 +251,7 @@ Every method this setup applies, where it lives, and what it buys.
 | Measure before → after | The `optimize` skill, applied to this setup | `/usage` · `/context` | A change stays only if it lowers tokens without failing gates |
 
 ### Measured on this setup
-The same 3-task feature (terminal tic-tac-toe, Node, TDD ON) run end to end with `claude -p`.
+The same 3-task feature (a small Node CLI app, TDD ON) run end to end with `claude -p`.
 
 | Version | Tokens per feature | Opus tokens | List cost | Quality |
 |---------|-------------------|-------------|-----------|---------|
@@ -259,7 +259,7 @@ The same 3-task feature (terminal tic-tac-toe, Node, TDD ON) run end to end with
 | Gates script + Sonnet implementer + Explore override (1 run) | 1.18 M (−24%) | 0.90 M (−42%) | $1.66 (−17%) | all RFs ✅ · 0 Hard Rule violations |
 | Reviewer at feature close | +85 k | +85 k | +$0.27 | caught a planted missing test and a real bug that passed every test |
 
-The same React tic-tac-toe feature (full cycle, Opus, `/clear → go` per task), 2 runs per version, averages.
+The same React feature (a small single-slice app with 5–7 RFs, full cycle, Opus, `/clear → go` per task), 2 runs per version, averages.
 
 | Version | Closed | Tokens | Time | List cost | Tests | Quality |
 |---------|--------|--------|------|-----------|-------|---------|
