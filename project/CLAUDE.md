@@ -54,7 +54,7 @@
 
 ## Testing Rules
 - Test observable behavior only — what a user sees, what an API returns — NEVER implementation details.
-- Find elements as a user does: role + accessible name, then visible text — NEVER by index, CSS class or test id.
+- UI tests: find elements as a user does: role + accessible name, then visible text — NEVER by index, CSS class or test id.
 - Mock only external boundaries (network, database, clock, file system) — use the real code everywhere else.
 - One test = one behavior, structured Arrange / Act / Assert.
 - Every variant a THEN names gets its own test — e.g. "pays by card, PayPal or bank transfer" = 3 tests.
@@ -108,7 +108,7 @@ These are Hard Rules. Any violation is a protocol breach.
      The human reviews `git diff --staged` and replies "go", or "fix: <what>" → fix → back to step 1
   4. Full cycle only: handle the human's next message — create-feature step 8
   ```
-- Full cycle: a change-doc task runs only in the `implementer` subagent — NEVER in the main session
+- Full cycle: a change-folder task runs only in the `implementer` subagent — NEVER in the main session
 - If something is unclear: ask ONE specific question — stop and wait
 
 ## Quality Gates — Run in every task close

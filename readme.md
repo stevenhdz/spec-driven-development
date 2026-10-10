@@ -156,7 +156,7 @@ ORDER-01 — The system MUST reject an order with no items
 | `.claude/gates.conf` | Gate commands — fill them per stack |
 | `.claude/scripts/gates.sh` | Formats the changed files, runs the gates in order, stops at the first failure, prints one line |
 | `.claude/agents/explore.md` | Replaces the built-in `Explore`: Sonnet, no `CLAUDE.md`, returns a summary only |
-| `.claude/agents/implementer.md` | Runs one approved task: TDD, scoped gates, change-doc update, staging (Sonnet) |
+| `.claude/agents/implementer.md` | Runs one approved task: TDD, scoped gates, change-folder update, staging (Sonnet) |
 | `.claude/agents/reviewer.md` | Checks the staged diff against the RFs, Hard Rules and Testing Rules once per feature — gaps only, never style |
 | `.claude/skills/create-feature/` | Full-cycle skill: specify → plan → approve → implement → verify → archive |
 | `.claude/skills/refactor/` | Refactor skill: green tests → plan → approve → small steps → verify |

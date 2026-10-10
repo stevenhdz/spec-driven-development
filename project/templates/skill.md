@@ -31,7 +31,7 @@ Do not load it when [situation that looks similar but is not].
 
 ```
 [Result title] — [key data]
-Gates: lint ✅ · build ✅ · tests ✅ (X passing) · audit ⏭️
+<line printed by gates.sh>
 ```
 
 ## References
