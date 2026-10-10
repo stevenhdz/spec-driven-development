@@ -34,7 +34,7 @@ Do not load it for a new, empty project — the human fills the placeholders by 
 5. Fill every `[placeholder]` in `docs/architecture.md`.
 6. Update `deny` in `.claude/settings.json`.
 7. Run `grep -nE '\[[^]]{2,}\]' CLAUDE.md docs/architecture.md .claude/gates.conf` — it MUST print nothing — re-read the edited files against `docs/doc-rules.md`.
-8. Run `bash .claude/scripts/gates.sh full` — report the line it prints — a failing gate is reported, NEVER fixed.
+8. Run `bash .claude/scripts/gates.sh full --no-format` — report the line it prints — a failing gate is reported, NEVER fixed.
 9. Stage the edited files — propose `chore: adopt spec-driven development` — stop and wait.
 
 ## Output Contract
@@ -47,7 +47,7 @@ Structure: <pattern> — slices: <names>
 Denied: <paths added>
 Staged: <files>
 Commit message: chore: adopt spec-driven development
-Next: commit → request a change
+Next: commit → if `FORMAT_*` is filled: `bash .claude/scripts/gates.sh full` once, commit it as `style: format codebase` → request a change
 ```
 
 ## References

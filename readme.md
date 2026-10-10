@@ -12,7 +12,7 @@ Every change follows the same order: **written spec → your approval → tests 
 ## Setup
 1. Copy everything inside `project/` to your repo root, including the hidden `.claude/` folder.
 2. Fill every `[placeholder]` in `CLAUDE.md` (Product, Stack, Layer Structure, Conventions, Hard Rules, Spec Rules) and the gate commands in `.claude/gates.conf` — `FORMAT_*` needs a formatter you approved as a dependency (e.g. prettier); leave it empty to skip formatting.
-3. Edit `docs/architecture.md`: map its layers to your stack and add your decisions.
+3. Edit `docs/architecture.md`: context, the layers in your stack and your decisions — the agent adds slices and project-wide decisions at each feature close.
 4. Confirm no placeholder is left. This command must print nothing:
    ```
    grep -nE '\[[^]]{2,}\]' CLAUDE.md docs/architecture.md .claude/gates.conf
@@ -32,15 +32,15 @@ Your first behavior change in each area runs the full cycle — it creates that 
 
 ### Example session
 ```
-You:    Create a React tic-tac-toe app: 3x3 board, X and O, win on a line, draw restarts.
-Agent:  Size: full cycle — creates the first slice, adds 7 RFs and new dependencies.
-        Change folder written: specs/changes/tic-tac-toe-game/ — approve?
+You:    Create an orders API: create an order with items, reject an empty order, list a user's orders.
+Agent:  Size: full cycle — creates the first slice, adds 5 RFs and new dependencies.
+        Change folder written: specs/changes/orders-api/ — approve?
 You:    yes
-Agent:  [ID-001 done] RED: GAME-01 failed before code · Gates: lint ✅ · build ✅ · tests ✅ — Staged: app/ …
+Agent:  [ID-001 done] RED: ORDER-01 failed before code · Gates: lint ✅ · build ✅ · tests ✅ — Staged: app/ …
         Next: ID-002 — /clear → go
 You:    /clear, then: go
 Agent:  … (repeat per task)
-Agent:  [Feature closed] Tasks: 4/4 · RFs: 7/7 ✅ — Commit message: feat(game): …
+Agent:  [Feature closed] Tasks: 3/3 · RFs: 5/5 ✅ — Commit message: feat(orders): …
 You:    git commit
 ```
 
@@ -60,7 +60,7 @@ You:    git commit
 | `explain` | Get a detailed answer — replies are short by default |
 
 ### Cheapest way to run a feature
-Measured on the tic-tac-toe benchmark before the senior-quality rules: $1.11 vs $1.39 all-Opus (−20%), same quality — not re-measured since.
+Measured on the benchmark feature before the senior-quality rules: $1.11 vs $1.39 all-Opus (−20%), same quality — not re-measured since.
 1. Request the feature with Opus — it writes the change folder; review it.
 2. `/model sonnet`
 3. `go up to ID-00N` (the last task) — or `/clear → go` per task if you want to review each one (−15%).
@@ -114,7 +114,7 @@ Yellow = you act. Inline skips phases 1–3 and 6: the agent edits the RF in `sp
 | 3 · Approve | Waits, then creates branch `feat/<feature>` | Read the change folder, reply `yes` | branch |
 | 4 · Implement | The `implementer` subagent (Sonnet) writes tests and code — failing test first when TDD is ON | — | code + tests |
 | 5 · Verify | Runs `gates.sh` (format → lint → build → tests → audit), stages the task | Review the diff, `/clear`, reply `go` | staged task |
-| 6 · Archive | The `reviewer` subagent checks the diff against the RFs, then full gates, merges new RFs into the living spec, proposes a commit message | Commit, `/clear` | 1 commit |
+| 6 · Archive | The `reviewer` subagent checks the diff against the RFs, then full gates, merges new RFs into the living spec, updates `docs/architecture.md` when a slice or project-wide decision was added, proposes a commit message | Commit, `/clear` | 1 commit |
 
 ## Adapt to your stack
 Phases, docs and commands never change. Change only these:
@@ -123,11 +123,11 @@ Phases, docs and commands never change. Change only these:
 |------|-------|-------|----------|--------|
 | Stack | `CLAUDE.md` → Stack | React + Vite + TS | Node + Express + TS | Python + FastAPI |
 | Slice | `CLAUDE.md` → Layer Structure | `src/features/<feature>/` | `src/modules/<module>/` | `app/<module>/` |
-| Business rules live in | `docs/architecture.md` | pure `rules.ts`, not components — a hook only when state outgrows one `useState` | services, not routes | services, not routers |
+| Business rules live in | `CLAUDE.md` → Layer Structure | pure `rules.ts`, not components — a hook only when state outgrows one `useState` | services, not routes | services, not routers |
 | Format | `.claude/gates.conf` | `prettier --write` | same | `ruff format` |
 | Full gates | `.claude/gates.conf` | `npm run lint` · `npm run build` · `npm test` · `npm audit` | same | `ruff check` · `mypy .` · `pytest` · `pip-audit` |
 | Scoped gates | `.claude/gates.conf` | `eslint <files>` · `vitest related <files>` | same | `ruff check <files>` · `pytest <slice>` |
-| Test name | `CLAUDE.md` → Spec Rules | `GAME-01 should …` | `ORDER-01 should …` | `test_order_01_…` |
+| Test name | `CLAUDE.md` → Spec Rules | `CART-01 should …` | `ORDER-01 should …` | `test_order_01_…` |
 | Denied files | `.claude/settings.json` | `package-lock.json`, `dist/` | `package-lock.json`, `dist/` | `.venv/`, `__pycache__/` |
 
 Write RFs as behavior seen from outside — UI on a frontend, HTTP responses on an API:
@@ -139,7 +139,7 @@ ORDER-01 — The system MUST reject an order with no items
 ## Glossary
 | Term | Meaning |
 |------|---------|
-| RF | Functional requirement: one rule the system MUST follow, with an ID like `GAME-04` |
+| RF | Functional requirement: one rule the system MUST follow, with an ID like `ORDER-04` |
 | GIVEN / WHEN / THEN | A concrete example of an RF; each one becomes a test |
 | Living spec | `specs/current/<capability>/spec.md` — what the system does today |
 | Change folder | `specs/changes/<feature>/` — `proposal.md` · `design.md` · `specs/<capability>/spec.md` (deltas) · `tasks.md` — what one change adds, modifies or removes |
@@ -156,13 +156,13 @@ ORDER-01 — The system MUST reject an order with no items
 | `.claude/gates.conf` | Gate commands — fill them per stack |
 | `.claude/scripts/gates.sh` | Formats the changed files, runs the gates in order, stops at the first failure, prints one line |
 | `.claude/agents/explore.md` | Replaces the built-in `Explore`: Sonnet, no `CLAUDE.md`, returns a summary only |
-| `.claude/agents/implementer.md` | Runs one approved task: TDD, scoped gates, change-doc update, staging (Sonnet) |
+| `.claude/agents/implementer.md` | Runs one approved task: TDD, scoped gates, change-folder update, staging (Sonnet) |
 | `.claude/agents/reviewer.md` | Checks the staged diff against the RFs, Hard Rules and Testing Rules once per feature — gaps only, never style |
 | `.claude/skills/create-feature/` | Full-cycle skill: specify → plan → approve → implement → verify → archive |
 | `.claude/skills/refactor/` | Refactor skill: green tests → plan → approve → small steps → verify |
 | `.claude/skills/optimize/` | Optimize skill: green tests → baseline → plan → approve → measured steps → verify |
 | `.claude/skills/adopt-project/` | `/adopt`: fits the setup to an existing project |
-| `docs/architecture.md` | Layers and architecture decisions |
+| `docs/architecture.md` | Project-wide map: context, slices, layers per stack, quality attributes, decisions — updated at each feature close; per-change design lives in the change folder |
 | `docs/decisions/` | ADRs — copy `000-template.md` |
 | `docs/doc-rules.md` | Format rules for every `.md` |
 | `specs/current/` | Living specs, one folder per capability (`<capability>/spec.md`) — copy `templates/spec.md` |
@@ -188,7 +188,7 @@ Every method this setup applies, where it lives, and what it buys.
 | BDD scenarios in Gherkin style | Behavior-Driven Development · Gherkin `Given / When / Then` | `GIVEN \| WHEN \| THEN` inline under each RF | Each scenario becomes one test — one line instead of a `.feature` file, so no Cucumber runner needed |
 | Arrange / Act / Assert | xUnit test pattern | `CLAUDE.md` → Testing Rules | One behavior per test, same shape everywhere |
 | Query like a user | Testing Library guiding principles | `CLAUDE.md` → Testing Rules | Tests find elements by role + accessible name — they survive markup changes and enforce accessibility |
-| One test per THEN variant | Equivalence partitioning | `CLAUDE.md` → Testing Rules | "A row, column or diagonal" = 3 tests — no variant left untested |
+| One test per THEN variant | Equivalence partitioning | `CLAUDE.md` → Testing Rules | "Pays by card, PayPal or bank transfer" = 3 tests — no variant left untested |
 | Test behavior, mock only boundaries | Classic (Detroit) TDD | `CLAUDE.md` → Testing Rules | Tests survive refactors; only network, database, clock and file system are mocked |
 | Test name starts with its RF ID | RF ↔ task ↔ test traceability | Spec Rules · `gates.sh rf` | Every RF is checkable by name |
 | TDD with RED evidence | Test-Driven Development | `implementer` · `gates.sh rf` | A test must fail before the code exists; the task line reports it |
@@ -200,7 +200,7 @@ Every method this setup applies, where it lives, and what it buys.
 | Vertical slices | Vertical Slice Architecture | `CLAUDE.md` → Layer Structure | A feature changes inside one folder |
 | ADRs | Architecture Decision Records | `docs/decisions/` | Project-wide choices keep their reason |
 | KISS · YAGNI | — | `CLAUDE.md` → Hard Rules | No abstraction for a use case that does not exist |
-| Make illegal states unrepresentable | Typed functional design | `CLAUDE.md` → Hard Rules | Exclusive states are one tagged union — no `winner` next to `nextPlayer` |
+| Make illegal states unrepresentable | Typed functional design | `CLAUDE.md` → Hard Rules | Exclusive states are one tagged union — no `isLoading` next to `error` and `data` |
 | Minimal public surface | Information hiding | `CLAUDE.md` → Hard Rules | Export only what another file imports, types included — no dead exports |
 | Explore → plan → approve → code | Anthropic best practices | `create-feature` steps 1–6 | No code before the human approves the change folder |
 | Conventional Commits | conventionalcommits.org | Working Protocol | One readable commit per feature |
@@ -251,7 +251,7 @@ Every method this setup applies, where it lives, and what it buys.
 | Measure before → after | The `optimize` skill, applied to this setup | `/usage` · `/context` | A change stays only if it lowers tokens without failing gates |
 
 ### Measured on this setup
-The same 3-task feature (terminal tic-tac-toe, Node, TDD ON) run end to end with `claude -p`.
+The same 3-task feature (a small Node CLI app, TDD ON) run end to end with `claude -p`.
 
 | Version | Tokens per feature | Opus tokens | List cost | Quality |
 |---------|-------------------|-------------|-----------|---------|
@@ -259,7 +259,7 @@ The same 3-task feature (terminal tic-tac-toe, Node, TDD ON) run end to end with
 | Gates script + Sonnet implementer + Explore override (1 run) | 1.18 M (−24%) | 0.90 M (−42%) | $1.66 (−17%) | all RFs ✅ · 0 Hard Rule violations |
 | Reviewer at feature close | +85 k | +85 k | +$0.27 | caught a planted missing test and a real bug that passed every test |
 
-The same React tic-tac-toe feature (full cycle, Opus, `/clear → go` per task), 2 runs per version, averages.
+The same React feature (a small single-slice app with 5–7 RFs, full cycle, Opus, `/clear → go` per task), 2 runs per version, averages.
 
 | Version | Closed | Tokens | Time | List cost | Tests | Quality |
 |---------|--------|--------|------|-----------|-------|---------|

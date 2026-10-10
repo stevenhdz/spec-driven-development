@@ -1,6 +1,6 @@
 #!/bin/bash
 # Quality Gates: format (rewrites, silent) → lint → build → tests → audit, stops at the first failure, prints one line.
-# Usage: bash .claude/scripts/gates.sh scoped <files…> | full | rf <RF-ID>
+# Usage: bash .claude/scripts/gates.sh scoped <files…> | full [--no-format] | rf <RF-ID>
 # Exit: 0 pass · 1 gate or test failed · 2 usage · 3 no test named <RF-ID>
 set -u
 
@@ -82,9 +82,10 @@ case "$mode" in
     test_cmd=$(expand "$TEST_SCOPED") || test_cmd=$TEST_FULL ;;
   full)
     format=${FORMAT_FULL:-}
+    if test "${1:-}" = --no-format; then format=""; fi
     lint=$LINT_FULL
     test_cmd=$TEST_FULL ;;
-  *) echo "usage: gates.sh scoped <files…> | full | rf <RF-ID>"; exit 2 ;;
+  *) echo "usage: gates.sh scoped <files…> | full [--no-format] | rf <RF-ID>"; exit 2 ;;
 esac
 
 audit=""

@@ -51,7 +51,7 @@ Do not load it for inline work — follow Spec Rules and still run Quality Gates
    - Relay its contract verbatim, then `Next: <Next step> — /clear → go` — the implementer already ran the close sequence up to staging.
    - On the human's next message — inside an approved batch: dispatch the next task · "go": approves and dispatches Progress → `Next step` · "fix: <what>": dispatch it for the last task · anything else: reply `Next: <Next step> — /clear → go` — stop and wait.
 9. Repeat step 8 only after explicit approval — per task or as a batch.
-10. When every task is `[x]` and every ADDED or MODIFIED RF `test:` is `✅`: if Progress → `Next step` is `review gaps (<N>)`, "go" accepts them — NEVER dispatch the reviewer again — otherwise dispatch the `reviewer` subagent (`.claude/agents/reviewer.md`) once with the change folder path — gaps: set Progress → `Next step: review gaps (<N>)`, report its contract with options — stop and wait ("fix: <what>" → step 8 · "go" accepts the gaps) — no gaps or gaps accepted: run Quality Gates in Full mode — then merge each `specs/changes/<feature-name>/specs/<capability>/spec.md` into `specs/current/<capability>/spec.md` — ADDED: append and advance `Next ID` · MODIFIED: replace the RF and its scenarios · REMOVED: delete the RF.
+10. When every task is `[x]` and every ADDED or MODIFIED RF `test:` is `✅`: if Progress → `Next step` is `review gaps (<N>)`, "go" accepts them — NEVER dispatch the reviewer again — otherwise dispatch the `reviewer` subagent (`.claude/agents/reviewer.md`) once with the change folder path — gaps: set Progress → `Next step: review gaps (<N>)`, report its contract with options — stop and wait ("fix: <what>" → step 8 · "go" accepts the gaps) — no gaps or gaps accepted: run Quality Gates in Full mode — then merge each `specs/changes/<feature-name>/specs/<capability>/spec.md` into `specs/current/<capability>/spec.md` — ADDED: append and advance `Next ID` · MODIFIED: replace the RF and its scenarios · REMOVED: delete the RF — then update `docs/architecture.md` only where the change made it stale: a created slice → §2 Slices · `design.md` → a Decision that binds future features → §5 Decisions.
 11. In `tasks.md` set Progress to `feature closed` and `Merged into specs: yes` → `git mv specs/changes/<feature-name> specs/changes/archive/<YYYY-MM-DD>-<feature-name>` → stage → propose the feature's single commit message per Working Protocol — one body line per task ID.
 
 ## Output Contract
@@ -68,6 +68,7 @@ Tasks: X/X · Files modified: X · RFs: X/X ✅
 Review: no gaps | <N> gaps accepted
 <line printed by gates.sh full>
 Specs merged: <files>
+Architecture: <§2 · §5 updated> | unchanged
 Archived: specs/changes/archive/<YYYY-MM-DD>-<feature-name>
 Commit message: feat(<scope>): description
 Next: commit → /clear

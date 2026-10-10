@@ -34,7 +34,7 @@ Do not load it when the request changes what a user sees, what an API returns or
 ## Execution Steps
 
 1. Read the code to refactor and the tests that cover it.
-2. Run the Tests gate scoped to that code — it MUST pass.
+2. Run `bash .claude/scripts/gates.sh scoped <files of that code>` — it MUST pass.
 3. Propose the plan: goal, scope IN/OUT, numbered steps — stop and wait for approval. Approval covers every step in the plan.
 4. Create branch `refactor/<name>` before the first staged change, unless there is no repo.
 5. Apply ONE step → run Quality Gates in Scoped mode → repeat until every step is done.
@@ -53,7 +53,7 @@ Final:
 ```
 [Refactor done] <name>
 Steps: X/X · Files modified: X · RFs: untouched · Tests: untouched
-Gates (full): lint ✅ · build ✅ · tests ✅ (X passing) · audit ⏭️
+<line printed by gates.sh full>
 Staged: <files>
 Commit message: refactor(<scope>): description
 Next: commit → /clear

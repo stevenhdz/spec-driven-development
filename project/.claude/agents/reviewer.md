@@ -27,5 +27,5 @@ Review: <feature> — no gaps
 or
 ```
 Review: <feature> — N gaps
-- <RF-ID | Scope | Hard Rule>: <gap> — <file:line>
+- <RF-ID | Scope | Hard Rule | Testing Rule>: <gap> — <file:line>
 ```
