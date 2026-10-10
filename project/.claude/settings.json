@@ -4,6 +4,9 @@
     "pr": ""
   },
   "permissions": {
+    "allow": [
+      "Bash(bash .claude/scripts/gates.sh *)"
+    ],
     "deny": [
       "Bash(git commit *)",
       "Bash(git push *)",

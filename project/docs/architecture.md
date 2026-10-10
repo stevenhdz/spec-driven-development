@@ -35,8 +35,8 @@ An arrow means "MAY import". Anything not drawn is forbidden.
 | Layer | This stack | Owns | NEVER |
 |-------|------------|------|-------|
 | Entry | [e.g. component · route / controller · command handler] | Receive input, call logic, return or render its result | Hold business rules |
-| Logic | [e.g. hook + pure rules · service / use case] | State, business rules, calls to Outbound systems | Know the transport (DOM, HTTP, terminal) |
-| Types | [e.g. `types.ts` · DTOs · `schemas.py`] | Shapes and contracts | Contain runtime logic |
+| Logic | [e.g. pure rules · a hook only when state outgrows one `useState` · service / use case] | State, business rules, calls to Outbound systems | Know the transport (DOM, HTTP, terminal) |
+| Types | [e.g. `types.ts` only when 2+ files share them · DTOs · `schemas.py`] | Shapes and contracts | Contain runtime logic |
 | Public API | [e.g. `index.ts` · `__init__.py` · exported package] | The only door into the slice | Be bypassed by another slice |
 
 ## 4. Data model
