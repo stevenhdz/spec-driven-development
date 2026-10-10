@@ -250,23 +250,6 @@ Every method this setup applies, where it lives, and what it buys.
 | Short replies | — | `CLAUDE.md` → Chat Replies | No greeting, restating or closing summary |
 | Measure before → after | The `optimize` skill, applied to this setup | `/usage` · `/context` | A change stays only if it lowers tokens without failing gates |
 
-### Measured on this setup
-The same 3-task feature (a small Node CLI app, TDD ON) run end to end with `claude -p`.
-
-| Version | Tokens per feature | Opus tokens | List cost | Quality |
-|---------|-------------------|-------------|-----------|---------|
-| Before (median of 2 runs) | 1.56 M | 1.56 M | $1.99 | all RFs ✅ |
-| Gates script + Sonnet implementer + Explore override (1 run) | 1.18 M (−24%) | 0.90 M (−42%) | $1.66 (−17%) | all RFs ✅ · 0 Hard Rule violations |
-| Reviewer at feature close | +85 k | +85 k | +$0.27 | caught a planted missing test and a real bug that passed every test |
-
-The same React feature (a small single-slice app with 5–7 RFs, full cycle, Opus, `/clear → go` per task), 2 runs per version, averages.
-
-| Version | Closed | Tokens | Time | List cost | Tests | Quality |
-|---------|--------|--------|------|-----------|-------|---------|
-| Single change doc, no implementer / reviewer | 1 of 2 — one run looped on a failing gate | 2.03 M | 3.8 min | $2.10 | 9 | pass-through hook, 5 dead exports |
-| Change folders + implementer + reviewer | 2 of 2 | 1.23 M (−39%) | 3.7 min | $1.50 (−29%) | 9 | dead exports, contradictory state fields, casts, inline styles |
-| + senior rules + formatter + one test per THEN variant | 2 of 2 | 1.38 M (−32%) | 4.3 min | $1.67 (−20%) | 10–12 | tagged-union state, private types, accessible UI, uniform style — the reviewer caught the one dead export left |
-
 ### Evaluated and not adopted
 | Method | Why not |
 |--------|---------|
