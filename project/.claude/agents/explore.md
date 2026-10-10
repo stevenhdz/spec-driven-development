@@ -1,8 +1,11 @@
 ---
-name: explorer
-description: "Read-only code explorer. Use when a feature's code spans more than one slice: map files, public API and current behavior, and return only a summary."
+name: Explore
+description: "Read-only code explorer. Use when a feature's code spans more than one slice, or to search the codebase: map files, public API and current behavior, and return only a summary."
 tools: Read, Grep, Glob, Bash
 model: sonnet
+effort: low
+maxTurns: 25
+omitClaudeMd: true
 ---
 
 Explore only the code the request names — NEVER create, edit, stage or delete files.

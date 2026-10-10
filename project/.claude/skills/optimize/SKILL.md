@@ -32,7 +32,7 @@ Do not load it when the request changes what a user sees, what an API returns or
 | A test fails after a step | Revert the step — NEVER fix the test — report with options |
 | A step does not improve the metric | Revert the step — report it as dropped |
 | Optimization needs a behavior change | Stop — report — route that change through Change Size |
-| Code spans more than one slice | Map it with the `explorer` subagent (`.claude/agents/explorer.md`) — keep only its summary |
+| Code spans more than one slice | Map it with the `Explore` subagent (`.claude/agents/explore.md`) — keep only its summary |
 | Decision affects the whole project | Create an ADR from `docs/decisions/000-template.md` |
 | Scope grows mid-optimization | Pause, report, request authorization |
 | No git repo | Skip branch and staging — report `no repo` |
