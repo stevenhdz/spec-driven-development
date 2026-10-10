@@ -12,7 +12,7 @@ Every change follows the same order: **written spec → your approval → tests 
 ## Setup
 1. Copy everything inside `project/` to your repo root, including the hidden `.claude/` folder.
 2. Fill every `[placeholder]` in `CLAUDE.md` (Product, Stack, Layer Structure, Conventions, Hard Rules, Spec Rules) and the gate commands in `.claude/gates.conf` — `FORMAT_*` needs a formatter you approved as a dependency (e.g. prettier); leave it empty to skip formatting.
-3. Edit `docs/architecture.md`: map its layers to your stack and add your decisions.
+3. Edit `docs/architecture.md`: context, the layers in your stack and your decisions — the agent adds slices and project-wide decisions at each feature close.
 4. Confirm no placeholder is left. This command must print nothing:
    ```
    grep -nE '\[[^]]{2,}\]' CLAUDE.md docs/architecture.md .claude/gates.conf
@@ -114,7 +114,7 @@ Yellow = you act. Inline skips phases 1–3 and 6: the agent edits the RF in `sp
 | 3 · Approve | Waits, then creates branch `feat/<feature>` | Read the change folder, reply `yes` | branch |
 | 4 · Implement | The `implementer` subagent (Sonnet) writes tests and code — failing test first when TDD is ON | — | code + tests |
 | 5 · Verify | Runs `gates.sh` (format → lint → build → tests → audit), stages the task | Review the diff, `/clear`, reply `go` | staged task |
-| 6 · Archive | The `reviewer` subagent checks the diff against the RFs, then full gates, merges new RFs into the living spec, proposes a commit message | Commit, `/clear` | 1 commit |
+| 6 · Archive | The `reviewer` subagent checks the diff against the RFs, then full gates, merges new RFs into the living spec, updates `docs/architecture.md` when a slice or project-wide decision was added, proposes a commit message | Commit, `/clear` | 1 commit |
 
 ## Adapt to your stack
 Phases, docs and commands never change. Change only these:
@@ -123,7 +123,7 @@ Phases, docs and commands never change. Change only these:
 |------|-------|-------|----------|--------|
 | Stack | `CLAUDE.md` → Stack | React + Vite + TS | Node + Express + TS | Python + FastAPI |
 | Slice | `CLAUDE.md` → Layer Structure | `src/features/<feature>/` | `src/modules/<module>/` | `app/<module>/` |
-| Business rules live in | `docs/architecture.md` | pure `rules.ts`, not components — a hook only when state outgrows one `useState` | services, not routes | services, not routers |
+| Business rules live in | `CLAUDE.md` → Layer Structure | pure `rules.ts`, not components — a hook only when state outgrows one `useState` | services, not routes | services, not routers |
 | Format | `.claude/gates.conf` | `prettier --write` | same | `ruff format` |
 | Full gates | `.claude/gates.conf` | `npm run lint` · `npm run build` · `npm test` · `npm audit` | same | `ruff check` · `mypy .` · `pytest` · `pip-audit` |
 | Scoped gates | `.claude/gates.conf` | `eslint <files>` · `vitest related <files>` | same | `ruff check <files>` · `pytest <slice>` |
@@ -162,7 +162,7 @@ ORDER-01 — The system MUST reject an order with no items
 | `.claude/skills/refactor/` | Refactor skill: green tests → plan → approve → small steps → verify |
 | `.claude/skills/optimize/` | Optimize skill: green tests → baseline → plan → approve → measured steps → verify |
 | `.claude/skills/adopt-project/` | `/adopt`: fits the setup to an existing project |
-| `docs/architecture.md` | Layers and architecture decisions |
+| `docs/architecture.md` | Project-wide map: context, slices, layers per stack, quality attributes, decisions — updated at each feature close; per-change design lives in the change folder |
 | `docs/decisions/` | ADRs — copy `000-template.md` |
 | `docs/doc-rules.md` | Format rules for every `.md` |
 | `specs/current/` | Living specs, one folder per capability (`<capability>/spec.md`) — copy `templates/spec.md` |

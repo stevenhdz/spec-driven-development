@@ -37,6 +37,7 @@
 ## Hard Rules
 - NEVER use: [forbidden patterns — e.g. `any`, default exports, class components, inline `style` · global mutable state]
 - NEVER put business rules in the entry layer — extract them to the logic layer
+- NEVER let the logic layer know the transport (DOM, HTTP, terminal) — it takes and returns plain data
 - NEVER add comments to the code you write or change — names and small functions must explain the intent; leave existing comments as they are
 - NEVER over-engineer (KISS · YAGNI): the simplest solution that works — a function before a class, no abstraction or layer for a use case that does not exist yet
 - NEVER create a pass-through: a wrapper around a single call (e.g. a hook around one `useState`, a service around one query), a component that only renders another, a re-export other than the public API, a type used in one place — and NEVER write code no RF or caller can reach
