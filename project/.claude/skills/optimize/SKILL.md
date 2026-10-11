@@ -1,6 +1,6 @@
 ---
 name: optimize
-description: "Trigger: optimize, performance, faster, slow, reduce size, memory. Improve a measured metric without changing observable behavior: baseline first, keep only steps that improve it, RFs and tests stay untouched."
+description: "Trigger: optimize, performance, faster, slow, reduce size, memory. Improve a measured metric without changing observable behavior: baseline first, keep only steps that improve it, FRs and tests stay untouched."
 ---
 
 ## Activation Contract
@@ -43,9 +43,9 @@ Do not load it when the request changes what a user sees, what an API returns or
 2. Run `bash .claude/scripts/gates.sh scoped <files of that code>` — it MUST pass.
 3. Agree the metric and its measure command — run it and record the baseline.
 4. Propose the plan: goal, scope IN/OUT, metric, baseline, numbered steps — stop and wait for approval. Approval covers every step in the plan.
-5. Create branch `perf/<name>` before the first staged change, unless there is no repo.
+5. Create the branch per `CLAUDE.md` → Working Protocol → Branch name, type `perf`, before the first staged change, unless there is no repo.
 6. Apply ONE step → run Quality Gates in Scoped mode → measure → keep the step only if the metric improves → repeat until every step is done.
-7. Run the Working Protocol close sequence with Quality Gates in Full mode — propose the commit message `perf(<scope>): description`.
+7. Run the Working Protocol close sequence with Quality Gates in Full mode — propose the commit message per Working Protocol, type `perf`.
 
 ## Output Contract
 
@@ -60,10 +60,10 @@ Steps: 1. <change> · 2. <change> · …
 Final:
 ```
 [Optimize done] <name>
-Steps: X kept · X dropped · Files modified: X · RFs: untouched · Tests: untouched
+Steps: X kept · X dropped · Files modified: X · FRs: untouched · Tests: untouched
 Metric: <name> <before> → <after>
 <line printed by gates.sh full>
 Staged: <files>
-Commit message: perf(<scope>): description
+Commit message: <per Working Protocol, type perf>
 Next: commit → /clear
 ```

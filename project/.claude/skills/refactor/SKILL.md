@@ -1,6 +1,6 @@
 ---
 name: refactor
-description: "Trigger: refactor, clean up, restructure, rename, extract, simplify. Change code structure without changing observable behavior: RFs and tests stay untouched, tests stay green."
+description: "Trigger: refactor, clean up, restructure, rename, extract, simplify. Change code structure without changing observable behavior: FRs and tests stay untouched, tests stay green."
 ---
 
 ## Activation Contract
@@ -36,9 +36,9 @@ Do not load it when the request changes what a user sees, what an API returns or
 1. Read the code to refactor and the tests that cover it.
 2. Run `bash .claude/scripts/gates.sh scoped <files of that code>` — it MUST pass.
 3. Propose the plan: goal, scope IN/OUT, numbered steps — stop and wait for approval. Approval covers every step in the plan.
-4. Create branch `refactor/<name>` before the first staged change, unless there is no repo.
+4. Create the branch per `CLAUDE.md` → Working Protocol → Branch name, type `refactor`, before the first staged change, unless there is no repo.
 5. Apply ONE step → run Quality Gates in Scoped mode → repeat until every step is done.
-6. Run the Working Protocol close sequence with Quality Gates in Full mode — propose the commit message `refactor(<scope>): description`.
+6. Run the Working Protocol close sequence with Quality Gates in Full mode — propose the commit message per Working Protocol, type `refactor`.
 
 ## Output Contract
 
@@ -52,9 +52,9 @@ Steps: 1. <move> · 2. <move> · …
 Final:
 ```
 [Refactor done] <name>
-Steps: X/X · Files modified: X · RFs: untouched · Tests: untouched
+Steps: X/X · Files modified: X · FRs: untouched · Tests: untouched
 <line printed by gates.sh full>
 Staged: <files>
-Commit message: refactor(<scope>): description
+Commit message: <per Working Protocol, type refactor>
 Next: commit → /clear
 ```
