@@ -1,0 +1,19 @@
+# Changelog
+
+## v1.1.0 — 2026-10-11
+### Added
+- `frs` gate in `gates.sh full`: every FR in `specs/current/` must have a test and a unique ID — catches deleted tests and duplicate IDs from parallel branches.
+- readme → In a team: CI workflow running the full gates on every PR, and how to fix a duplicate FR ID.
+- Branch name and commit message formats are `CLAUDE.md` placeholders — fit them to your team's convention, ticket ID included.
+- `reviewer` flags tests named with an FR ID that check another behavior or assert nothing.
+
+### Changed
+- RF renamed to FR everywhere: `gates.sh fr`, `TEST_FR`, `{fr}`, `{fr_id}`. Upgrade: rename `TEST_RF` to `TEST_FR` and `{rf}` / `{rf_id}` to `{fr}` / `{fr_id}` in your `gates.conf`, and RF to FR in your `CLAUDE.md`.
+- Feature close merges the FRs into the living spec before the full gates, so a REMOVED FR no longer fails `frs`.
+- Methodologies moved from the readme to `METHODOLOGIES.md`; readme trimmed.
+
+### Fixed
+- `gates.conf` documents single quotes for commands with `$` — double quotes expanded them when the script sourced the file.
+
+## v1.0.0 — 2026-10-11
+- First release.
