@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+### Fixed
+- `gates.sh` detects test files by path (`__tests__/`, `tests/`, `spec/`, `test_*`, `*.test.*`, `*.spec.*`, `*_test.*`, `*_spec.*`) — Jest tests in `__tests__/` without a `.test` suffix no longer fail `frs`, and source files like `latest.ts` or `special.ts` no longer count as tests.
+
 ## v1.1.0 — 2026-10-11
 ### Added
 - `frs` gate in `gates.sh full`: every FR in `specs/current/` must have a test and a unique ID — catches deleted tests and duplicate IDs from parallel branches.
