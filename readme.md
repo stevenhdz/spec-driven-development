@@ -16,7 +16,11 @@ A copy-and-fill setup for using **Claude Code** on any project — frontend, bac
 - Commands for lint, build and tests in your project — any language
 
 ## Setup
-1. Copy everything inside `project/` to your repo root, including the hidden `.claude/` folder.
+1. From your repo root, install `project/` — it never overwrites a file that already exists and lists the ones it kept:
+   ```
+   curl -fsSL https://raw.githubusercontent.com/stevenhdz/spec-driven-development/main/install.sh | bash
+   ```
+   Pin a version with `| bash -s v1.2.0`. Or copy everything inside `project/` by hand, including the hidden `.claude/` folder.
 2. Fill every `[placeholder]` in `CLAUDE.md` (Product, Stack, Layer Structure, Conventions, Hard Rules, Spec Rules, Working Protocol) and the gate commands in `.claude/gates.conf` — `FORMAT_*` needs a formatter you approved as a dependency (e.g. prettier); leave it empty to skip formatting.
 3. Edit `docs/architecture.md`: context, the layers in your stack and your decisions — the agent adds slices and project-wide decisions at each feature close.
 4. Confirm no placeholder is left. This command must print nothing:
@@ -30,7 +34,7 @@ A copy-and-fill setup for using **Claude Code** on any project — frontend, bac
 Optional: for a typed language, install its code intelligence plugin with `/plugin` — symbol lookups replace grep + file reads.
 
 ### Existing project
-Copy `project/` into it, open Claude Code and run `/adopt`. The agent asks you to confirm, then does steps 2–5 from your code — it changes no code.
+Install `project/` into it as in Setup step 1, open Claude Code and run `/adopt`. The agent asks you to confirm, then does steps 2–5 from your code — it changes no code.
 
 Your first behavior change in each area runs the full cycle — it creates that area's spec.
 
