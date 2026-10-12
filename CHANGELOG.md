@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.2.0 — 2026-10-12
+### Added
+- `install.sh`: installs `project/` into the current repo with one `curl … | bash` — never overwrites an existing file, lists the ones it kept, makes `gates.sh` executable · `-s <tag>` pins a version.
+
 ## v1.1.2 — 2026-10-12
 ### Changed
 - readme: version, license, Claude Code and methodology badges · GitHub alerts for the core flow, the cheapest run, the diff review and duplicate FR IDs · Phases diagram colors agent steps blue and the inline path gray.
