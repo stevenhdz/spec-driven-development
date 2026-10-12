@@ -15,6 +15,7 @@ app_dir=${APP_DIR:-.}
 app="$root/$app_dir"
 log=$(mktemp)
 trap 'rm -f "$log"' EXIT
+test_path='(^|/)(__tests__|tests?|spec)/|(^|/)test_[^/]*$|[._](test|spec)\.[^/]*$'
 
 files="" tests="" dirs="" code=0
 for f in "$@"; do
@@ -26,7 +27,7 @@ for f in "$@"; do
   fi
   test -e "$app/$f" || continue
   files="$files $f"
-  case "${f##*/}" in *test*|*spec*) tests="$tests $f" ;; esac
+  if [[ $f =~ $test_path ]]; then tests="$tests $f"; fi
   d=$(dirname "$f")
   case " $dirs " in *" $d "*) ;; *) dirs="$dirs $d" ;; esac
 done
@@ -63,8 +64,8 @@ fr_pattern() {
 }
 
 has_test() {
-  grep -rIqiE "$(fr_pattern "$1")" "$app" --include='*test*' --include='*spec*' --exclude='*.md' \
-    --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist --exclude-dir=.venv --exclude-dir=target
+  (cd "$app" && grep -rIliE "$(fr_pattern "$1")" . --exclude='*.md' \
+    --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist --exclude-dir=.venv --exclude-dir=target) | grep -qE "$test_path"
 }
 
 if test "$mode" = fr; then
