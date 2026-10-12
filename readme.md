@@ -1,8 +1,14 @@
 # Spec Driven Development
 
+[![Version](https://img.shields.io/github/v/tag/stevenhdz/spec-driven-development?label=version&color=blue)](CHANGELOG.md)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Claude Code](https://img.shields.io/badge/Claude_Code-v2.1.271%2B-D97757)](https://claude.com/claude-code)
+[![SDD · BDD · TDD](https://img.shields.io/badge/SDD_%C2%B7_BDD_%C2%B7_TDD-8A2BE2)](METHODOLOGIES.md)
+
 A copy-and-fill setup for using **Claude Code** on any project — frontend, backend, API, CLI or library.
 
-Every change follows the same order: **written spec → your approval → tests + code**. The agent never guesses what to build, every rule has a test, and only you commit.
+> [!NOTE]
+> Every change follows the same order: **written spec → your approval → tests + code**. The agent never guesses what to build, every rule has a test, and only you commit.
 
 ## Requirements
 - [Claude Code](https://claude.com/claude-code) v2.1.271 or later
@@ -62,12 +68,15 @@ You:    git commit
 **Inline or full cycle:** inline when the change adds or modifies at most 1 FR in an existing spec, in 1 existing slice, with no new dependency — no change folder, no approval round, one commit. Anything else runs the full cycle.
 
 ### Cheapest way to run a feature
-Request the feature with Opus and review the change folder, then `/model sonnet` and `go up to ID-00N` (the last task).
+> [!TIP]
+> Request the feature with Opus and review the change folder, then `/model sonnet` and `go up to ID-00N` (the last task).
 
 ### Rules and guarantees
+> [!IMPORTANT]
+> Review `git diff --staged` before `go` or committing — `go` is your approval of the last task.
+
 - No code before you approve the change folder.
 - `/clear` after each task, unless you ran a batch with `go up to` — the change folder and staged files keep the state.
-- Review `git diff --staged` before `go` or committing.
 - Edit the FR in `specs/current/` before changing code by hand.
 - Only you commit: the agent stages files but cannot run `git commit` or `git push`.
 - A failing gate stops the work; the agent shows the error and proposes options.
@@ -88,8 +97,10 @@ Request the feature with Opus and review the change folder, then `/model sonnet`
         - uses: actions/checkout@v4
         - run: bash .claude/scripts/gates.sh full --no-format
   ```
-- Two branches can add the same FR ID. After the merge, `frs` fails with `FR ORDER-05: ❌ duplicate ID` — ask the agent to renumber the FR your branch added.
 - `frs` checks that each FR has a test by name, not what the test asserts: in the agent flow the `reviewer` flags empty or mislabeled tests; in CI, your PR review does.
+
+> [!WARNING]
+> Two branches can add the same FR ID. After the merge, `frs` fails with `FR ORDER-05: ❌ duplicate ID` — ask the agent to renumber the FR your branch added.
 
 ## Phases
 ```mermaid
@@ -112,9 +123,13 @@ flowchart LR
     V -. inline: full gates .-> K
 
     classDef human fill:#fde68a,stroke:#b45309,color:#1f2937
+    classDef agent fill:#dbeafe,stroke:#1d4ed8,color:#1f2937
+    classDef inline fill:#e5e7eb,stroke:#4b5563,color:#1f2937
     class A,D,K human
+    class C,S,P,I,V,R agent
+    class E inline
 ```
-Yellow hexagon = you act. Inline: the agent edits one FR in `specs/current/`, implements, runs full gates, you commit — no change folder, no archive.
+Yellow = you act · blue = the agent works · gray = inline only. Inline: the agent edits one FR in `specs/current/`, implements, runs full gates, you commit — no change folder, no archive.
 
 | Phase | Agent | You |
 |-------|-------|-----|
