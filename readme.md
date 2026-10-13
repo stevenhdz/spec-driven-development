@@ -23,7 +23,7 @@ Requires Claude Code v2.1.271+, Git, and lint/build/test commands.
    ```
    curl -fsSL https://raw.githubusercontent.com/stevenhdz/spec-driven-development/main/install.sh | bash
    ```
-   Pin a version with `| bash -s v1.2.0`.
+   Pin a version with `| bash -s <tag>` — [tags](https://github.com/stevenhdz/spec-driven-development/tags).
 2. Fill every `[placeholder]` in `CLAUDE.md`, `docs/architecture.md` and `.claude/gates.conf` — `FORMAT_*` needs a formatter you approved as a dependency, or leave it empty. Check with:
    ```
    grep -nE '\[[^]]{2,}\]' CLAUDE.md docs/architecture.md .claude/gates.conf
