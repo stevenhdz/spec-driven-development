@@ -7,6 +7,15 @@
 
 A copy-and-fill setup for **Claude Code** on any project. Every change follows: **spec → your approval → tests + code**. Only you commit.
 
+## Why
+AI wrote fast, working code — and also bugs, layers nobody asked for, security holes and technical debt. What worked was taking away its room to improvise: first it writes the spec, I approve it, and only then come tests and code.
+
+- **It guesses what to build** → SDD + BDD: a written, approved spec with concrete GIVEN / WHEN / THEN examples comes first.
+- **Bugs and unproven "it works"** → TDD + deterministic gates: a test fails first, a script prints the result.
+- **Layers nobody asked for, technical debt** → KISS · YAGNI · vertical slices + a reviewer that checks the diff against the spec.
+- **Security holes** → secrets denied and never hardcoded, no dependency without approval, `audit` gate.
+- **Spec and code drift apart** → living specs + traceability: every FR keeps a test, checked in CI.
+
 ## Setup
 Requires Claude Code v2.1.271+, Git, and lint/build/test commands.
 
