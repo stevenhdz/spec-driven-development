@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.2.2 — 2026-10-12
+### Changed
+- readme → Why: the problem this setup solves — bugs, unrequested layers, security holes and technical debt from AI-written code — and which methodology answers each one.
+
 ## v1.2.1 — 2026-10-12
 ### Changed
 - readme rewritten for usage: Setup, Use it, How it works and Methodologies only — example session, phase table, stack adaptation, glossary and file list removed.
