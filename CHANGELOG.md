@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+### Changed
+- readme rewritten for usage: Setup, Use it, How it works and Methodologies only — example session, phase table, stack adaptation, glossary and file list removed.
+- `METHODOLOGIES.md` merged into the readme as one table: each methodology and how this setup applies it.
+
 ## v1.2.0 — 2026-10-12
 ### Added
 - `install.sh`: installs `project/` into the current repo with one `curl … | bash` — never overwrites an existing file, lists the ones it kept, makes `gates.sh` executable · `-s <tag>` pins a version.
