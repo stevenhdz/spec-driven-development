@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.2.1 — 2026-10-12
 ### Changed
 - readme rewritten for usage: Setup, Use it, How it works and Methodologies only — example session, phase table, stack adaptation, glossary and file list removed.
 - `METHODOLOGIES.md` merged into the readme as one table: each methodology and how this setup applies it.
