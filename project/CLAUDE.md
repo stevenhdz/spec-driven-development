@@ -45,7 +45,7 @@
 - Model states that exclude each other as one tagged union — NEVER separate fields that can contradict each other (e.g. `isLoading` next to `error` and `data`)
 - NEVER silence the type checker — no casts, non-null assertions or ignore comments: fix the type — scaffold files exempt
 - UI: native semantic elements first — every control has an accessible name — an ARIA role only with the children its pattern requires
-- NEVER add a dependency without explicit approval
+- NEVER add a dependency without explicit approval — before asking, check it in its registry (e.g. `npm view <pkg>` · `pip index versions <pkg>`) and show: exact name, version, publish date, weekly downloads, source repo — a package not found, published in the last 30 days, with few downloads or a name close to a popular one: say so and propose a known alternative
 - ALWAYS search (grep / glob) before opening a file — read only the line range the task needs
 - NEVER read the internal files of a slice the task does not change — only its public API
 - NEVER read, print or work around a file denied in `.claude/settings.json` — if a task needs a value from one, ask the human

@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+### Added
+- Hard Rule: before asking to add a dependency, the agent checks it in its registry and shows name, version, publish date, downloads and repo — it flags a missing, brand-new, little-used or look-alike package and proposes a known alternative.
+- `gates.conf`: `AUDIT` and `MANIFESTS` examples for Go (`govulncheck`) and Rust (`cargo audit`).
+
+### Fixed
+- `audit` never ran in CI: the checkout is clean, so no manifest looked changed. `gates.sh full` now also compares against `$GATES_BASE`, or `origin/<base branch>` in a GitHub PR — if the base is not fetched, `audit` runs.
+
 ## v1.2.2 — 2026-10-12
 ### Changed
 - readme → Why: the problem this setup solves — bugs, unrequested layers, security holes and technical debt from AI-written code — and which methodology answers each one.

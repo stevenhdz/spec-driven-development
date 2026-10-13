@@ -1,6 +1,7 @@
 #!/bin/bash
 # Quality Gates: format (rewrites, silent) → lint → build → tests → frs (full only: every FR in specs/current has a test and a unique ID) → audit, stops at the first failure, prints one line.
 # Usage: bash .claude/scripts/gates.sh scoped <files…> | full [--no-format] | fr <FR-ID>
+# Audit runs when a manifest changed: uncommitted, or since $GATES_BASE (in a GitHub PR: origin/<base branch>) in full mode.
 # Exit: 0 pass · 1 gate or test failed · 2 usage · 3 no test named <FR-ID>
 set -u
 
@@ -95,9 +96,18 @@ case "$mode" in
   *) echo "usage: gates.sh scoped <files…> | full [--no-format] | fr <FR-ID>"; exit 2 ;;
 esac
 
+changed_paths() {
+  git -C "$root" status --porcelain
+  if test "$mode" = full && test -n "$base"; then
+    git -C "$root" diff --name-only "$base...HEAD" 2>/dev/null || printf '%s\n' $MANIFESTS
+  fi
+}
+
+base=${GATES_BASE:-${GITHUB_BASE_REF:+origin/$GITHUB_BASE_REF}}
 audit=""
+paths=$(changed_paths)
 for m in $MANIFESTS; do
-  if git -C "$root" status --porcelain | grep -qE "(^|/)$m\$"; then audit=$AUDIT; break; fi
+  if printf '%s\n' "$paths" | grep -qE "(^|/)$m\$"; then audit=$AUDIT; break; fi
 done
 
 line="Gates:"

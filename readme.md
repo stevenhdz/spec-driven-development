@@ -13,7 +13,7 @@ AI wrote fast, working code — and also bugs, layers nobody asked for, security
 - **It guesses what to build** → SDD + BDD: a written, approved spec with concrete GIVEN / WHEN / THEN examples comes first.
 - **Bugs and unproven "it works"** → TDD + deterministic gates: a test fails first, a script prints the result.
 - **Layers nobody asked for, technical debt** → KISS · YAGNI · vertical slices + a reviewer that checks the diff against the spec.
-- **Security holes** → secrets denied and never hardcoded, no dependency without approval, `audit` gate.
+- **Security holes and fake packages** → secrets denied and never hardcoded, every new dependency checked in its registry and approved by you, `audit` gate.
 - **Spec and code drift apart** → living specs + traceability: every FR keeps a test, checked in CI.
 
 ## Setup
@@ -50,7 +50,7 @@ Existing project: install, then run `/adopt` — it fills steps 2 and 3 from you
 > [!TIP]
 > Cheapest: plan with Opus, then `/model sonnet` and `go up to ID-00N`.
 
-CI: run `bash .claude/scripts/gates.sh full --no-format` on every PR. If two branches add the same FR ID, `frs` fails after the merge — ask the agent to renumber the FR your branch added.
+CI: run `bash .claude/scripts/gates.sh full --no-format` on every PR. In a GitHub PR, `audit` runs when the PR changes a manifest — check out with `fetch-depth: 0`, or it runs on every PR. If two branches add the same FR ID, `frs` fails after the merge — ask the agent to renumber the FR your branch added.
 
 ## How it works
 ```mermaid
@@ -82,6 +82,6 @@ flowchart LR
 | **Quality gates** | `gates.sh` runs format → lint → build → tests → frs → audit, stops at the first failure and prints one line the agent copies as is — same command in CI |
 | **Multi-agent** | `implementer` (Sonnet) runs one task — a fix that fails 3 times returns to you · `reviewer` checks the diff against the FRs in a fresh context — gaps only, never style · `Explore` maps code on Sonnet |
 | **Context engineering** | `/clear` per task, state lives in the change folder · skills load on demand · search before reading · short `CLAUDE.md` · secrets and bulky files denied |
-| **Security** | No hardcoded secrets — env vars documented in `.env.example` · secrets denied in `.claude/settings.json` · no dependency without your approval · `audit` gate when a manifest changes |
+| **Security** | No hardcoded secrets — env vars documented in `.env.example` · secrets denied in `.claude/settings.json` · a new dependency is checked in its registry (exists, age, downloads, repo, look-alike name) and needs your approval · `audit` gate for known vulnerabilities when a manifest changes, locally and in CI |
 | **Measure** | `/usage` and `/context` for tokens · `/doctor prompt-audit` after editing rules, skills or agents |
 | **Conventional Commits** | One commit and one branch per change, typed `feat` · `refactor` · `perf` |
