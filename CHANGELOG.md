@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.3.0 — 2026-10-12
 ### Added
 - Hard Rule: before asking to add a dependency, the agent checks it in its registry and shows name, version, publish date, downloads and repo — it flags a missing, brand-new, little-used or look-alike package and proposes a known alternative.
 - `gates.conf`: `AUDIT` and `MANIFESTS` examples for Go (`govulncheck`) and Rust (`cargo audit`).
