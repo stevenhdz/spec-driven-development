@@ -15,7 +15,7 @@
 ## Layer Structure — Vertical Slice
 ```
 [src]/
-  [features]/
+  [features]/          ← create with the second slice — until then the only slice folder lives in [src]/
     [feature-name]/
       [entry]          ← entry layer: UI component · HTTP route · CLI command — holds simple state, no business rules — always
       [rules]          ← logic layer: pure business rules — always when there is a rule
@@ -30,7 +30,7 @@
 
 ## Conventions
 - Naming: [e.g. PascalCase components, camelCase functions · snake_case modules and functions]
-- One feature = one folder in `[features]/`
+- One feature = one folder in `[features]/` — in `[src]/` while there is only one slice
 - NEVER import a slice's internal files — always through its public API
 - Every `.md` follows `docs/doc-rules.md` — new docs start from their template
 
@@ -38,10 +38,13 @@
 - NEVER use: [forbidden patterns — e.g. `any`, default exports, class components, inline `style` · global mutable state]
 - NEVER put business rules in the entry layer — extract them to the logic layer
 - NEVER let the logic layer know the transport (DOM, HTTP, terminal) — it takes and returns plain data
+- ALWAYS check the shape of external data (parsed JSON, request body, file content) in the entry layer — data of the wrong shape becomes the error path, NEVER an unhandled exception
 - NEVER add comments to the code you write or change — names and small functions must explain the intent; leave existing comments as they are
 - NEVER over-engineer (KISS · YAGNI): the simplest solution that works — a function before a class, no abstraction or layer for a use case that does not exist yet
 - NEVER create a pass-through: a wrapper around a single call (e.g. a hook around one `useState`, a service around one query), a component that only renders another, a re-export other than the public API, a type used in one place — and NEVER write code no FR or caller can reach
 - NEVER export what no other file imports — types included
+- NEVER reimplement what the standard library, the framework or an approved dependency already does (e.g. argument parsing, date math, JSON schema checks) — configure it instead (e.g. override the parser's error handler, not a hand-written parser)
+- NEVER signal an error with a sentinel value (`None`, `-1`, `""`) — raise or return the language's error type, with a message that names the bad input
 - Model states that exclude each other as one tagged union — NEVER separate fields that can contradict each other (e.g. `isLoading` next to `error` and `data`)
 - NEVER silence the type checker — no casts, non-null assertions or ignore comments: fix the type — scaffold files exempt
 - UI: native semantic elements first — every control has an accessible name — an ARIA role only with the children its pattern requires
@@ -85,6 +88,7 @@ Classify every request before touching code.
 - NEVER reuse or renumber an FR ID — except a duplicate the `frs` gate reports after a merge: renumber the FR your branch added, with its tests, from the file's `Next ID`.
 - FRs describe behavior observable from outside: what a user sees, what an API returns, what a command prints.
 - FRs cover everything the request makes visible — layout (e.g. "a list sorted by date"), messages and controls — not only the logic.
+- A broad request (e.g. "any error", "invalid input") MUST become one scenario per input it names and per way that input can be wrong: wrong type, wrong shape, missing field, boundary value — NEVER only the cases it lists as examples.
 - NEVER change observable behavior before its FR is written:
   - Full cycle: the FR goes in the change folder's delta spec (`specs/<capability>/spec.md`) — approved before any code.
   - Inline: add or edit the FR in `specs/current/<capability>/spec.md` first — a new FR takes the file's `Next ID` and advances it — then test, then code — stage all three together.
