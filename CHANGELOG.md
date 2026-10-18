@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.4.0 — 2026-10-18
+### Added
+- `proposal.md` → Request: the human's request verbatim, never summarized — `create-feature` NEVER narrows it, asks ONE question when it conflicts with a rule, and flags `⚠️ Request not covered: <quote>` before `approve?`.
+- `reviewer` reports a Request statement that no FR covers, that an FR narrows or that Scope OUT excludes.
+- Hard Rules: check the shape of external data in the entry layer · NEVER reimplement what the standard library, the framework or an approved dependency already does · NEVER signal an error with a sentinel value.
+- Spec Rule: a broad request ("any error", "invalid input") becomes one scenario per input and per way it can be wrong — wrong type, wrong shape, missing field, boundary value.
+
+### Changed
+- `gates.conf`: `LINT_*` examples block technical debt — complexity, magic numbers, unused code, bug patterns — not only errors · `BUILD` type-checks in strict mode.
+- Layer Structure: `[features]/` is created with the second slice — until then the only slice lives in `[src]/`.
+
 ## v1.3.0 — 2026-10-12
 ### Added
 - Hard Rule: before asking to add a dependency, the agent checks it in its registry and shows name, version, publish date, downloads and repo — it flags a missing, brand-new, little-used or look-alike package and proposes a known alternative.
