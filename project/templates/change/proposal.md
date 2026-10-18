@@ -1,5 +1,8 @@
 # Change: [name]
 
+## Request
+The human's request, verbatim — NEVER summarized.
+
 ## Goal
 What must work when this is closed, and why it is needed.
 

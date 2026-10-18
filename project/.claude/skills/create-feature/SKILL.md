@@ -15,6 +15,7 @@ Do not load it for inline work — follow Spec Rules and still run Quality Gates
 - NEVER edit `specs/current/` before the feature closes — deltas live in `specs/changes/<feature>/specs/` until the merge.
 - NEVER write code in Approach — names, types and responsibilities only.
 - NEVER expand scope without explicit user authorization.
+- NEVER narrow the Request — anything it asks for goes in Scope IN and in an FR — when it conflicts with a rule, ask ONE question before creating the change folder.
 - ALWAYS explore existing code before proposing anything.
 - ALWAYS follow Working Protocol — NEVER restate or shorten it.
 
@@ -44,8 +45,8 @@ Do not load it for inline work — follow Spec Rules and still run Quality Gates
 2. Confirm goal, scope IN/OUT, TDD ON/OFF, FR deltas (ADDED / MODIFIED / REMOVED — `<FR-ID> — The system MUST …` + GIVEN/WHEN/THEN) and constraints.
 3. Design Approach from the FR deltas and the explored code: slices, types, state, logic placement, non-obvious decisions — every ADDED or MODIFIED FR maps to a line.
 4. Derive the tasks from Approach — every task lists the FRs it `covers`, every ADDED or MODIFIED FR is covered by a task — the fewest tasks that each leave a working, reviewable diff: group FRs owned by the same rule or component, NEVER one task per FR by default.
-5. Create the folder `specs/changes/<feature-name>/` from `templates/change/`: `proposal.md` (Goal, Scope, Constraints) · `design.md` (Approach) · `tasks.md` (Tasks, Progress) · one `specs/<capability>/spec.md` with the FR deltas per capability touched.
-6. End the turn: reply with the change folder path and `approve?` — NEVER dispatch a task in the same turn that wrote the change folder.
+5. Create the folder `specs/changes/<feature-name>/` from `templates/change/`: `proposal.md` (Request verbatim, Goal, Scope, Constraints) · `design.md` (Approach) · `tasks.md` (Tasks, Progress) · one `specs/<capability>/spec.md` with the FR deltas per capability touched.
+6. End the turn: reply with the change folder path, then `⚠️ Request not covered: <quote>` per part of the Request no FR covers, then `approve?` — NEVER dispatch a task in the same turn that wrote the change folder.
 7. Create the branch per `CLAUDE.md` → Working Protocol → Branch name, type `feat`, before the first staged change, unless there is no repo.
 8. Dispatch ONE task to the `implementer` subagent (`.claude/agents/implementer.md`) — message: the change folder path and the task ID, or `fix: <what>` and the last task ID — run it in the foreground and wait for its result — NEVER implement a task yourself.
    - Relay its contract verbatim, then `Next: <Next step> — /clear → go` — the implementer already ran the close sequence up to staging.
