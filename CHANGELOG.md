@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.5.0 — 2026-10-18
+### Added
+- `install.ps1`: installs `project/` from Windows PowerShell with `irm … | iex` — same behavior as `install.sh`: never overwrites an existing file, lists the ones it kept · `-Ref <tag>` pins a version.
+- readme → Setup: install commands for macOS · Linux · WSL and for Windows, which needs Git for Windows to run the gates.
+- `.gitattributes`: `*.sh` always checks out with LF — on Windows `core.autocrlf` no longer breaks `gates.sh` with CRLF.
+
 ## v1.4.0 — 2026-10-18
 ### Added
 - `proposal.md` → Request: the human's request verbatim, never summarized — `create-feature` NEVER narrows it, asks ONE question when it conflicts with a rule, and flags `⚠️ Request not covered: <quote>` before `approve?`.
