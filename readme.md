@@ -17,13 +17,21 @@ AI wrote fast, working code — and also bugs, layers nobody asked for, security
 - **Spec and code drift apart** → living specs + traceability: every FR keeps a test, checked in CI.
 
 ## Setup
-Requires Claude Code v2.1.271+, Git, and lint/build/test commands.
+Requires Claude Code v2.1.271+, Git, and lint/build/test commands. Windows: Git for Windows — the gates run in its Git Bash.
 
 1. Install into your repo root (never overwrites existing files):
-   ```
-   curl -fsSL https://raw.githubusercontent.com/stevenhdz/spec-driven-development/main/install.sh | bash
-   ```
-   Pin a version with `| bash -s <tag>` — [tags](https://github.com/stevenhdz/spec-driven-development/tags).
+   - macOS · Linux · WSL:
+     ```
+     curl -fsSL https://raw.githubusercontent.com/stevenhdz/spec-driven-development/main/install.sh | bash
+     ```
+     Pin a version with `| bash -s <tag>`.
+   - Windows (PowerShell):
+     ```
+     irm https://raw.githubusercontent.com/stevenhdz/spec-driven-development/main/install.ps1 | iex
+     ```
+     Pin a version with `& ([scriptblock]::Create((irm https://raw.githubusercontent.com/stevenhdz/spec-driven-development/main/install.ps1))) -Ref <tag>`.
+
+   Versions: [tags](https://github.com/stevenhdz/spec-driven-development/tags).
 2. Fill every `[placeholder]` in `CLAUDE.md`, `docs/architecture.md` and `.claude/gates.conf` — `FORMAT_*` needs a formatter you approved as a dependency, or leave it empty. Check with:
    ```
    grep -nE '\[[^]]{2,}\]' CLAUDE.md docs/architecture.md .claude/gates.conf
