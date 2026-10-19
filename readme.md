@@ -40,11 +40,23 @@ Requires Claude Code v2.1.271+, Git, and lint/build/test commands. Windows: Git 
 4. Open Claude Code and describe the change you want.
 
 Existing project: install, then run `/adopt` — it fills steps 2 and 3 from your code.
+- It asks once before writing, never touches source code, reports failing gates without fixing them, stages its files and proposes the commit — you commit.
+- `specs/current/` starts empty: existing behavior has no FR until a change touches it — to cover it, request it as a change.
 
 ## Use it
 - **FR**: one behavior the system MUST have, with GIVEN / WHEN / THEN examples — lives in `specs/current/`, each with a test.
 - **Change folder**: `specs/changes/<feature>/` — the plan for one change: proposal, design, FR deltas, tasks `ID-001…`.
 - **Size**: the agent picks **inline** (at most 1 FR, 1 slice — one feature folder) or **full cycle** (anything bigger).
+
+```mermaid
+flowchart LR
+    C{Size} -->|full cycle| S[Change folder] --> A{{You: yes}} --> I[Test RED → code GREEN → gates] --> D{{You review staged diff}}
+    D -->|go| I
+    D -->|fix: what| I
+    D -->|last task| R[Review vs FRs + archive] --> K{{You commit}}
+    C -. inline .-> E[Edit FR in specs/current] -.-> I
+    D -. inline .-> K
+```
 
 **Full cycle**
 1. You: `add discount codes at checkout`.
@@ -56,12 +68,24 @@ Existing project: install, then run `/adopt` — it fills steps 2 and 3 from you
 
 **Inline**: the agent edits the FR in `specs/current/`, writes the test, then the code, and stages all three — steps 5–6 without the archive.
 
-| Also say | Effect |
-|----------|--------|
+| Say | Effect |
+|-----|--------|
+| `<request>` | Starts a change — the agent picks inline or full cycle |
 | `<request>, inline` · `<request>, as a feature` | Force the size |
+| `yes` | Approve the change folder |
+| `go` | Approve the staged task and run the next one — also resumes the active feature after `/clear` |
 | `go up to ID-003` | One approval for every task up to ID-003 |
+| `fix: <what>` | Redo the staged task |
 | `refactor: <what>` · `optimize: <what>` | Change code without changing behavior — tests untouched |
 | `explain` | Replies are short by default — this gets the detailed answer |
+| `/adopt` | Fill the setup from an existing project's code (→ Setup) |
+| `/clear` | Fresh context between tasks — state lives in the change folder |
+
+| Gates | When |
+|-------|------|
+| `bash .claude/scripts/gates.sh scoped <files…>` | Changed files only — each task close |
+| `bash .claude/scripts/gates.sh full [--no-format]` | Whole project, plus `frs` — feature close, inline change, CI |
+| `bash .claude/scripts/gates.sh fr <FR-ID>` | Tests of one FR — proves RED before the code |
 
 > [!IMPORTANT]
 > Changing code by hand: edit its FR in `specs/current/` first.
