@@ -1,41 +1,14 @@
-# [Project name]
+# Rules — Spec Driven Development
+<!-- Framework rules — `install.sh --update` overwrites this file. Your project values live in `.claude/project.md`. -->
 
-## Product
-- [What the product does, in one line — e.g. "REST API for orders", "CLI that imports CSV files"]
-- Behavior lives as FRs in `specs/current/<capability>/spec.md` — NEVER define it here.
-
-## Stack
-- Language: [e.g. TypeScript · Python · Go]
-- Framework: [e.g. React + Vite · Express · FastAPI]
-- App folder: [e.g. `app/` — run all commands from there]
-- Testing: [e.g. Vitest + Testing Library · Jest · pytest]
-- Lint: [e.g. oxlint · eslint · ruff]
-- Run locally: [e.g. `npm run dev` · `uvicorn app.main:app --reload`]
-
-## Layer Structure — Vertical Slice
-```
-[src]/
-  [features]/          ← create with the second slice — until then the only slice folder lives in [src]/
-    [feature-name]/
-      [entry]          ← entry layer: UI component · HTTP route · CLI command — holds simple state, no business rules — always
-      [rules]          ← logic layer: pure business rules — always when there is a rule
-      [tests]          ← tests of the slice — always
-      [public API]     ← the only file other slices import (e.g. index.ts · __init__.py) — always
-      [stateful logic] ← logic layer: hook · service · use case — only when state or I/O outgrows the entry layer, or is reused
-      [types]          ← types, schemas, contracts, no runtime logic — only when 2+ files share them
-  [shared]/            ← only code used by 2+ slices — create when first needed
-  [app entry]          ← app composition: wires slices together, no feature logic
-```
-- Layers are responsibilities, not files — create an optional file only when its condition is true.
+@.claude/project.md
 
 ## Conventions
-- Naming: [e.g. PascalCase components, camelCase functions · snake_case modules and functions]
-- One feature = one folder in `[features]/` — in `[src]/` while there is only one slice
 - NEVER import a slice's internal files — always through its public API
 - Every `.md` follows `docs/doc-rules.md` — new docs start from their template
 
 ## Hard Rules
-- NEVER use: [forbidden patterns — e.g. `any`, default exports, class components, inline `style` · global mutable state]
+- NEVER use the patterns in `.claude/project.md` → Forbidden
 - NEVER put business rules in the entry layer — extract them to the logic layer
 - NEVER let the logic layer know the transport (DOM, HTTP, terminal) — it takes and returns plain data
 - ALWAYS check the shape of external data (parsed JSON, request body, file content) in the entry layer — data of the wrong shape becomes the error path, NEVER an unhandled exception
@@ -93,7 +66,7 @@ Classify every request before touching code.
   - Full cycle: the FR goes in the change folder's delta spec (`specs/<capability>/spec.md`) — approved before any code.
   - Inline: add or edit the FR in `specs/current/<capability>/spec.md` first — a new FR takes the file's `Next ID` and advances it — then test, then code — stage all three together.
 - No observable behavior change (refactor, styling, docs, chore): NEVER edit FRs.
-- ALWAYS start the name of a test that covers an FR with its FR ID, in the form the test runner allows: [e.g. `ORDER-01 should <result> when <condition>` · `test_order_01_<result>_when_<condition>`].
+- ALWAYS start the name of a test that covers an FR with its FR ID, in the form `.claude/project.md` → Test name gives.
 - Check an FR with `bash .claude/scripts/gates.sh fr <FR-ID>` — mark `test: ✅` only when it passes and every GIVEN/WHEN/THEN has a test.
 
 ## Working Protocol — STRICT
@@ -102,8 +75,8 @@ These are Hard Rules. Any violation is a protocol breach.
 - NEVER start a new task without explicit approval — per task ("yes" or "go") or as a batch ("go up to ID-00N")
 - NEVER assume silence = approval — wait for a clear yes
 - Any reply about an active feature ("go", "yes", "fix: <what>", "go up to ID-00N") in a new session or after `/clear`: load `.claude/skills/create-feature/SKILL.md` first
-- Commit message format: [e.g. `type(scope): description` · `type(PROJ-123): description`] — type is one of `feat | fix | refactor | perf | test | docs | chore`
-- Branch name: [e.g. `type/<name>` · `type/PROJ-123-<name>`] — type: `feat` full cycle · `refactor` · `perf` — ask for the ticket ID when the format has one
+- Commit message: `.claude/project.md` → Commit message — type is one of `feat | fix | refactor | perf | test | docs | chore`
+- Branch name: `.claude/project.md` → Branch name — type: `feat` full cycle · `refactor` · `perf` — ask for the ticket ID when the format has one
 - Commit once per change, never per task — full cycle: when the feature closes · inline: after its close sequence — propose the message, the human commits
 - NEVER skip the task close sequence — it is mandatory after every task and every inline change:
   ```

@@ -32,14 +32,20 @@ Requires Claude Code v2.1.271+, Git, and lint/build/test commands. Windows: Git 
      Pin a version with `& ([scriptblock]::Create((irm https://raw.githubusercontent.com/stevenhdz/spec-driven-development/main/install.ps1))) -Ref <tag>`.
 
    Versions: [tags](https://github.com/stevenhdz/spec-driven-development/tags).
-2. Fill every `[placeholder]` in `CLAUDE.md`, `docs/architecture.md` and `.claude/gates.conf` — `FORMAT_*` needs a formatter you approved as a dependency, or leave it empty. Check with:
+2. Fill every `[placeholder]` in `.claude/project.md`, `docs/architecture.md` and `.claude/gates.conf` — `FORMAT_*` needs a formatter you approved as a dependency, or leave it empty. Check with:
    ```
-   grep -nE '\[[^]]{2,}\]' CLAUDE.md docs/architecture.md .claude/gates.conf
+   grep -nE '\[[^]]{2,}\]' .claude/project.md docs/architecture.md .claude/gates.conf
    ```
 3. Deny secrets and bulky paths (`.env`, `dist/`, lockfiles) in `.claude/settings.json`.
 4. Open Claude Code and describe the change you want.
 
 Existing project: install, then run `/adopt` — it fills steps 2 and 3 from your code.
+
+Update to a new version — overwrites only the framework files listed in `.claude/sdd-core` (`CLAUDE.md`, agents, skills, scripts, templates); your `.claude/project.md`, `gates.conf`, `settings.json`, `specs/` and `docs/` stay as they are:
+- macOS · Linux · WSL: `curl -fsSL https://raw.githubusercontent.com/stevenhdz/spec-driven-development/main/install.sh | bash -s -- --update [<tag>]`
+- Windows: `& ([scriptblock]::Create((irm https://raw.githubusercontent.com/stevenhdz/spec-driven-development/main/install.ps1))) -Update [-Ref <tag>]`
+
+Then review `git diff`. A skill or agent you edited is overwritten too — put project rules in `.claude/project.md` → Project Rules instead. Coming from v1.5 or earlier: the first `--update` only adds `.claude/project.md` — move your values from `CLAUDE.md` into it, then run `--update` again.
 
 ## Use it
 | Say | Effect |

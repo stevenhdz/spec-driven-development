@@ -1,6 +1,6 @@
 # Architecture — [Project name]
 
-Project-wide map and the *why*. Behavior (FRs): `specs/current/`. Rules and folder pattern: `CLAUDE.md`. Per-change design: `specs/changes/<feature>/design.md`.
+Project-wide map and the *why*. Behavior (FRs): `specs/current/`. Rules: `CLAUDE.md`. Folder pattern: `.claude/project.md`. Per-change design: `specs/changes/<feature>/design.md`.
 Updated at each feature close — a new slice goes in §2, a project-wide decision in §5.
 
 ## 1. Context
