@@ -1,5 +1,5 @@
 #!/bin/bash
-# Framework file — `install.sh --update` overwrites it. Your commands live in .claude/gates.conf.
+# Spec Driven Development by stevenhdz · https://github.com/stevenhdz/spec-driven-development — framework file: `install.sh --update` overwrites it. Your commands live in .claude/gates.conf.
 # Quality Gates: format (rewrites, silent) → lint → build → tests → frs (full only: every FR in specs/current has a test and a unique ID) → audit, stops at the first failure, prints one line.
 # Usage: bash .claude/scripts/gates.sh scoped <files…> | full [--no-format] | fr <FR-ID>
 # `- Gates: OFF` in the active change's proposal.md (specs/changes/<feature>/): scoped and full print ⏭️ for every gate — fr still runs.

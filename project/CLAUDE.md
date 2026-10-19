@@ -1,5 +1,5 @@
 # Rules — Spec Driven Development
-<!-- Framework rules — `install.sh --update` overwrites this file. Your project values live in `.claude/project.md`. -->
+<!-- Spec Driven Development by stevenhdz · https://github.com/stevenhdz/spec-driven-development — framework rules: `install.sh --update` overwrites this file. Your project values live in `.claude/project.md`. -->
 
 @.claude/project.md
 

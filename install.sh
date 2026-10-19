@@ -68,7 +68,7 @@ if test "$overwrite" = 1; then
   done
 fi
 
-echo "SDD $ref: ✅ $added files added · $updated updated · $deleted removed"
+echo "SDD $ref by stevenhdz: ✅ $added files added · $updated updated · $deleted removed"
 if test -n "$kept"; then
   echo "Kept yours, differs from $ref:"
   for f in $kept; do echo "  $f"; done

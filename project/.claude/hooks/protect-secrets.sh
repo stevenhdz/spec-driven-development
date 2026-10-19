@@ -1,5 +1,5 @@
 #!/bin/bash
-# Framework file — `install.sh --update` overwrites it. Your denied paths live in .claude/settings.json.
+# Spec Driven Development by stevenhdz · https://github.com/stevenhdz/spec-driven-development — framework file: `install.sh --update` overwrites it. Your denied paths live in .claude/settings.json.
 # PreToolUse hook for Bash: blocks a command that names a secret — every path denied for Edit in .claude/settings.json (and settings.local.json); a `!` entry stays allowed.
 # Covers what deny rules miss in a shell: python -c "open('.env')", node, cp, base64, find -exec, and other commands Claude Code does not parse.
 # Limit: it reads the command text — a script file that opens a secret by itself is not caught; the sandbox covers that (readme → Security).

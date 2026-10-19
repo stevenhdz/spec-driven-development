@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.13.0 — 2026-10-19
+### Added
+- Origin marker `Spec Driven Development by stevenhdz · https://github.com/stevenhdz/spec-driven-development` on the framework-file line of `CLAUDE.md`, `.claude/doc-rules.md`, `gates.sh` and `protect-secrets.sh`.
+- readme: `by stevenhdz` badge.
+- `install.sh` / `install.ps1`: the summary line reads `SDD <ref> by stevenhdz: ✅ …`.
+
+### Migration from v1.12
+- None — run `--update`.
+
 ## v1.12.0 — 2026-10-18
 ### Changed
 - `.claude/sdd/templates/` → `.claude/templates/` · `.claude/sdd/doc-rules.md` → `.claude/doc-rules.md` — the `sdd/` folder is gone. `CLAUDE.md`, skills, `docs/architecture.md`, readme and `sdd-core` point to the new paths.

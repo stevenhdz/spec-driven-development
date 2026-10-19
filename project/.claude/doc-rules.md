@@ -1,5 +1,5 @@
 # Documentation Rules
-<!-- Framework file — `install.sh --update` overwrites it. -->
+<!-- Spec Driven Development by stevenhdz · https://github.com/stevenhdz/spec-driven-development — framework file: `install.sh --update` overwrites it. -->
 
 Applies to every `.md` in this project.
 
