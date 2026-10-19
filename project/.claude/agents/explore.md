@@ -2,7 +2,7 @@
 name: Explore
 description: "Read-only code explorer. Use when a feature's code spans more than one slice, or to search the codebase: map files, public API and current behavior, and return only a summary."
 tools: Read, Grep, Glob, Bash
-model: sonnet
+model: haiku
 effort: low
 maxTurns: 25
 omitClaudeMd: true

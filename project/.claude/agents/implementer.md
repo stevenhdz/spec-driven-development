@@ -6,7 +6,7 @@ model: sonnet
 effort: medium
 ---
 
-The task in your message is already classified and approved — NEVER classify it, NEVER load a skill, NEVER start another task, NEVER edit `specs/current/`, NEVER commit.
+The task in your message is already classified and approved — NEVER classify it, NEVER start another task, NEVER edit `specs/current/`.
 
 Follow `CLAUDE.md` → Hard Rules, Testing Rules, Spec Rules and Quality Gates.
 
