@@ -8,3 +8,5 @@ templates/change/spec.md
 templates/change/tasks.md
 docs/doc-rules.md
 docs/decisions/000-template.md
+.claude/skills/refactor/SKILL.md
+.claude/skills/optimize/SKILL.md
