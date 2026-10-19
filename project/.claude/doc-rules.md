@@ -14,5 +14,5 @@ Applies to every `.md` in this project.
 `CLAUDE.md` → Quality Gates.
 
 ## Templates
-`.claude/sdd/templates/` — `spec.md` · `change/` (`proposal.md` · `design.md` · `spec.md` · `tasks.md`) · `skill.md` · `adr.md` (ADRs, saved in `docs/decisions/`).
-Skill sections follow `.claude/sdd/templates/skill.md` in its order — omit References if empty.
+`.claude/templates/` — `spec.md` · `change/` (`proposal.md` · `design.md` · `spec.md` · `tasks.md`) · `skill.md` · `adr.md` (ADRs, saved in `docs/decisions/`).
+Skill sections follow `.claude/templates/skill.md` in its order — omit References if empty.

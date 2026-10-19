@@ -99,7 +99,7 @@ No gates: `- Gates: OFF` in the change's `proposal.md` → Scope, next to `TDD` 
 | Owner | Paths | `--update` |
 |-------|-------|------------|
 | You | `.claude/project.md` · `.claude/gates.conf` · `.claude/settings.json` · `docs/` · `specs/` | never touches them |
-| Framework | `CLAUDE.md` · `.claude/agents/` · `.claude/skills/` · `.claude/scripts/` · `.claude/hooks/` · `.claude/sdd/` | overwrites them — list: [`sdd-core`](sdd-core) |
+| Framework | `CLAUDE.md` · `.claude/agents/` · `.claude/skills/` · `.claude/scripts/` · `.claude/hooks/` · `.claude/templates/` · `.claude/doc-rules.md` | overwrites them — list: [`sdd-core`](sdd-core) |
 
 Project rules go in `.claude/project.md` → Project Rules — a framework file you edit is overwritten on the next update.
 
@@ -125,7 +125,7 @@ Run `bash .claude/scripts/gates.sh full --no-format` on every PR. In a GitHub PR
 | **Testing practices** | Test behavior, not implementation · query like a user (Testing Library) · mock only boundaries (classic TDD) · Arrange / Act / Assert · one test per THEN variant |
 | **Low bureaucracy** | Inline changes (1 FR, 1 slice) skip the change folder and the approval round · one approval per plan or batch (`go up to ID-00N`) · ONE question at a time · `/adopt` needs one confirmation |
 | **Low verbosity** | Short replies by default, `explain` for depth · skills reply with a fixed Output Contract and nothing around it · gates print one line, failing lines only · FRs, change folders and questions are never shortened |
-| **English, imperative prompts** | Every `.md` follows `.claude/sdd/doc-rules.md`: English, imperative, one idea per line · `MUST` / `NEVER` / `ALWAYS`, no "should" or "try to" · each rule lives in one place · a line that changes nothing gets cut · every skill follows `.claude/sdd/templates/skill.md` |
+| **English, imperative prompts** | Every `.md` follows `.claude/doc-rules.md`: English, imperative, one idea per line · `MUST` / `NEVER` / `ALWAYS`, no "should" or "try to" · each rule lives in one place · a line that changes nothing gets cut · every skill follows `.claude/templates/skill.md` |
 | **Refactoring** (Fowler) | Green tests first · one move per step · gates after each step · tests untouched |
 | **Measured optimization** | Baseline first · one change per step · keep a step only if the metric improves |
 | **Human in the loop** | You approve the change folder and each task, review the staged diff and commit — the agent cannot run `git commit` or `git push` · explore → plan → approve → code: no code before approval |

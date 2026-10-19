@@ -27,10 +27,10 @@ Do not load it for inline work — follow Spec Rules and still run Quality Gates
 | Feature partially exists | Map what exists before writing FRs |
 | Task has no acceptance criteria | Define it before implementing |
 | Task names something Approach does not | Complete Approach before listing the task |
-| Approach decision affects the whole project | Create an ADR from `.claude/sdd/templates/adr.md` — link it in Approach |
+| Approach decision affects the whole project | Create an ADR from `.claude/templates/adr.md` — link it in Approach |
 | Scope grows mid-feature | Pause, report, request authorization |
 | Accepted change mid-feature | Update the delta spec and `tasks.md` in the same change folder — wait for approval |
-| Capability has no spec file | Agree its prefix in step 2 — create `specs/current/<capability>/spec.md` from `.claude/sdd/templates/spec.md` at the merge |
+| Capability has no spec file | Agree its prefix in step 2 — create `specs/current/<capability>/spec.md` from `.claude/templates/spec.md` at the merge |
 | FR is REMOVED | Add a task that deletes its tests |
 | Human approves a range ("go up to ID-00N") | Dispatch one implementer per task, in order — each waits for the previous result |
 | Implementer returns `blocked`, or no Output Contract (stopped at maxTurns) | Stop — and stop the batch — relay what it returned — back to per-task approval |
@@ -45,7 +45,7 @@ Do not load it for inline work — follow Spec Rules and still run Quality Gates
 2. Confirm goal, scope IN/OUT, TDD ON/OFF, Gates ON/OFF, FR deltas (ADDED / MODIFIED / REMOVED — `<FR-ID> — The system MUST …` + GIVEN/WHEN/THEN) and constraints.
 3. Design Approach from the FR deltas and the explored code: slices, types, state, logic placement, non-obvious decisions — every ADDED or MODIFIED FR maps to a line.
 4. Derive the tasks from Approach — every task lists the FRs it `covers`, every ADDED or MODIFIED FR is covered by a task — the fewest tasks that each leave a working, reviewable diff: group FRs owned by the same rule or component, NEVER one task per FR by default.
-5. Create the folder `specs/changes/<feature-name>/` from `.claude/sdd/templates/change/`: `proposal.md` (Request verbatim, Goal, Scope, Constraints) · `design.md` (Approach) · `tasks.md` (Tasks, Progress) · one `specs/<capability>/spec.md` with the FR deltas per capability touched.
+5. Create the folder `specs/changes/<feature-name>/` from `.claude/templates/change/`: `proposal.md` (Request verbatim, Goal, Scope, Constraints) · `design.md` (Approach) · `tasks.md` (Tasks, Progress) · one `specs/<capability>/spec.md` with the FR deltas per capability touched.
 6. End the turn: reply with the change folder path, then `⚠️ Request not covered: <quote>` per part of the Request no FR covers, then `approve?` — NEVER dispatch a task in the same turn that wrote the change folder.
 7. Create the branch per `CLAUDE.md` → Working Protocol → Branch name, type `feat`, before the first staged change, unless there is no repo.
 8. Dispatch ONE task to the `implementer` subagent (`.claude/agents/implementer.md`) — message: the change folder path and the task ID, or `fix: <what>` and the last task ID — run it in the foreground and wait for its result — NEVER implement a task yourself.
