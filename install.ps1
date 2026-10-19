@@ -79,7 +79,7 @@ try {
     }
   }
 
-  Write-Host "SDD ${Ref}: ✅ $added files added · $updated updated · $deleted removed"
+  Write-Host "SDD ${Ref} by stevenhdz: ✅ $added files added · $updated updated · $deleted removed"
   if ($kept.Count -gt 0) {
     Write-Host "Kept yours, differs from ${Ref}:"
     foreach ($f in $kept) { Write-Host "  $f" }
