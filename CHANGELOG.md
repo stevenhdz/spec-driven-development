@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.9.0 — 2026-10-18
+### Added
+- `proposal.md` → Scope → `- Gates: ON | OFF`, next to `TDD` — confirmed in create-feature step 2 · inline: always ON. `OFF` makes `gates.sh scoped` and `full` print `⏭️` for every gate, ending in `(off)` — `gates.sh fr` still runs `TEST_FR`, so TDD RED checks and `test: ✅` keep working.
+
+### Migration from v1.8
+- None — a change folder without the `Gates` line runs the gates.
+
 ## v1.8.1 — 2026-10-18
 ### Changed
 - readme → Setup: what `/adopt` does — asks once, never touches source code, reports failing gates without fixing them, stages its files, you commit — and that existing behavior has no FR until a change touches it.

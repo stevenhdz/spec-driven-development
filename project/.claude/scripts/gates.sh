@@ -2,6 +2,7 @@
 # Framework file — `install.sh --update` overwrites it. Your commands live in .claude/gates.conf.
 # Quality Gates: format (rewrites, silent) → lint → build → tests → frs (full only: every FR in specs/current has a test and a unique ID) → audit, stops at the first failure, prints one line.
 # Usage: bash .claude/scripts/gates.sh scoped <files…> | full [--no-format] | fr <FR-ID>
+# `- Gates: OFF` in the active change's proposal.md (specs/changes/<feature>/): scoped and full print ⏭️ for every gate — fr still runs.
 # Audit runs when a manifest changed: uncommitted, or since $GATES_BASE (in a GitHub PR: origin/<base branch>) in full mode.
 # Exit: 0 pass · 1 gate or test failed · 2 usage · 3 no test named <FR-ID>
 set -u
@@ -81,6 +82,13 @@ if test "$mode" = fr; then
   if test "$n" = 0; then echo "FR $fr: ❌ no test named $fr"; exit 3; fi
   echo "FR $fr: ✅ ($n tests)"
   exit 0
+fi
+
+if grep -qsE '^- Gates: OFF' "$root"/specs/changes/*/proposal.md; then
+  case "$mode" in
+    scoped) echo "Gates: lint ⏭️ · build ⏭️ · tests ⏭️ · audit ⏭️ (off)"; exit 0 ;;
+    full) echo "Gates: lint ⏭️ · build ⏭️ · tests ⏭️ · frs ⏭️ · audit ⏭️ (off)"; exit 0 ;;
+  esac
 fi
 
 case "$mode" in

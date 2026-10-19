@@ -42,7 +42,7 @@ Do not load it for inline work — follow Spec Rules and still run Quality Gates
 ## Execution Steps
 
 1. Read `docs/architecture.md`, the `specs/current/<capability>/spec.md` files the feature touches, and the related code — when the code spans more than one slice, explore it with the `Explore` subagent (`.claude/agents/explore.md`) and keep only its summary.
-2. Confirm goal, scope IN/OUT, TDD ON/OFF, FR deltas (ADDED / MODIFIED / REMOVED — `<FR-ID> — The system MUST …` + GIVEN/WHEN/THEN) and constraints.
+2. Confirm goal, scope IN/OUT, TDD ON/OFF, Gates ON/OFF, FR deltas (ADDED / MODIFIED / REMOVED — `<FR-ID> — The system MUST …` + GIVEN/WHEN/THEN) and constraints.
 3. Design Approach from the FR deltas and the explored code: slices, types, state, logic placement, non-obvious decisions — every ADDED or MODIFIED FR maps to a line.
 4. Derive the tasks from Approach — every task lists the FRs it `covers`, every ADDED or MODIFIED FR is covered by a task — the fewest tasks that each leave a working, reviewable diff: group FRs owned by the same rule or component, NEVER one task per FR by default.
 5. Create the folder `specs/changes/<feature-name>/` from `.claude/sdd/templates/change/`: `proposal.md` (Request verbatim, Goal, Scope, Constraints) · `design.md` (Approach) · `tasks.md` (Tasks, Progress) · one `specs/<capability>/spec.md` with the FR deltas per capability touched.
