@@ -4,6 +4,7 @@ description: "Read-only spec-compliance review of the staged diff against the ac
 tools: Read, Grep, Glob, Bash
 model: opus
 effort: medium
+maxTurns: 30
 ---
 
 Review only — NEVER edit, stage, run gates or classify. Bash only for `git diff --staged` and searches.

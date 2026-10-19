@@ -51,7 +51,7 @@ These are Hard Rules. Any violation is a protocol breach.
 
 ## Spec Rules — SDD
 - `specs/current/<capability>/spec.md` is the source of truth for current behavior — one folder per capability, start from `.claude/sdd/templates/spec.md`.
-- `specs/changes/<feature>/` records one change — start from `.claude/sdd/templates/change/`: `proposal.md` (goal, scope, constraints) · `design.md` (approach) · `specs/<capability>/spec.md` (FR deltas) · `tasks.md` (tasks, progress) — closed changes move to `specs/changes/archive/<YYYY-MM-DD>-<feature>/`.
+- `specs/changes/<feature>/` records one change — start from `.claude/sdd/templates/change/` (create-feature step 5) — closed changes move to `specs/changes/archive/<YYYY-MM-DD>-<feature>/`.
 - FR ID: `<PREFIX>-NN` (e.g. `ORDER-01`) — prefix unique per spec file, number taken from its `Next ID`.
 - NEVER reuse or renumber an FR ID — except a duplicate the `frs` gate reports after a merge: renumber the FR your branch added, with its tests, from the file's `Next ID`.
 - FRs describe behavior observable from outside: what a user sees, what an API returns, what a command prints.
@@ -119,7 +119,6 @@ Commands live in `.claude/gates.conf`. Run them only through `bash .claude/scrip
 - NEVER run a gate command outside the script — except the single failing test while fixing it.
 - `❌`: stop, quote the lines the script printed, propose options — NEVER continue with a failing gate, NEVER self-fix silently.
 - Status: `✅` pass · `❌ <gate>` fail · `⏭️` skipped · `-` pending
-- Gates format: `lint ✅ · build ✅ · tests ✅ (X passing) · frs ✅ (N) · audit ⏭️` — `frs` only in Full mode — the script prints it.
 - Docs-only change (`.md` files): re-read the edited files against `.claude/sdd/doc-rules.md` — the script prints `⏭️` for every gate.
 
 ## Chat Replies
