@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.10.0 — 2026-10-18
+### Changed
+- `refactor` and `optimize` skills folded into `CLAUDE.md` → No Behavior Change: seven rules — green tests first, tests untouched, one step at a time with scoped gates, revert a step that breaks a test, optimize measures a baseline and keeps only steps that improve it. Branch, ADR, Explore and close rules they restated are already in `CLAUDE.md` and `create-feature`.
+
+### Removed
+- `.claude/skills/refactor/` · `.claude/skills/optimize/` — listed in `sdd-removed`.
+
+### Migration from v1.9
+- Run `--update`: it deletes both skills. A rule you added to either one: move it to `.claude/project.md` → Project Rules.
+
 ## v1.9.0 — 2026-10-18
 ### Added
 - `proposal.md` → Scope → `- Gates: ON | OFF`, next to `TDD` — confirmed in create-feature step 2 · inline: always ON. `OFF` makes `gates.sh scoped` and `full` print `⏭️` for every gate, ending in `(off)` — `gates.sh fr` still runs `TEST_FR`, so TDD RED checks and `test: ✅` keep working.
