@@ -1,0 +1,10 @@
+# Paths, relative to project/, the framework no longer ships: `install.sh --update` deletes them, then the folders they leave empty.
+.claude/sdd-core
+templates/spec.md
+templates/skill.md
+templates/change/proposal.md
+templates/change/design.md
+templates/change/spec.md
+templates/change/tasks.md
+docs/doc-rules.md
+docs/decisions/000-template.md

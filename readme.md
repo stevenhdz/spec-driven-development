@@ -41,40 +41,50 @@ Requires Claude Code v2.1.271+, Git, and lint/build/test commands. Windows: Git 
 
 Existing project: install, then run `/adopt` — it fills steps 2 and 3 from your code.
 
-Update to a new version — overwrites only the framework files listed in `.claude/sdd-core` (`CLAUDE.md`, agents, skills, scripts, templates); your `.claude/project.md`, `gates.conf`, `settings.json`, `specs/` and `docs/` stay as they are:
-- macOS · Linux · WSL: `curl -fsSL https://raw.githubusercontent.com/stevenhdz/spec-driven-development/main/install.sh | bash -s -- --update [<tag>]`
-- Windows: `& ([scriptblock]::Create((irm https://raw.githubusercontent.com/stevenhdz/spec-driven-development/main/install.ps1))) -Update [-Ref <tag>]`
-
-Then review `git diff`. A skill or agent you edited is overwritten too — put project rules in `.claude/project.md` → Project Rules instead. Coming from v1.5 or earlier: the first `--update` only adds `.claude/project.md` — move your values from `CLAUDE.md` into it, then run `--update` again.
-
 ## Use it
-| Say | Effect |
-|-----|--------|
-| `<request>` | Agent picks the size: inline (1 FR, 1 slice) or full cycle |
+- **FR**: one behavior the system MUST have, with GIVEN / WHEN / THEN examples — lives in `specs/current/`, each with a test.
+- **Change folder**: `specs/changes/<feature>/` — the plan for one change: proposal, design, FR deltas, tasks `ID-001…`.
+- **Size**: the agent picks **inline** (at most 1 FR, 1 slice — one feature folder) or **full cycle** (anything bigger).
+
+**Full cycle**
+1. You: `add discount codes at checkout`.
+2. Agent: writes the change folder, replies with its path and `approve?`.
+3. You: read `proposal.md`, `specs/*/spec.md` and `tasks.md` → `yes`, or say what to change.
+4. Agent: runs one task — failing test, code, gates — stages it and stops: `[ID-001 done] … Next: ID-002 — /clear → go`.
+5. You: review `git diff --staged` → `/clear` → `go` approves it and runs the next task · `fix: <what>` redoes it.
+6. After the last task: the agent checks the diff against the FRs, merges them into `specs/current/`, archives the folder and proposes a commit message — you commit.
+
+**Inline**: the agent edits the FR in `specs/current/`, writes the test, then the code, and stages all three — steps 5–6 without the archive.
+
+| Also say | Effect |
+|----------|--------|
 | `<request>, inline` · `<request>, as a feature` | Force the size |
-| `refactor: <what>` · `optimize: <what>` | Change code without changing behavior |
-| `yes` | Approve the change folder |
-| `go` · `go up to ID-003` | Run the next task · run tasks up to ID-003 |
-| `fix: <what>` | Redo the last task |
-| `explain` | Get a detailed answer |
+| `go up to ID-003` | One approval for every task up to ID-003 |
+| `refactor: <what>` · `optimize: <what>` | Change code without changing behavior — tests untouched |
+| `explain` | Replies are short by default — this gets the detailed answer |
 
 > [!IMPORTANT]
-> Review `git diff --staged` before `go` — `go` approves the last task. `/clear` between tasks. Changing code by hand: edit its FR in `specs/current/` first.
+> Changing code by hand: edit its FR in `specs/current/` first.
 
 > [!TIP]
 > Cheapest: plan with Opus, then `/model sonnet` and `go up to ID-00N`.
 
-CI: run `bash .claude/scripts/gates.sh full --no-format` on every PR. In a GitHub PR, `audit` runs when the PR changes a manifest — check out with `fetch-depth: 0`, or it runs on every PR. If two branches add the same FR ID, `frs` fails after the merge — ask the agent to renumber the FR your branch added.
+## Files
+| Owner | Paths | `--update` |
+|-------|-------|------------|
+| You | `.claude/project.md` · `.claude/gates.conf` · `.claude/settings.json` · `docs/` · `specs/` | never touches them |
+| Framework | `CLAUDE.md` · `.claude/agents/` · `.claude/skills/` · `.claude/scripts/` · `.claude/hooks/` · `.claude/sdd/` | overwrites them — list: [`sdd-core`](sdd-core) |
 
-## How it works
-```mermaid
-flowchart LR
-    C{Classify} -->|full cycle| S[Spec FRs] --> A{{You approve}} --> I[Test RED → code GREEN] --> V[Gates] --> D{{You review}}
-    D -->|next task| I
-    D -->|last task| R[Review + archive] --> K{{You commit}}
-    C -. inline .-> E[Edit FR in specs/current] --> I
-    D -. inline .-> K
-```
+Project rules go in `.claude/project.md` → Project Rules — a framework file you edit is overwritten on the next update.
+
+## Update
+- macOS · Linux · WSL: `curl -fsSL https://raw.githubusercontent.com/stevenhdz/spec-driven-development/main/install.sh | bash -s -- --update [<tag>]`
+- Windows: `& ([scriptblock]::Create((irm https://raw.githubusercontent.com/stevenhdz/spec-driven-development/main/install.ps1))) -Update [-Ref <tag>]`
+
+Overwrites the framework files (→ Files) and deletes the ones a new version no longer ships — then review `git diff`. Migration steps per version: [CHANGELOG](CHANGELOG.md). Coming from v1.5 or earlier: the first `--update` only adds `.claude/project.md` — move your values from `CLAUDE.md` into it, then run `--update` again.
+
+## CI
+Run `bash .claude/scripts/gates.sh full --no-format` on every PR. In a GitHub PR, `audit` runs when the PR changes a manifest — check out with `fetch-depth: 0`, or it runs on every PR. If two branches add the same FR ID, `frs` fails after the merge — ask the agent to renumber the FR your branch added.
 
 ## Methodologies
 | Methodology | How this setup applies it |
@@ -89,7 +99,7 @@ flowchart LR
 | **Testing practices** | Test behavior, not implementation · query like a user (Testing Library) · mock only boundaries (classic TDD) · Arrange / Act / Assert · one test per THEN variant |
 | **Low bureaucracy** | Inline changes (1 FR, 1 slice) skip the change folder and the approval round · one approval per plan or batch (`go up to ID-00N`) · ONE question at a time · `/adopt` needs one confirmation |
 | **Low verbosity** | Short replies by default, `explain` for depth · skills reply with a fixed Output Contract and nothing around it · gates print one line, failing lines only · FRs, change folders and questions are never shortened |
-| **English, imperative prompts** | Every `.md` follows `docs/doc-rules.md`: English, imperative, one idea per line · `MUST` / `NEVER` / `ALWAYS`, no "should" or "try to" · each rule lives in one place · a line that changes nothing gets cut · every skill follows `templates/skill.md` |
+| **English, imperative prompts** | Every `.md` follows `.claude/sdd/doc-rules.md`: English, imperative, one idea per line · `MUST` / `NEVER` / `ALWAYS`, no "should" or "try to" · each rule lives in one place · a line that changes nothing gets cut · every skill follows `.claude/sdd/templates/skill.md` |
 | **Refactoring** (Fowler) | Green tests first · one move per step · gates after each step · tests untouched |
 | **Measured optimization** | Baseline first · one change per step · keep a step only if the metric improves |
 | **Human in the loop** | You approve the change folder and each task, review the staged diff and commit — the agent cannot run `git commit` or `git push` · explore → plan → approve → code: no code before approval |

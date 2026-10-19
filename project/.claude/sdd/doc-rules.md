@@ -1,4 +1,5 @@
 # Documentation Rules
+<!-- Framework file — `install.sh --update` overwrites it. -->
 
 Applies to every `.md` in this project.
 
@@ -13,6 +14,5 @@ Applies to every `.md` in this project.
 `CLAUDE.md` → Quality Gates.
 
 ## Templates
-`templates/` — `spec.md` · `change/` (`proposal.md` · `design.md` · `spec.md` · `tasks.md`) · `skill.md`.
-ADRs — `docs/decisions/000-template.md`.
-Skill sections follow `templates/skill.md` in its order — omit References if empty.
+`.claude/sdd/templates/` — `spec.md` · `change/` (`proposal.md` · `design.md` · `spec.md` · `tasks.md`) · `skill.md` · `adr.md` (ADRs, saved in `docs/decisions/`).
+Skill sections follow `.claude/sdd/templates/skill.md` in its order — omit References if empty.

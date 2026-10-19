@@ -1,6 +1,6 @@
 #!/bin/bash
 # Installs project/ into the current directory: copies every file that does not exist yet, never overwrites one.
-# --update also overwrites the framework files listed in .claude/sdd-core — your files (project.md, gates.conf, settings.json, specs/, docs/) stay untouched.
+# --update also overwrites the framework files listed in this repo's sdd-core and deletes the old ones listed in sdd-removed — your files (project.md, gates.conf, settings.json, specs/, docs/) stay untouched.
 # Usage: curl -fsSL https://raw.githubusercontent.com/stevenhdz/spec-driven-development/main/install.sh | bash [-s -- [--update] [<tag|branch>]]
 # Exit: 0 installed · 1 download failed
 set -u
@@ -17,7 +17,11 @@ if ! curl -fsSL "https://codeload.github.com/$repo/tar.gz/$ref" | tar -xz -C "$t
   exit 1
 fi
 src=$(echo "$tmp"/*/project)
-core=$(grep -vE '^(#|$)' "$src/.claude/sdd-core" 2>/dev/null)
+root=${src%/project}
+core_file=$root/sdd-core
+test -f "$core_file" || core_file=$src/.claude/sdd-core
+core=$(grep -vE '^(#|$)' "$core_file" 2>/dev/null)
+removed=$(grep -vE '^(#|$)' "$root/sdd-removed" 2>/dev/null)
 
 is_core() {
   local p
@@ -54,7 +58,17 @@ while IFS= read -r f; do
 done < <(find "$src" -type f)
 chmod +x .claude/scripts/gates.sh
 
-echo "SDD $ref: ✅ $added files added · $updated updated"
+deleted=0
+if test "$overwrite" = 1; then
+  for f in $removed; do
+    test -f "$f" || continue
+    rm "$f"
+    rmdir -p "$(dirname "$f")" 2>/dev/null
+    deleted=$((deleted + 1))
+  done
+fi
+
+echo "SDD $ref: ✅ $added files added · $updated updated · $deleted removed"
 if test -n "$kept"; then
   echo "Kept yours, differs from $ref:"
   for f in $kept; do echo "  $f"; done

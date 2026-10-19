@@ -34,7 +34,7 @@ Do not load it for a new, empty project — the human fills the placeholders by 
 4. Fill every `[placeholder]` in `.claude/project.md` and `.claude/gates.conf` — every command in `gates.conf` MUST exist in the repo — no formatter in the repo: leave `FORMAT_*` empty, NEVER add one.
 5. Fill every `[placeholder]` in `docs/architecture.md`.
 6. Update `deny` in `.claude/settings.json`.
-7. Run `grep -nE '\[[^]]{2,}\]' .claude/project.md docs/architecture.md .claude/gates.conf` — it MUST print nothing — re-read the edited files against `docs/doc-rules.md`.
+7. Run `grep -nE '\[[^]]{2,}\]' .claude/project.md docs/architecture.md .claude/gates.conf` — it MUST print nothing — re-read the edited files against `.claude/sdd/doc-rules.md`.
 8. Run `bash .claude/scripts/gates.sh full --no-format` — report the line it prints — a failing gate is reported, NEVER fixed.
 9. Stage the edited files — propose `chore: adopt spec-driven development` — stop and wait.
 
