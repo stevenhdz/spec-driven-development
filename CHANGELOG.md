@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.8.1 — 2026-10-18
+### Changed
+- readme → Setup: what `/adopt` does — asks once, never touches source code, reports failing gates without fixing them, stages its files, you commit — and that existing behavior has no FR until a change touches it.
+- readme → Use it: the command table lists every command — `yes` · `go` · `fix: <what>` · `/adopt` · `/clear` — plus a Gates table with the `scoped` · `full` · `fr` modes of `gates.sh`.
+- readme → Use it: the flow diagram is back, with the `yes` · `go` · `fix:` steps.
+
 ## v1.8.0 — 2026-10-18
 ### Changed
 - Framework files live in one folder, `.claude/sdd/`: `templates/` → `.claude/sdd/templates/` · `docs/doc-rules.md` → `.claude/sdd/doc-rules.md` · `docs/decisions/000-template.md` → `.claude/sdd/templates/adr.md` . `docs/` and `specs/` now hold only your files.
