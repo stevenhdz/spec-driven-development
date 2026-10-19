@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.11.0 — 2026-10-18
+### Changed
+- `implementer` → `maxTurns: 60` · `reviewer` → `maxTurns: 30` — `Explore` already had 25, so every agent has a turn cap that stops a run stuck in a loop.
+- create-feature: an implementer that returns no Output Contract (stopped at maxTurns) is handled like `blocked` — stop the batch, relay what it returned · a reviewer with no contract: report it, stop and wait.
+- readme → Methodologies: Multi-agent lists the turn caps · Context engineering notes `Explore` runs without `CLAUDE.md`.
+
+### Migration from v1.10
+- None — run `--update`.
+
 ## v1.10.0 — 2026-10-18
 ### Changed
 - `refactor` and `optimize` skills folded into `CLAUDE.md` → No Behavior Change: seven rules — green tests first, tests untouched, one step at a time with scoped gates, revert a step that breaks a test, optimize measures a baseline and keeps only steps that improve it. Branch, ADR, Explore and close rules they restated are already in `CLAUDE.md` and `create-feature`.
