@@ -39,4 +39,4 @@ Updated at each feature close — a new slice goes in §2, a project-wide decisi
 | Business rules in the logic layer | One home per rule, testable without the transport | Rules inside components, routes or handlers |
 | [Project decision] | [Why] | [Alternative and why not] |
 
-A decision that needs context and options: write an ADR from `.claude/sdd/templates/adr.md` and link it here.
+A decision that needs context and options: write an ADR from `.claude/templates/adr.md` and link it here.

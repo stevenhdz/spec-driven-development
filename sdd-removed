@@ -10,3 +10,11 @@ docs/doc-rules.md
 docs/decisions/000-template.md
 .claude/skills/refactor/SKILL.md
 .claude/skills/optimize/SKILL.md
+.claude/sdd/doc-rules.md
+.claude/sdd/templates/spec.md
+.claude/sdd/templates/skill.md
+.claude/sdd/templates/adr.md
+.claude/sdd/templates/change/proposal.md
+.claude/sdd/templates/change/design.md
+.claude/sdd/templates/change/spec.md
+.claude/sdd/templates/change/tasks.md

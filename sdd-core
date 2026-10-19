@@ -5,4 +5,5 @@ CLAUDE.md
 .claude/skills/
 .claude/scripts/
 .claude/hooks/
-.claude/sdd/
+.claude/templates/
+.claude/doc-rules.md
