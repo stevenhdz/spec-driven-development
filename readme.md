@@ -87,6 +87,8 @@ flowchart LR
 | `bash .claude/scripts/gates.sh full [--no-format]` | Whole project, plus `frs` — feature close, inline change, CI |
 | `bash .claude/scripts/gates.sh fr <FR-ID>` | Tests of one FR — proves RED before the code |
 
+No gates: `- Gates: OFF` in the change's `proposal.md` → Scope, next to `TDD` — `scoped` and `full` print `⏭️` for every gate, `fr` still runs so TDD keeps working · inline: always ON.
+
 > [!IMPORTANT]
 > Changing code by hand: edit its FR in `specs/current/` first.
 

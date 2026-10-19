@@ -10,6 +10,7 @@ What must work when this is closed, and why it is needed.
 - IN:
 - OUT:
 - TDD: ON | OFF
+- Gates: ON | OFF
 - Specs touched: `specs/current/[capability]/spec.md`
 
 ## Constraints
