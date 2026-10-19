@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.5.1 — 2026-10-18
+### Changed
+- `Explore` runs on Haiku — read-only mapping with a fixed summary, cheaper and faster.
+- `reviewer` runs on Opus — it runs once per feature and is the last check before the specs merge.
+- `implementer` and `reviewer` drop "NEVER load a skill" — neither has the `Skill` tool · `implementer` drops "NEVER commit" — `settings.json` already denies `git commit`.
+
 ## v1.5.0 — 2026-10-18
 ### Added
 - `install.ps1`: installs `project/` from Windows PowerShell with `irm … | iex` — same behavior as `install.sh`: never overwrites an existing file, lists the ones it kept · `-Ref <tag>` pins a version.
