@@ -1,6 +1,7 @@
 # Architecture — [Project name]
+<!-- Yours — `install.sh --update` never overwrites this file. -->
 
-Project-wide map and the *why*. Behavior (FRs): `specs/current/`. Rules and folder pattern: `CLAUDE.md`. Per-change design: `specs/changes/<feature>/design.md`.
+Project-wide map and the *why*. Behavior (FRs): `specs/current/`. Rules: `CLAUDE.md`. Folder pattern: `.claude/project.md`. Per-change design: `specs/changes/<feature>/design.md`.
 Updated at each feature close — a new slice goes in §2, a project-wide decision in §5.
 
 ## 1. Context
@@ -38,4 +39,4 @@ Updated at each feature close — a new slice goes in §2, a project-wide decisi
 | Business rules in the logic layer | One home per rule, testable without the transport | Rules inside components, routes or handlers |
 | [Project decision] | [Why] | [Alternative and why not] |
 
-A decision that needs context and options: write an ADR from `docs/decisions/000-template.md` and link it here.
+A decision that needs context and options: write an ADR from `.claude/sdd/templates/adr.md` and link it here.

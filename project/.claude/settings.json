@@ -37,7 +37,22 @@
       "Edit(*.key)",
       "Edit(*.p12)",
       "Edit(*.pfx)",
-      "Edit(secrets/**)"
+      "Edit(secrets/**)",
+      "Edit(~/.ssh/**)",
+      "Edit(~/.aws/**)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect-secrets.sh\""
+          }
+        ]
+      }
     ]
   }
 }

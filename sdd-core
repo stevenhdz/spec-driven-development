@@ -1,0 +1,8 @@
+# Framework-owned paths, relative to project/: `install.sh --update` overwrites them — a path ending in / covers every file the framework ships under it.
+# Everything else is yours: copied only when missing, never overwritten.
+CLAUDE.md
+.claude/agents/
+.claude/skills/
+.claude/scripts/
+.claude/hooks/
+.claude/sdd/
