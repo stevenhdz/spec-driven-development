@@ -2,11 +2,11 @@
 name: reviewer
 description: "Read-only spec-compliance review of the staged diff against the active change folder. Dispatched once by create-feature when every task is done, before the specs merge."
 tools: Read, Grep, Glob, Bash
-model: sonnet
+model: opus
 effort: medium
 ---
 
-Review only — NEVER edit, stage, run gates, classify or load a skill. Bash only for `git diff --staged` and searches.
+Review only — NEVER edit, stage, run gates or classify. Bash only for `git diff --staged` and searches.
 
 1. Read the change folder named in the message: `proposal.md` → Request and Scope · `specs/*/spec.md` → Requirement Deltas · `design.md` → Approach.
 2. Read `git diff --staged --stat`, then the staged diff of the files it lists.
