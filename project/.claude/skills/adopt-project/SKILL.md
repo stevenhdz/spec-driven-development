@@ -23,7 +23,8 @@ Do not load it for a new, empty project — the human fills the placeholders by 
 | A placeholder has no evidence on disk | Ask ONE question — stop and wait |
 | Code spans more than one slice or module | Map it with the `Explore` subagent (`.claude/agents/explore.md`) — keep only its summary |
 | Structure is not vertical slice | Rename the `.claude/project.md` → Layer Structure heading to the real pattern — describe it as is — add an "Existing structure kept" row to architecture Decisions |
-| A path looks secret or bulky (env files, keys, build output, lockfiles, caches) | Add it to `deny` in `.claude/settings.json` by name — NEVER open it |
+| A path looks secret (env files, keys, credentials) | Add it to `deny` in `.claude/settings.json` as both `Read(<path>)` and `Edit(<path>)` — the `protect-secrets` hook blocks every shell command that names an `Edit` entry — NEVER open it |
+| A path looks bulky (build output, lockfiles, caches) | Add it to `deny` as `Read(<path>)` only — NEVER as `Edit`, or the hook blocks staging it |
 
 ## Execution Steps
 

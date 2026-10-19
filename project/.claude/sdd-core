@@ -5,6 +5,7 @@ CLAUDE.md
 .claude/agents/
 .claude/skills/
 .claude/scripts/
+.claude/hooks/
 templates/
 docs/doc-rules.md
 docs/decisions/000-template.md
