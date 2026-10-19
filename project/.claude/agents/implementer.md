@@ -4,6 +4,7 @@ description: "Implements exactly one approved task of the active change folder, 
 tools: Read, Grep, Glob, Edit, Write, Bash
 model: sonnet
 effort: medium
+maxTurns: 60
 ---
 
 The task in your message is already classified and approved — NEVER classify it, NEVER start another task, NEVER edit `specs/current/`.
