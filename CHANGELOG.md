@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.11.1 — 2026-10-18
+### Changed
+- `CLAUDE.md` → Quality Gates: the `Gates format` line is gone — `gates.sh` prints it and the agent copies it as printed.
+- `CLAUDE.md` → Spec Rules: the change-folder line points to create-feature step 5 instead of restating its files.
+- `doc-rules.md`: `## Status legend and Gates format` → `## Status legend`.
+
+### Migration from v1.11
+- None — run `--update`.
+
 ## v1.11.0 — 2026-10-18
 ### Changed
 - `implementer` → `maxTurns: 60` · `reviewer` → `maxTurns: 30` — `Explore` already had 25, so every agent has a turn cap that stops a run stuck in a loop.
