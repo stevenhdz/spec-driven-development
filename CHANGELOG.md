@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.12.0 — 2026-10-18
+### Changed
+- `.claude/sdd/templates/` → `.claude/templates/` · `.claude/sdd/doc-rules.md` → `.claude/doc-rules.md` — the `sdd/` folder is gone. `CLAUDE.md`, skills, `docs/architecture.md`, readme and `sdd-core` point to the new paths.
+
+### Removed
+- `.claude/sdd/` — its files are listed in `sdd-removed`.
+
+### Migration from v1.11
+- Run `--update`: it copies the new paths and deletes `.claude/sdd/`. A template you edited there: copy your changes to `.claude/templates/` before updating.
+
 ## v1.11.1 — 2026-10-18
 ### Changed
 - `CLAUDE.md` → Quality Gates: the `Gates format` line is gone — `gates.sh` prints it and the agent copies it as printed.
