@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.7.0 — 2026-10-18
+### Added
+- `.claude/hooks/protect-secrets.sh`: `PreToolUse` hook on Bash — blocks a command that names a path denied for `Edit` in `settings.json` (`python -c "open('.env')"`, `node`, `cp`, `base64`, `find -exec`…), which deny rules miss in a shell · `!` entries stay allowed · `settings.json` registers it · `~/.ssh` and `~/.aws` are now denied for `Edit` too.
+- `--update` installs `.claude/hooks/` — listed in `.claude/sdd-core`.
+
+### Changed
+- `/adopt` puts a secret in `deny` as `Read` and `Edit`, a bulky path as `Read` only — an `Edit` entry would make the hook block staging it.
+
+### Migration from v1.6
+- `settings.json` is yours, so `--update` never adds the hook to it: copy the `hooks` block and the `Edit(~/.ssh/**)` · `Edit(~/.aws/**)` lines from `project/.claude/settings.json`.
+
 ## v1.6.0 — 2026-10-18
 ### Added
 - `.claude/project.md`: your project values — Product, Stack, Layer Structure, Naming, Forbidden, Test name, Commit message, Branch name — plus a Project Rules section. Never overwritten.
