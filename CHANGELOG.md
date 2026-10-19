@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.8.0 — 2026-10-18
+### Changed
+- Framework files live in one folder, `.claude/sdd/`: `templates/` → `.claude/sdd/templates/` · `docs/doc-rules.md` → `.claude/sdd/doc-rules.md` · `docs/decisions/000-template.md` → `.claude/sdd/templates/adr.md` . `docs/` and `specs/` now hold only your files.
+- `.claude/sdd-core` → `sdd-core` at this repo's root, listing folders only — only the installer reads it, so it is no longer installed.
+- `specs/changes/.gitkeep` removed — `specs/changes/archive/.gitkeep` already keeps the folder.
+- `CLAUDE.md`: Hard Rules grouped by topic — Architecture · Code · Dependencies and secrets · Context · Docs — and Conventions folded into them. Sections follow the workflow: Change Size → Working Protocol → Spec Rules → Hard Rules → Testing Rules → Quality Gates. No rule changed.
+- `gates.conf`, `docs/architecture.md`, `gates.sh`, `protect-secrets.sh` and `doc-rules.md` say in their first lines whether they are yours or the framework's.
+- readme: Use it is a short walkthrough — terms, full cycle step by step, inline, extra commands — replacing the command table and the How it works diagram · new Files section (who owns each path) · Update and CI get their own sections.
+
+### Added
+- `sdd-removed` at this repo's root: paths the framework no longer ships — `--update` deletes them and the folders they leave empty.
+
+### Migration from v1.7
+- Run `--update`: it adds `.claude/sdd/` and deletes the old paths. A template you edited under `templates/` is deleted too — copy it into `.claude/sdd/templates/` first.
+- A rule of yours in `.claude/project.md` that names an old path: point it to the new one.
+
 ## v1.7.0 — 2026-10-18
 ### Added
 - `.claude/hooks/protect-secrets.sh`: `PreToolUse` hook on Bash — blocks a command that names a path denied for `Edit` in `settings.json` (`python -c "open('.env')"`, `node`, `cp`, `base64`, `find -exec`…), which deny rules miss in a shell · `!` entries stay allowed · `settings.json` registers it · `~/.ssh` and `~/.aws` are now denied for `Edit` too.
