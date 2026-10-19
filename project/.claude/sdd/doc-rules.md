@@ -10,7 +10,7 @@ Applies to every `.md` in this project.
 - A rule that applies only to some paths goes in `.claude/rules/<topic>.md` with a `paths:` frontmatter — NEVER in `CLAUDE.md`.
 - Notes for humans inside `CLAUDE.md` go in `<!-- -->` — Claude Code strips them before loading.
 
-## Status legend and Gates format
+## Status legend
 `CLAUDE.md` → Quality Gates.
 
 ## Templates
