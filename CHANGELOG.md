@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.6.0 — 2026-10-18
+### Added
+- `.claude/project.md`: your project values — Product, Stack, Layer Structure, Naming, Forbidden, Test name, Commit message, Branch name — plus a Project Rules section. Never overwritten.
+- `install.sh --update` · `install.ps1 -Update`: overwrites only the framework files listed in `.claude/sdd-core` — never your `project.md`, `gates.conf`, `settings.json`, `specs/` or `docs/`, never a skill or agent you added.
+- `.claude/sdd-core`: the list of framework-owned paths.
+
+### Changed
+- `CLAUDE.md` holds only framework rules and imports `.claude/project.md` with `@.claude/project.md` — rules that used a project value now name it (e.g. `project.md` → Forbidden).
+- `/adopt` fills `.claude/project.md` instead of `CLAUDE.md`.
+- Installers list only the existing files that differ from the version installed.
+
+### Migration from v1.5
+- Run `--update` once: it adds `.claude/project.md` and updates nothing else. Move your values from `CLAUDE.md` into it, then run `--update` again — it replaces `CLAUDE.md` with the framework version.
+
 ## v1.5.1 — 2026-10-18
 ### Changed
 - `Explore` runs on Haiku — read-only mapping with a fixed summary, cheaper and faster.
