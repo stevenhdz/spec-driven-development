@@ -17,8 +17,17 @@ Classify every request before touching code.
 
 - The human's word wins: "as a feature" or "inline" overrides the table.
 - If inline work grows past the table: stop, report, switch to the full cycle.
-- No observable behavior change in code: skip the table — refactor: load `.claude/skills/refactor/SKILL.md` · optimization: load `.claude/skills/optimize/SKILL.md`.
+- No observable behavior change in code: skip the table — follow No Behavior Change.
 - ALWAYS state the classification before starting: `Size: inline — <reason>`, `Size: full cycle — <reason>`, `Size: refactor — <reason>` or `Size: optimize — <reason>`.
+
+## No Behavior Change — refactor · optimize
+- Covering tests MUST pass before the first step — none: propose adding them as an inline change first — wait.
+- NEVER edit, delete or skip a test — only its import paths when a file moves.
+- NEVER add a dependency, a feature or a behavior fix inside — needs a behavior change: stop, route it through Change Size.
+- Optimize: agree the metric and its measure command, record the baseline before any code — NEVER claim an improvement without a measured before → after.
+- Propose the plan — goal, scope IN/OUT, numbered steps · optimize: metric and baseline — stop and wait — approval covers every step.
+- One step at a time → scoped Quality Gates · optimize: measure — a test fails or the metric does not improve: revert the step, NEVER fix the test, report it.
+- Close with the close sequence and Quality Gates in Full mode — branch and commit type `refactor` · `perf`.
 
 ## Working Protocol — STRICT
 These are Hard Rules. Any violation is a protocol breach.
