@@ -104,6 +104,38 @@ No gates: `- Gates: OFF` in the change's `proposal.md` → Scope, next to `TDD` 
 
 Project rules go in `.claude/project.md` → Project Rules — a framework file you edit is overwritten on the next update.
 
+What the install adds to your repo — **You** = yours to fill and edit · **Framework** = overwritten by `--update`:
+```
+CLAUDE.md                       Framework · rules every change follows — loads .claude/project.md
+.gitattributes                  You       · keeps *.sh with LF endings so the gates run on Windows
+.claude/
+  project.md                    You       · product, stack, folder pattern, conventions, Project Rules
+  gates.conf                    You       · format · lint · build · test · audit commands for gates.sh
+  settings.json                 You       · permissions (secrets denied, no git commit/push) and the secrets hook
+  doc-rules.md                  Framework · how every .md is written
+  agents/
+    explore.md                  Framework · read-only code map (Haiku)
+    implementer.md              Framework · runs one approved task: test RED → code GREEN → gates (Sonnet)
+    reviewer.md                 Framework · checks the staged diff against the FRs (Opus)
+  skills/
+    create-feature/SKILL.md     Framework · the full cycle: change folder → tasks → review → archive
+    adopt/SKILL.md              Framework · /adopt — fills the setup from an existing project's code
+  scripts/gates.sh              Framework · quality gates: scoped · full · fr
+  hooks/protect-secrets.sh      Framework · blocks shell commands that name a secret
+  templates/                    Framework · copied by the agent, never edited in place
+    spec.md                     living spec of one capability
+    adr.md                      one project-wide decision
+    skill.md                    shape of every skill
+    change/                     one change folder: proposal.md · design.md · spec.md (FR deltas) · tasks.md
+docs/
+  architecture.md               You       · project-wide map and the why
+  decisions/                    You       · ADRs
+specs/
+  current/<capability>/spec.md  You       · living FRs — what the system does today
+  changes/<feature>/            You       · the change in progress
+  changes/archive/              You       · closed changes
+```
+
 ## Update
 - macOS · Linux · WSL: `curl -fsSL https://raw.githubusercontent.com/stevenhdz/spec-driven-development/main/install.sh | bash -s -- --update [<tag>]`
 - Windows: `& ([scriptblock]::Create((irm https://raw.githubusercontent.com/stevenhdz/spec-driven-development/main/install.ps1))) -Update [-Ref <tag>]`
