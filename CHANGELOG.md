@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.14.0 — 2026-10-19
+### Added
+- README → Files: the folder tree the install adds, with the owner and purpose of each file.
+
+### Changed
+- `.claude/skills/adopt-project/` → `.claude/skills/adopt/` — the folder matches the skill's `name: adopt`, like `create-feature/`.
+- `readme.md` → `README.md`.
+
+### Removed
+- `.claude/skills/adopt-project/` — listed in `sdd-removed`.
+
+### Migration from v1.13
+- Run `--update`: it copies `.claude/skills/adopt/` and deletes `.claude/skills/adopt-project/`. A rule you added to that skill: move it to `.claude/project.md` → Project Rules.
+
 ## v1.13.0 — 2026-10-19
 ### Added
 - Origin marker `Spec Driven Development by stevenhdz · https://github.com/stevenhdz/spec-driven-development` on the framework-file line of `CLAUDE.md`, `.claude/doc-rules.md`, `gates.sh` and `protect-secrets.sh`.
