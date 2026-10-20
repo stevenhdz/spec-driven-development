@@ -18,3 +18,4 @@ docs/decisions/000-template.md
 .claude/sdd/templates/change/design.md
 .claude/sdd/templates/change/spec.md
 .claude/sdd/templates/change/tasks.md
+.claude/skills/adopt-project/SKILL.md
