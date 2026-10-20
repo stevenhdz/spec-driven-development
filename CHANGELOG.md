@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.15.0 — 2026-10-19
+### Added
+- `.claude/skills/research/` — `/research <question>`: inverted Feynman. The human explains in their own words, the agent asks up to 3 newcomer questions per round and points to the sources (`path:line`, section, link) — never the answer first. Ends with a 3-line explanation by the human and the gaps left.
+- README → Commands and Files: `/research`.
+
+### Migration from v1.14
+- None — run `--update`.
+
 ## v1.14.0 — 2026-10-19
 ### Added
 - README → Files: the folder tree the install adds, with the owner and purpose of each file.
