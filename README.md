@@ -122,6 +122,7 @@ CLAUDE.md                       Framework · rules every change follows — load
     create-feature/SKILL.md     Framework · the full cycle: change folder → tasks → review → archive
     adopt/SKILL.md              Framework · /adopt — fills the setup from an existing project's code
     research/SKILL.md           Framework · /research — you explain, the agent asks: inverted Feynman
+    master/SKILL.md             Framework · example task note template: Feynman summary, 5 Ws, ADR, GTD next action, Zettelkasten
   scripts/gates.sh              Framework · quality gates: scoped · full · fr
   hooks/protect-secrets.sh      Framework · blocks shell commands that name a secret
   templates/                    Framework · copied by the agent, never edited in place
