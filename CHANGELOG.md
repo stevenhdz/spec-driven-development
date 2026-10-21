@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.17.0 — 2026-10-20
+### Removed
+- `.claude/skills/research/` — `/research` and its README entries. Listed in `sdd-removed`.
+- `.claude/skills/master/` — the task note template and its README entry. Listed in `sdd-removed`.
+
+### Migration from v1.16
+- None — run `--update`: it deletes both skill folders.
+
 ## v1.16.0 — 2026-10-20
 ### Added
 - `.claude/skills/master/` — example task note template: Feynman summary, 5 Ws, How + ADR, risks, GTD next action, quick reply, Zettelkasten links. Every value is a placeholder.
