@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.16.0 — 2026-10-20
+### Added
+- `.claude/skills/master/` — example task note template: Feynman summary, 5 Ws, How + ADR, risks, GTD next action, quick reply, Zettelkasten links. Every value is a placeholder.
+- README → Files: `master/SKILL.md`.
+
+### Migration from v1.15
+- None — run `--update`.
+
 ## v1.15.0 — 2026-10-19
 ### Added
 - `.claude/skills/research/` — `/research <question>`: inverted Feynman. The human explains in their own words, the agent asks up to 3 newcomer questions per round and points to the sources (`path:line`, section, link) — never the answer first. Ends with a 3-line explanation by the human and the gaps left.
