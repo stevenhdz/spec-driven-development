@@ -77,18 +77,18 @@ flowchart LR
 | `<request>, inline` · `<request>, as a feature` | Force the size |
 | `yes` | Approve the Research, then the change folder |
 | `go` | Approve the staged task and run the next one — also resumes the active feature after `/clear` |
-| `go up to ID-003` | One approval for every task up to ID-003 |
+| `go up to ID-003` · `go all` | One approval for every task up to ID-003 or the last one — runs them back to back, stops on `blocked` or a deviation from the plan — you review the staged diff once at the end |
 | `fix: <what>` | Redo the staged task |
 | `refactor: <what>` · `optimize: <what>` | Change code without changing behavior — tests untouched |
 | `explain` | Replies are short by default — this gets the detailed answer |
 | `/adopt` | Fill the setup from an existing project's code (→ Setup) |
-| `/clear` | Fresh context between tasks — state lives in the change folder |
+| `/clear` | Fresh context between tasks or batches — state lives in the change folder |
 
 | Gates | When |
 |-------|------|
 | `bash .claude/scripts/gates.sh scoped <files…>` | Changed files only — each task close |
-| `bash .claude/scripts/gates.sh full [--no-format]` | Whole project, plus `frs` — feature close, inline change, CI |
-| `bash .claude/scripts/gates.sh fr <FR-ID>` | Tests of one FR — proves RED before the code |
+| `bash .claude/scripts/gates.sh full [--no-format]` | Whole project, plus `frs` — and in a PR, `commits`: each subject matches `COMMIT_PATTERN` — feature close, inline change, CI |
+| `bash .claude/scripts/gates.sh fr <FR-ID>` | Tests of one FR — proves RED before the code · fails with fewer tests than GIVEN/WHEN/THEN scenarios |
 
 No gates: `- Gates: OFF` in the change's `proposal.md` → Scope, next to `TDD` — `scoped` and `full` print `⏭️` for every gate, `fr` still runs so TDD keeps working · inline: always ON.
 
@@ -122,6 +122,7 @@ CLAUDE.md                       Framework · rules every change follows — load
   skills/
     create-feature/SKILL.md     Framework · the full cycle: change folder → tasks → review → archive
     adopt/SKILL.md              Framework · /adopt — fills the setup from an existing project's code
+    refactor/SKILL.md           Framework · refactor: · optimize: — no behavior change, tests untouched
   scripts/gates.sh              Framework · quality gates: scoped · full · fr
   hooks/protect-secrets.sh      Framework · blocks shell commands that name a secret
   templates/                    Framework · copied by the agent, never edited in place
@@ -151,22 +152,22 @@ Run `bash .claude/scripts/gates.sh full --no-format` on every PR. In a GitHub PR
 | Methodology | How this setup applies it |
 |-------------|---------------------------|
 | **Spec-Driven Development** (OpenSpec style) | Living spec per capability in `specs/current/` · each change in `specs/changes/` as proposal → design → delta spec (ADDED / MODIFIED / REMOVED) → tasks · archived when closed |
-| **BDD** (Gherkin style) | Each FR is `The system MUST …` (RFC 2119) with inline Gherkin `GIVEN / WHEN / THEN` — one line, no `.feature` file or Cucumber — every scenario becomes a test |
-| **TDD** | Test fails first (RED), proven by `gates.sh fr` · ON/OFF per feature, always ON inline |
+| **BDD** (Gherkin style) | Each FR is `The system MUST …` (RFC 2119) with inline Gherkin `GIVEN / WHEN / THEN` — one line, no `.feature` file or Cucumber — every scenario becomes a test, and `gates.sh fr` fails with fewer tests than scenarios |
+| **TDD** | Test fails first (RED), proven by `gates.sh fr` — which records `- RED: <FR-ID>` in the change's `tasks.md`, and the reviewer reports an FR without it · ON/OFF per feature, always ON inline |
 | **Traceability** | FR → task (`covers`) → test name starting with the FR ID · `frs` gate fails if an FR has no test or a duplicate ID |
 | **Vertical Slice Architecture** | One folder per feature · entry layer without business rules · logic layer independent of the transport · imports only through the public API |
 | **ADRs** | Project-wide decisions in `docs/decisions/` and `docs/architecture.md` |
-| **Clean code** | KISS · YAGNI · no pass-throughs · export only what is imported · exclusive states as one tagged union · no type casts · semantic, accessible UI |
-| **Testing practices** | Test behavior, not implementation · query like a user (Testing Library) · mock only boundaries (classic TDD) · Arrange / Act / Assert · one test per THEN variant |
-| **Low bureaucracy** | Inline changes (1 FR, 1 slice) skip the change folder and the approval round · one approval per plan or batch (`go up to ID-00N`) · ONE question at a time · `/adopt` needs one confirmation |
+| **Clean code** | KISS · YAGNI · no pass-throughs · export only what is imported · exclusive states as one tagged union · no type casts · semantic, accessible UI — enforced by the lint gate (debt rules, unused exports, a `FORBIDDEN` regex on every added line, inline changes too) and the reviewer (every Hard Rule) |
+| **Testing practices** | Test behavior, not implementation · query like a user (Testing Library) · mock only boundaries (classic TDD) · Arrange / Act / Assert · one test per THEN variant — enforced by the lint gate (`TEST_FORBIDDEN` regex on every added test line, inline changes too, and the stack's test lint plugin) and the reviewer (every Testing Rule) |
+| **Low bureaucracy** | Inline changes (1 FR, 1 slice) skip the change folder and the approval round · one approval per plan or batch (`go up to ID-00N` · `go all`) · ONE question at a time · `/adopt` needs one confirmation |
 | **Low verbosity** | Short replies by default, `explain` for depth · skills reply with a fixed Output Contract and nothing around it · gates print one line, failing lines only · FRs, change folders and questions are never shortened |
-| **English, imperative prompts** | Every `.md` follows `.claude/doc-rules.md`: English, imperative, one idea per line · `MUST` / `NEVER` / `ALWAYS`, no "should" or "try to" · each rule lives in one place · a line that changes nothing gets cut · every skill follows `.claude/templates/skill.md` |
+| **English, imperative prompts** | Every `.md` follows `.claude/doc-rules.md`: English, imperative, one idea per line · uppercase `MUST` / `NEVER` / `ALWAYS` only for rules whose violation is costly, with the reason — plain imperative for the rest, no "should" or "try to" · each rule lives in one place · a line that changes nothing gets cut · every skill follows `.claude/templates/skill.md` |
 | **Refactoring** (Fowler) | Green tests first · one move per step · gates after each step · tests untouched |
 | **Measured optimization** | Baseline first · one change per step · keep a step only if the metric improves |
-| **Human in the loop** | You approve the change folder and each task, review the staged diff and commit — the agent cannot run `git commit` or `git push` · research → approve → plan → approve → code: no code before approval |
+| **Human in the loop** | You approve the change folder and each task or batch, review the staged diff once per task or batch — a batch stops on a deviation from the plan — and commit — the agent cannot run `git commit` or `git push` · research → approve → plan → approve → code: no code before approval |
 | **Quality gates** | `gates.sh` runs format → lint → build → tests → frs → audit, stops at the first failure and prints one line the agent copies as is — same command in CI |
-| **Multi-agent** | `implementer` (Sonnet) runs one task — a fix that fails 3 times returns to you · `reviewer` (Opus) checks the diff against the FRs in a fresh context — gaps only, never style · `Explore` maps code on Haiku · every agent has a turn cap (`maxTurns`) — a run that hits it stops like a blocked task |
-| **Context engineering** | `/clear` per task, state lives in the change folder · skills load on demand · search before reading · short `CLAUDE.md` · `Explore` runs without it · secrets and bulky files denied |
-| **Security** | No hardcoded secrets — env vars documented in `.env.example` · secrets denied in `.claude/settings.json` · a `PreToolUse` hook blocks any shell command that names a secret (`python -c "open('.env')"`, `cp`, `base64`…) — for a script that opens one by itself, turn on the [sandbox](https://code.claude.com/docs/en/sandboxing) · a new dependency is checked in its registry (exists, age, downloads, repo, look-alike name) and needs your approval · `audit` gate for known vulnerabilities when a manifest changes, locally and in CI |
+| **Multi-agent** | `implementer` (Sonnet) runs one task — a fix that fails 3 times returns to you · `reviewer` (Opus) checks the diff in a fresh context — gaps against FRs, Hard Rules and Testing Rules only, never naming or preferences · `Explore` maps code on Haiku · every agent has a turn cap (`maxTurns`) — a run that hits it stops like a blocked task |
+| **Context engineering** | `/clear` per task or batch, state lives in the change folder · skills load on demand · search before reading · `CLAUDE.md` ≈ 1690 words, only rules every session needs — refactor and full-cycle rules load as skills · `Explore` runs without it · secrets and bulky files denied |
+| **Security** | No hardcoded secrets — env vars documented in `.env.example` · secrets denied in `.claude/settings.json` · a `PreToolUse` hook blocks any shell command that names a secret (`python -c "open('.env')"`, `cp`, `base64`…) — the [sandbox](https://code.claude.com/docs/en/sandboxing) is on, so a script that opens one by itself is blocked too: every `Read` deny becomes an OS-level read block for shell commands (Linux and WSL2 need `bubblewrap` and `socat` — without them, `/sandbox` shows what is missing and commands run unsandboxed) · a new dependency is checked in its registry (exists, age, downloads, repo, look-alike name) and needs your approval · `audit` gate for known vulnerabilities when a manifest changes, locally and in CI |
 | **Measure** | `/usage` and `/context` for tokens · `/doctor prompt-audit` after editing rules, skills or agents |
-| **Conventional Commits** | One commit and one branch per change, typed `feat` · `refactor` · `perf` |
+| **Conventional Commits** | One commit and one branch per change, typed `feat` · `refactor` · `perf` — the agent proposes the message from `.claude/project.md`, `gates.sh full` checks every subject in a PR against `COMMIT_PATTERN` |

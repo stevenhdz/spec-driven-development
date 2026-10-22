@@ -38,4 +38,4 @@
 - Branch name: [e.g. `type/<name>` · `type/PROJ-123-<name>`]
 
 ## Project Rules
-<!-- Rules only this project needs — same style as CLAUDE.md: imperative, NEVER / ALWAYS / MUST. -->
+<!-- Rules only this project needs — same style as CLAUDE.md: imperative, uppercase NEVER / ALWAYS / MUST only for costly rules. -->
