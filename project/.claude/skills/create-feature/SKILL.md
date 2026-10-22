@@ -11,7 +11,7 @@ Do not load it for inline work — follow Spec Rules and still run Quality Gates
 
 ## Hard Rules
 
-- NEVER write code before `specs/changes/<feature>/` exists and the user approves it — the request itself is NEVER approval, even when it pre-approves dependencies or says "go".
+- NEVER write code before `specs/changes/<feature>/` exists and the user approves it — the request itself and the "yes" to `research ok?` are NEVER approval of the change folder, even when it pre-approves dependencies or says "go".
 - NEVER edit `specs/current/` before the feature closes — deltas live in `specs/changes/<feature>/specs/` until the merge.
 - NEVER write code in Approach — names, types and responsibilities only.
 - NEVER expand scope without explicit user authorization.
@@ -35,17 +35,17 @@ Do not load it for inline work — follow Spec Rules and still run Quality Gates
 | Human approves a range ("go up to ID-00N") | Dispatch one implementer per task, in order — each waits for the previous result |
 | Implementer returns `blocked`, or no Output Contract (stopped at maxTurns) | Stop — and stop the batch — relay what it returned — back to per-task approval |
 | Batch ends | Report tasks done — `Next: <Next step> — /clear → go` — wait |
-| Any reply about an active feature in a new session or after `/clear` | Find the active change folder with `ls -d specs/changes/*/ | grep -v archive` — read only its `tasks.md` → "fix: <what>": dispatch it for the last task (step 8) · otherwise: continue from Progress → `Next step` (step 8 or 10) |
+| Any reply about an active feature in a new session or after `/clear` | Find the active change folder with `ls -d specs/changes/*/ | grep -v archive` — no `tasks.md` yet: read its `proposal.md` → Request and `design.md` → Research and handle the reply as in step 1 · otherwise read only its `tasks.md` → "fix: <what>": dispatch it for the last task (step 8) · otherwise: continue from Progress → `Next step` (step 8 or 10) |
 | Technical blocker | Report with options — NEVER assume a solution |
 | No git repo | Skip branch and staging — report `no repo` — Next line: `/clear → go` |
 
 ## Execution Steps
 
-1. Read `docs/architecture.md`, the `specs/current/<capability>/spec.md` files the feature touches, and the related code — when the code spans more than one slice, explore it with the `Explore` subagent (`.claude/agents/explore.md`) and keep only its summary.
+1. Read `docs/architecture.md`, the `specs/current/<capability>/spec.md` files the feature touches, and the related code — when the code spans more than one slice, explore it with the `Explore` subagent (`.claude/agents/explore.md`) and keep only its summary — from `.claude/templates/change/` write `specs/changes/<feature-name>/proposal.md` → Request verbatim only, and `design.md` → Research only, from what you found: the code as it is, with `path:line`, no proposals · Approach stays as the template — end the turn: reply with the file path and `research ok?` — NEVER start step 2 in the same turn — "yes": continue from step 2 · anything else: correct Research — stop and wait.
 2. Confirm goal, scope IN/OUT, TDD ON/OFF, Gates ON/OFF, FR deltas (ADDED / MODIFIED / REMOVED — `<FR-ID> — The system MUST …` + GIVEN/WHEN/THEN) and constraints.
 3. Design Approach from the FR deltas and the explored code: slices, types, state, logic placement, non-obvious decisions — every ADDED or MODIFIED FR maps to a line.
 4. Derive the tasks from Approach — every task lists the FRs it `covers`, every ADDED or MODIFIED FR is covered by a task — the fewest tasks that each leave a working, reviewable diff: group FRs owned by the same rule or component, NEVER one task per FR by default.
-5. Create the folder `specs/changes/<feature-name>/` from `.claude/templates/change/`: `proposal.md` (Request verbatim, Goal, Scope, Constraints) · `design.md` (Approach) · `tasks.md` (Tasks, Progress) · one `specs/<capability>/spec.md` with the FR deltas per capability touched.
+5. Create the folder `specs/changes/<feature-name>/` from `.claude/templates/change/`: `proposal.md` (Goal, Scope, Constraints — Request is already written) · `design.md` (Approach — Research is already written) · `tasks.md` (Tasks, Progress) · one `specs/<capability>/spec.md` with the FR deltas per capability touched.
 6. End the turn: reply with the change folder path, then `⚠️ Request not covered: <quote>` per part of the Request no FR covers, then `approve?` — NEVER dispatch a task in the same turn that wrote the change folder.
 7. Create the branch per `CLAUDE.md` → Working Protocol → Branch name, type `feat`, before the first staged change, unless there is no repo.
 8. Dispatch ONE task to the `implementer` subagent (`.claude/agents/implementer.md`) — message: the change folder path and the task ID, or `fix: <what>` and the last task ID — run it in the foreground and wait for its result — NEVER implement a task yourself.

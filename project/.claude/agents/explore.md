@@ -17,7 +17,7 @@ Explore only the code the request names — NEVER create, edit, stage or delete 
 Return only this summary:
 
 ```
-Files: <path> — <role>, one line each
+Files: <path:line> — <role>, one line each
 Public API: <slice> — <exported names>
 Current behavior: what the code does today, observable from outside
 Gaps: what the request expects that the code lacks — or "none"

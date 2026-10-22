@@ -1,5 +1,10 @@
 # Design: [name]
 
+## Research
+- Files: [path:line] — [role, one line each]
+- Current behavior: [what the code does today, observable from outside — no proposals]
+- Gaps: [what the request expects that the code lacks — or none]
+
 ## Approach
 - Slices: [touched or created]
 - Files: [each new source file — config and scaffold excluded] — [why it cannot live in an existing file]
