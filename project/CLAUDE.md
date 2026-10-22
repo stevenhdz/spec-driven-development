@@ -28,7 +28,7 @@ The human approves every step, so these rules hold even when a shortcut looks sa
 - Any reply about an active feature ("go", "yes", "fix: <what>", "go up to ID-00N", "go all") in a new session or after `/clear`: load `.claude/skills/create-feature/SKILL.md` first
 - Commit message and branch name: `.claude/project.md` — commit types `feat | fix | refactor | perf | test | docs | chore` · branch types `feat` full cycle · `refactor` · `perf` — ask for the ticket ID when the format has one
 - Commit once per change, never per task — full cycle: when the feature closes · inline: after its close sequence — propose the message, the human commits
-- NEVER skip the task close sequence — it is mandatory after every task and every inline change:
+- Run the task close sequence after every task and every inline change:
   ```
   1. Run Quality Gates
   2. Full cycle only: update the change folder — the implementer does it

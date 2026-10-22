@@ -16,7 +16,6 @@ Do not load it for inline work — follow Spec Rules and still run Quality Gates
 - NEVER write code in Approach — names, types and responsibilities only.
 - NEVER expand scope without explicit user authorization.
 - NEVER narrow the Request — anything it asks for goes in Scope IN and in an FR — when it conflicts with a rule, ask ONE question before creating the change folder.
-- ALWAYS explore existing code before proposing anything.
 - ALWAYS follow Working Protocol — NEVER restate or shorten it.
 
 ## Decision Gates
