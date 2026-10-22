@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.18.0 — 2026-10-21
+### Added
+- `.claude/templates/change/design.md` → `## Research`: the code as it is — `path:line` files, current behavior, gaps — no proposals. The human approves it on its own, before the plan exists.
+
+### Changed
+- `create-feature` step 1: what the exploration finds becomes `design.md` → Research, instead of being discarded — the agent stops with `research ok?` and writes the plan only after `yes`. A resumed feature with no `tasks.md` yet goes back to that stop.
+- `Explore` agent: `Files:` lines carry `path:line`.
+- `implementer` step 1: reads `design.md` → Research too.
+- README → Full cycle: the Research stop is steps 2–3 — the later steps move down by two · flowchart and `yes` row updated.
+
+### Migration from v1.17
+- None — run `--update`. Open change folders keep working without a Research section.
+
 ## v1.17.0 — 2026-10-20
 ### Removed
 - `.claude/skills/research/` — `/research` and its README entries. Listed in `sdd-removed`.

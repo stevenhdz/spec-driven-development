@@ -13,7 +13,7 @@ Follow `CLAUDE.md` → Hard Rules, Testing Rules, Spec Rules and Quality Gates.
 
 ## Steps
 
-1. Read the change folder named in the message: `proposal.md` → Scope · `specs/*/spec.md` → the FRs the task `covers` · `design.md` → Approach · `tasks.md` → the task line.
+1. Read the change folder named in the message: `proposal.md` → Scope · `specs/*/spec.md` → the FRs the task `covers` · `design.md` → Research, Approach · `tasks.md` → the task line.
 2. Search first, then read only the code the task needs.
 3. TDD ON: write the tests for every GIVEN/WHEN/THEN of the covered FRs → `bash .claude/scripts/gates.sh fr <FR-ID>` MUST print `FR <FR-ID>: ❌` with failing lines (RED) — `no test named` is NOT RED: fix the test name and rerun.
 4. Write the code until `gates.sh fr <FR-ID>` passes for every covered FR.

@@ -51,7 +51,7 @@ Existing project: install, then run `/adopt` — it fills steps 2 and 3 from you
 
 ```mermaid
 flowchart LR
-    C{Size} -->|full cycle| S[Change folder] --> A{{You: yes}} --> I[Test RED → code GREEN → gates] --> D{{You review staged diff}}
+    C{Size} -->|full cycle| RS[Research] --> RA{{You: yes}} --> S[Change folder] --> A{{You: yes}} --> I[Test RED → code GREEN → gates] --> D{{You review staged diff}}
     D -->|go| I
     D -->|fix: what| I
     D -->|last task| R[Review vs FRs + archive] --> K{{You commit}}
@@ -61,19 +61,21 @@ flowchart LR
 
 **Full cycle**
 1. You: `add discount codes at checkout`.
-2. Agent: writes the change folder, replies with its path and `approve?`.
-3. You: read `proposal.md`, `specs/*/spec.md` and `tasks.md` → `yes`, or say what to change.
-4. Agent: runs one task — failing test, code, gates — stages it and stops: `[ID-001 done] … Next: ID-002 — /clear → go`.
-5. You: review `git diff --staged` → `/clear` → `go` approves it and runs the next task · `fix: <what>` redoes it.
-6. After the last task: the agent checks the diff against the FRs, merges them into `specs/current/`, archives the folder and proposes a commit message — you commit.
+2. Agent: explores the code, writes `design.md` → Research — files with `path:line`, current behavior, gaps — and replies `research ok?`.
+3. You: did it understand the code? → `yes`, or say what it got wrong.
+4. Agent: writes the rest of the change folder, replies with its path and `approve?`.
+5. You: read `proposal.md`, `design.md` → Approach, `specs/*/spec.md` and `tasks.md` → `yes`, or say what to change.
+6. Agent: runs one task — failing test, code, gates — stages it and stops: `[ID-001 done] … Next: ID-002 — /clear → go`.
+7. You: review `git diff --staged` → `/clear` → `go` approves it and runs the next task · `fix: <what>` redoes it.
+8. After the last task: the agent checks the diff against the FRs, merges them into `specs/current/`, archives the folder and proposes a commit message — you commit.
 
-**Inline**: the agent edits the FR in `specs/current/`, writes the test, then the code, and stages all three — steps 5–6 without the archive.
+**Inline**: the agent edits the FR in `specs/current/`, writes the test, then the code, and stages all three — steps 7–8 without the archive.
 
 | Say | Effect |
 |-----|--------|
 | `<request>` | Starts a change — the agent picks inline or full cycle |
 | `<request>, inline` · `<request>, as a feature` | Force the size |
-| `yes` | Approve the change folder |
+| `yes` | Approve the Research, then the change folder |
 | `go` | Approve the staged task and run the next one — also resumes the active feature after `/clear` |
 | `go up to ID-003` | One approval for every task up to ID-003 |
 | `fix: <what>` | Redo the staged task |
@@ -161,7 +163,7 @@ Run `bash .claude/scripts/gates.sh full --no-format` on every PR. In a GitHub PR
 | **English, imperative prompts** | Every `.md` follows `.claude/doc-rules.md`: English, imperative, one idea per line · `MUST` / `NEVER` / `ALWAYS`, no "should" or "try to" · each rule lives in one place · a line that changes nothing gets cut · every skill follows `.claude/templates/skill.md` |
 | **Refactoring** (Fowler) | Green tests first · one move per step · gates after each step · tests untouched |
 | **Measured optimization** | Baseline first · one change per step · keep a step only if the metric improves |
-| **Human in the loop** | You approve the change folder and each task, review the staged diff and commit — the agent cannot run `git commit` or `git push` · explore → plan → approve → code: no code before approval |
+| **Human in the loop** | You approve the change folder and each task, review the staged diff and commit — the agent cannot run `git commit` or `git push` · research → approve → plan → approve → code: no code before approval |
 | **Quality gates** | `gates.sh` runs format → lint → build → tests → frs → audit, stops at the first failure and prints one line the agent copies as is — same command in CI |
 | **Multi-agent** | `implementer` (Sonnet) runs one task — a fix that fails 3 times returns to you · `reviewer` (Opus) checks the diff against the FRs in a fresh context — gaps only, never style · `Explore` maps code on Haiku · every agent has a turn cap (`maxTurns`) — a run that hits it stops like a blocked task |
 | **Context engineering** | `/clear` per task, state lives in the change folder · skills load on demand · search before reading · short `CLAUDE.md` · `Explore` runs without it · secrets and bulky files denied |
