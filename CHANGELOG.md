@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.27.1 — 2026-10-21
+### Changed
+- `CLAUDE.md` → Working Protocol: the task close sequence rule is a plain imperative.
+- `create-feature` → Hard Rules: drop "explore existing code before proposing" — step 1 already requires it.
+
 ## v1.27.0 — 2026-10-21
 ### Added
 - `gates.conf` → `TEST_FORBIDDEN`: extended regex — an added line in a test file that matches fails the lint gate (`lint ❌ (TEST_FORBIDDEN)`), in scoped and full, inline changes too — e.g. queries by test id, CSS class or index.
