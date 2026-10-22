@@ -1,15 +1,18 @@
 #!/bin/bash
 # Spec Driven Development by stevenhdz · https://github.com/stevenhdz/spec-driven-development — framework file: `install.sh --update` overwrites it. Your commands live in .claude/gates.conf.
-# Quality Gates: format (rewrites, silent) → lint → build → tests → frs (full only: every FR in specs/current has a test and a unique ID) → audit, stops at the first failure, prints one line.
+# Quality Gates: format (rewrites, silent) → lint (FORBIDDEN regex on added lines, TEST_FORBIDDEN on added test lines, then the linter) → build → tests → frs (full only: every FR in specs/current has a test and a unique ID) → commits (full with a base only: each subject since the base matches COMMIT_PATTERN) → audit, stops at the first failure, prints one line.
 # Usage: bash .claude/scripts/gates.sh scoped <files…> | full [--no-format] | fr <FR-ID>
 # `- Gates: OFF` in the active change's proposal.md (specs/changes/<feature>/): scoped and full print ⏭️ for every gate — fr still runs.
 # Audit runs when a manifest changed: uncommitted, or since $GATES_BASE (in a GitHub PR: origin/<base branch>) in full mode.
+# fr records RED: a failing run appends `- RED: <FR-ID>` to the active change's tasks.md (one active change only).
+# fr fails when it finds fewer tests than the FR's GIVEN lines — read from the active change's delta spec, else from specs/current.
 # Exit: 0 pass · 1 gate or test failed · 2 usage · 3 no test named <FR-ID>
 set -u
 
 root=$(cd "$(dirname "$0")/../.." && pwd)
 conf="$root/.claude/gates.conf"
 if ! test -f "$conf"; then echo "Gates: ❌ missing .claude/gates.conf"; exit 1; fi
+if grep -qE '^[A-Z_]+="\[' "$conf"; then echo "Gates: ❌ .claude/gates.conf not configured — run /adopt or fill its [placeholders]"; exit 1; fi
 . "$conf"
 
 mode=${1:-}
@@ -71,15 +74,34 @@ has_test() {
     --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist --exclude-dir=.venv --exclude-dir=target) | grep -qE "$test_path"
 }
 
+scenario_count() {
+  local f n
+  for f in "$root"/specs/changes/*/specs/*/spec.md "$root"/specs/current/*/spec.md; do
+    test -f "$f" || continue
+    n=$(awk -v id="$1" '/^#/ { on = 0 } $1 == "-" && $2 ~ /^[A-Z][A-Z0-9]*-[0-9]+$/ { on = ($2 == id); next } on && $1 == "-" && $2 == "GIVEN" { c++ } END { print c + 0 }' "$f")
+    if test "$n" -gt 0; then echo "$n"; return; fi
+  done
+  echo 0
+}
+
+record_red() {
+  local tasks
+  tasks=$(ls "$root"/specs/changes/*/tasks.md 2>/dev/null)
+  test -n "$tasks" && test "$(printf '%s\n' "$tasks" | wc -l)" = 1 || return 0
+  grep -qxF -- "- RED: $1" "$tasks" || printf -- '- RED: %s\n' "$1" >>"$tasks"
+}
+
 if test "$mode" = fr; then
   fr=${1:-}
   if test -z "$fr"; then echo "usage: gates.sh fr <FR-ID>"; exit 2; fi
   fr_id=$(printf '%s' "$fr" | tr 'A-Z-' 'a-z_')
   pattern=$(fr_pattern "$fr")
   if ! has_test "$fr"; then echo "FR $fr: ❌ no test named $fr"; exit 3; fi
-  if ! run "$(expand "$TEST_FR")"; then echo "FR $fr: ❌"; failing_lines; exit 1; fi
+  if ! run "$(expand "$TEST_FR")"; then record_red "$fr"; echo "FR $fr: ❌"; failing_lines; exit 1; fi
   n=$(grep -iE "$pattern" "$log" | grep -viE 'test-name-pattern|-k |-t ' | awk '!seen[$0]++' | wc -l)
   if test "$n" = 0; then echo "FR $fr: ❌ no test named $fr"; exit 3; fi
+  s=$(scenario_count "$fr")
+  if test "$n" -lt "$s"; then echo "FR $fr: ❌ $n tests < $s scenarios"; exit 1; fi
   echo "FR $fr: ✅ ($n tests)"
   exit 0
 fi
@@ -159,10 +181,59 @@ FR $id: ❌ no test named $id"
   sep=" ·"
 }
 
+added_lines() {
+  local ref f
+  ref=HEAD
+  if test "$mode" = full && test -n "$base"; then ref=$base; fi
+  git -C "$app" rev-parse -q --verify "$ref" >/dev/null || ref=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+  if test "$mode" = full; then
+    files=$( { git -C "$app" diff --name-only --relative "$ref"; git -C "$app" ls-files --others --exclude-standard; } | grep -vE '\.md$|^\.claude/' | sort -u)
+  fi
+  for f in $files; do
+    test -f "$app/$f" || continue
+    if git -C "$app" ls-files --error-unmatch -- "$f" >/dev/null 2>&1; then
+      git -C "$app" diff -U0 "$ref" -- "$f" | awk -v f="$f" '/^@@/ { split($3, a, /[+,]/); n = a[2]; next } /^\+\+\+/ { next } /^\+/ { print f ":" n ": " substr($0, 2); n++ }'
+    else
+      awk -v f="$f" '{ print f ":" NR ": " $0 }' "$app/$f"
+    fi
+  done
+}
+
+test_lines() {
+  local l
+  while IFS= read -r l; do
+    if [[ ${l%%:*} =~ $test_path ]]; then printf '%s\n' "$l"; fi
+  done
+}
+
+commits_gate() {
+  local subjects bad n
+  subjects=$(git -C "$root" log --format='%h %s' "$base..HEAD" 2>/dev/null | grep -vE '^[0-9a-f]+ (Merge|Revert) ')
+  n=$(printf '%s' "$subjects" | grep -c '')
+  bad=$(printf '%s\n' "$subjects" | awk 'NF' | while read -r hash subject; do
+    printf '%s\n' "$subject" | grep -qE "$COMMIT_PATTERN" || printf '%s %s\n' "$hash" "$subject"
+  done)
+  if test -n "$bad"; then echo "$line$sep commits ❌"; printf '%s\n' "$bad" | head -30; exit 1; fi
+  line="$line$sep commits ✅ ($n)"
+  sep=" ·"
+}
+
 if test -n "$format" && ! run "$format"; then echo "Gates: format ❌"; failing_lines; exit 1; fi
+if test -n "${FORBIDDEN:-}${TEST_FORBIDDEN:-}"; then
+  added=$(added_lines)
+  if test -n "${FORBIDDEN:-}"; then
+    hits=$(printf '%s\n' "$added" | grep -E "^[^:]+:[0-9]+: .*(${FORBIDDEN})" | head -30)
+    if test -n "$hits"; then echo "$line$sep lint ❌ (FORBIDDEN)"; printf '%s\n' "$hits"; exit 1; fi
+  fi
+  if test -n "${TEST_FORBIDDEN:-}"; then
+    hits=$(printf '%s\n' "$added" | test_lines | grep -E "^[^:]+:[0-9]+: .*(${TEST_FORBIDDEN})" | head -30)
+    if test -n "$hits"; then echo "$line$sep lint ❌ (TEST_FORBIDDEN)"; printf '%s\n' "$hits"; exit 1; fi
+  fi
+fi
 gate lint "$lint"
 gate build "$BUILD"
 gate tests "$test_cmd"
 if test "$mode" = full; then frs_gate; fi
+if test "$mode" = full && test -n "${COMMIT_PATTERN:-}" && test -n "$base"; then commits_gate; fi
 gate audit "$audit"
 echo "$line"

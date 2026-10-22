@@ -1,5 +1,112 @@
 # Changelog
 
+## v1.27.0 — 2026-10-21
+### Added
+- `gates.conf` → `TEST_FORBIDDEN`: extended regex — an added line in a test file that matches fails the lint gate (`lint ❌ (TEST_FORBIDDEN)`), in scoped and full, inline changes too — e.g. queries by test id, CSS class or index.
+- `/adopt` fills `TEST_FORBIDDEN` from the test runner and the Testing Rules.
+
+### Changed
+- `gates.conf` → LINT comment: the linter MUST also use the stack's test plugin when one exists.
+- README → Testing practices names what enforces it.
+
+### Migration from v1.26
+- `--update` never touches your `gates.conf`: add a `TEST_FORBIDDEN='…'` line (single quotes, empty = off) — see the template's example.
+
+## v1.26.0 — 2026-10-21
+### Added
+- `.claude/settings.json` → `"sandbox": {"enabled": true}`: shell commands run in Claude Code's sandbox — every `Read` deny becomes an OS-level read block, so a script that opens a denied file by itself fails too. Linux and WSL2 need `bubblewrap` and `socat`; without them Claude Code runs commands unsandboxed and `/sandbox` lists what is missing. A command's first new network host asks for approval.
+
+### Changed
+- `CLAUDE.md` 1756 → 1688 words, same rules: approval and silence in one line · commit and branch in one line · close sequence step 4 removed (create-feature step 8 owns it) · dependency check shortened · one example less in "Do not reimplement" · Quality Gates intro merged with the "only through the script" rule.
+- README → Security and the `protect-secrets` hook name the sandbox as on · Context engineering states the new size.
+
+### Migration from v1.25
+- `--update` never touches your `.claude/settings.json`: add `"sandbox": { "enabled": true }` at its top level · Linux/WSL2: `sudo apt-get install bubblewrap socat` (or your distro's equivalent).
+
+## v1.25.0 — 2026-10-21
+### Added
+- `gates.sh fr`: a failing run appends `- RED: <FR-ID>` to the active change's `tasks.md` — the script writes the evidence, not the agent · once per FR · only when one change is active · inline changes have no change folder: no record.
+- `reviewer`: with TDD ON, an ADDED or MODIFIED FR with no `- RED:` line is a gap · reads `tasks.md` → Progress.
+
+### Changed
+- README → TDD names the record.
+
+### Migration from v1.24
+- None — run `--update`. Open changes started before v1.25 have no `RED:` lines: accept the reviewer's gaps with "go", or rerun `gates.sh fr` on a reverted test.
+
+## v1.24.0 — 2026-10-21
+### Added
+- `gates.conf` → `COMMIT_PATTERN`: extended regex for commit subjects. `gates.sh full` with a base (`$GATES_BASE`, or the PR base in CI) checks every subject since the base — `commits ❌` lists the ones that do not match · Merge and Revert commits skipped · empty or no base: no check.
+- `/adopt` fills `COMMIT_PATTERN` from `.claude/project.md` → Commit message.
+
+### Changed
+- `CLAUDE.md` → Quality Gates and README → Gates, Conventional Commits: name the check.
+
+### Migration from v1.23
+- `--update` never touches your `gates.conf`: add a `COMMIT_PATTERN='…'` line (single quotes, empty = off) — see the template's example.
+
+## v1.23.0 — 2026-10-21
+### Changed
+- `CLAUDE.md` (from `/doctor prompt-audit`): uppercase `NEVER` / `ALWAYS` / `MUST` 41 → 13 — kept only where a violation is costly or hard to undo (approval, close sequence, FR IDs, dependencies, credentials, tests, failing gates), with the reason when it is not obvious · the rest is plain imperative, same meaning.
+- `CLAUDE.md` → Working Protocol: "STRICT — any violation is a protocol breach" becomes the reason the rules hold.
+- `CLAUDE.md` → Change Size: a change to `.md` files only skips the table and is classified `Size: docs`.
+- `.claude/doc-rules.md`: the uppercase convention above — FRs keep RFC 2119 `MUST`.
+- README → English, imperative prompts: names the convention.
+
+### Fixed
+- `CLAUDE.md` → Quality Gates: a docs-only change prints `⏭️` for every gate in `gates.sh scoped` — `full` still runs them.
+
+### Migration from v1.22
+- None — run `--update`. Rules in your `.claude/project.md` → Project Rules may follow the new uppercase convention.
+
+## v1.22.0 — 2026-10-21
+### Changed
+- `gates.sh fr`: fails with `FR <ID>: ❌ <n> tests < <s> scenarios` when the FR has fewer tests than GIVEN lines — read from the active change's delta spec, else from `specs/current/` — so `test: ✅` can no longer hide an untested scenario.
+- README → BDD and the Gates table name the check.
+
+### Migration from v1.21
+- None — run `--update`. An FR already marked `test: ✅` with fewer tests than scenarios now fails `gates.sh fr`.
+
+## v1.21.0 — 2026-10-21
+### Added
+- `.claude/skills/refactor/` — the No Behavior Change rules (refactor · optimize), loaded on demand instead of in every session.
+
+### Changed
+- `CLAUDE.md` 1925 → 1700 words: No Behavior Change moves to the `refactor` skill · removed the full-cycle lines `create-feature` already owns (implementer-only tasks, change folder lifecycle) and the duplicate FR row in Quality Gates.
+- README → Context engineering: states the real `CLAUDE.md` size instead of "short" · skills tree lists `refactor`.
+
+### Fixed
+- `gates.sh`: a `gates.conf` with `[placeholders]` prints `Gates: ❌ .claude/gates.conf not configured — run /adopt or fill its [placeholders]` instead of shell errors.
+
+### Migration from v1.20
+- None — run `--update`.
+
+## v1.20.0 — 2026-10-21
+### Added
+- `gates.conf` → `FORBIDDEN`: an extended regex — an added line that matches fails the lint gate, in scoped and full, so inline changes get it too. Only added lines count: existing code never breaks.
+- `/adopt` fills `FORBIDDEN` from `.claude/project.md` → Forbidden plus the stack's ignore comments.
+
+### Changed
+- `gates.conf` → LINT comment: the linter MUST also block unused exports.
+- README → Clean code: names what enforces it · Multi-agent: the reviewer checks FRs, Hard Rules and Testing Rules.
+
+### Migration from v1.19
+- `--update` never touches your `gates.conf`: add a `FORBIDDEN="…"` line (empty = off) — see the template's example.
+
+## v1.19.0 — 2026-10-21
+### Added
+- `go all` — approves every remaining task as one batch (= `go up to <last task>`).
+- `implementer` Output Contract: `Deviation: <what>` line when the task changed the plan.
+
+### Changed
+- Batch runs back to back: `create-feature` dispatches the next task in the same turn — no message from the human between tasks — and prints `Next` only when the batch ends.
+- Batch also stops on a `Deviation:` line, not only on `blocked` or `maxTurns`.
+- Close sequence step 3: inside a batch, no wait — the human reviews `git diff --staged` once when the batch ends.
+- README → Say table, Low bureaucracy, Human in the loop, Context engineering: per task or batch.
+
+### Migration from v1.18
+- None — run `--update`.
+
 ## v1.18.0 — 2026-10-21
 ### Added
 - `.claude/templates/change/design.md` → `## Research`: the code as it is — `path:line` files, current behavior, gaps — no proposals. The human approves it on its own, before the plan exists.

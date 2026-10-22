@@ -31,7 +31,7 @@ Do not load it for a new, empty project — the human fills the placeholders by 
 1. Ask "Adapt `.claude/project.md`, `docs/architecture.md`, `.claude/gates.conf` and `.claude/settings.json` to this code? yes / no" — stop and wait. Anything but "yes": stop.
 2. Read only manifests and tool config: scripts, dependencies, lint, test and build settings.
 3. Map the code structure: folders, entry points, slices or modules, outbound systems, persistence.
-4. Fill every `[placeholder]` in `.claude/project.md` and `.claude/gates.conf` — every command in `gates.conf` MUST exist in the repo — no formatter in the repo: leave `FORMAT_*` empty, NEVER add one.
+4. Fill every `[placeholder]` in `.claude/project.md` and `.claude/gates.conf` — every command in `gates.conf` MUST exist in the repo — no formatter in the repo: leave `FORMAT_*` empty, NEVER add one — `FORBIDDEN` from `.claude/project.md` → Forbidden plus the stack's ignore comments — `COMMIT_PATTERN` from `.claude/project.md` → Commit message — `TEST_FORBIDDEN` from the test runner and `CLAUDE.md` → Testing Rules.
 5. Fill every `[placeholder]` in `docs/architecture.md`.
 6. Update `deny` in `.claude/settings.json`.
 7. Run `grep -nE '\[[^]]{2,}\]' .claude/project.md docs/architecture.md .claude/gates.conf` — it MUST print nothing — re-read the edited files against `.claude/doc-rules.md`.

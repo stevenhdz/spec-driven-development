@@ -39,6 +39,7 @@ Done:
 RED: <FR-ID> failed before code | TDD OFF | n/a (fix)
 <line printed by gates.sh scoped>
 Staged: <files>
+Deviation: <what> — only when step 6 added one
 ```
 
 Blocked:
