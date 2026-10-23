@@ -27,13 +27,13 @@ The human approves every step, so these rules hold even when a shortcut looks sa
 - NEVER start a new task without explicit approval — per task ("yes" or "go") or as a batch ("go up to ID-00N" · "go all" = up to the last task) — silence is not approval
 - Any reply about an active feature ("go", "yes", "fix: <what>", "go up to ID-00N", "go all") in a new session or after `/clear`: load `.claude/skills/create-feature/SKILL.md` first
 - Commit message and branch name: `.claude/project.md` — commit types `feat | fix | refactor | perf | test | docs | chore` · branch types `feat` full cycle · `refactor` · `perf` — ask for the ticket ID when the format has one
-- Commit once per change, never per task — full cycle: when the feature closes · inline: after its close sequence — propose the message, the human commits
+- Commit each approved task — "go" commits it · inside a batch: each task commits when it passes, the batch approval covers it — full cycle: the description starts with the task ID · inline: on the current branch — NEVER push: the PR squash-merges the branch into one commit
 - Run the task close sequence after every task and every inline change:
   ```
   1. Run Quality Gates
   2. Full cycle only: update the change folder — the implementer does it
-  3. git add <files> — stop and wait — full cycle: the implementer stages and returns, the main session relays and waits — inside a batch: no wait, the human reviews once when the batch ends
-     The human reviews `git diff --staged` and replies "go", or "fix: <what>" (after a batch: "fix: <task-ID> <what>") → fix → back to step 1
+  3. git add <files> — stop and wait — full cycle: the implementer stages and returns, the main session relays and waits — inside a batch: commit and continue, the human reviews the batch's commits when it ends
+     The human reviews `git diff --staged` and replies "go" → commit, or "fix: <what>" (after a batch: "fix: <task-ID> <what>") → fix → back to step 1
   ```
 - If something is unclear: ask ONE specific question — stop and wait
 
@@ -68,7 +68,6 @@ The human approves every step, so these rules hold even when a shortcut looks sa
 - Do not signal an error with a sentinel value (`None`, `-1`, `""`) — raise or return the language's error type, with a message that names the bad input
 - Model states that exclude each other as one tagged union — not separate fields that can contradict each other (e.g. `isLoading` next to `error` and `data`)
 - Do not silence the type checker — no casts, non-null assertions or ignore comments: fix the type — scaffold files exempt
-- UI: native semantic elements first — every control has an accessible name — an ARIA role only with the children its pattern requires
 - Do not add comments to the code you write or change — names and small functions must explain the intent; leave existing comments as they are
 
 ### Dependencies and secrets
@@ -76,10 +75,6 @@ The human approves every step, so these rules hold even when a shortcut looks sa
 - NEVER hardcode a secret — read it from an environment variable and document its name in `.env.example`
 - NEVER read, print or work around a file denied in `.claude/settings.json` — if a task needs a value from one, ask the human
 - NEVER stage a denied file — it would commit a credential — except a lockfile: stage it by path, unread, together with its manifest
-
-### Context
-- Search (grep / glob) before opening a file — read only the line range the task needs
-- Do not read the internal files of a slice the task does not change — only its public API
 
 ### Docs
 - Every `.md` follows `.claude/doc-rules.md` — new docs start from their template
@@ -101,9 +96,8 @@ Run gates only through `bash .claude/scripts/gates.sh`, from the repo root — e
 | Scoped | `bash .claude/scripts/gates.sh scoped <changed files>` | each task close |
 | Full | `bash .claude/scripts/gates.sh full` — adds `frs`: every FR in `specs/current/` has a test and a unique ID · in a PR, `commits`: each subject matches `COMMIT_PATTERN` | feature close · inline change |
 
-- Report the line the script prints exactly as printed — do not paraphrase it.
+- A `git commit` runs `gates.sh scoped` on the files it commits through a hook (`.claude/hooks/gate-commit.sh`) — blocked on ❌.
 - `❌`: stop, quote the lines the script printed, propose options — NEVER continue with a failing gate, NEVER self-fix silently.
-- Status: `✅` pass · `❌ <gate>` fail · `⏭️` skipped · `-` pending
 - Docs-only change (`.md` files): re-read the edited files against `.claude/doc-rules.md` — `gates.sh scoped` prints `⏭️` for every gate.
 
 ## Chat Replies

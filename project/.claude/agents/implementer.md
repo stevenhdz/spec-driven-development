@@ -21,7 +21,7 @@ Follow `CLAUDE.md` → Hard Rules, Testing Rules, Spec Rules and Quality Gates.
 6. Update the change folder: `tasks.md` → task line `[x]` + `gates:` the printed line · delta spec → covered FRs `test: ✅` · `tasks.md` → only if the plan changed: sub-bullet `deviation: <what>` · Progress → `Next step:` the next task ID, or `merge specs` after the last task.
 7. `git add` the changed files, the test files and the change folder — return the Output Contract.
 
-A message that starts with `fix: <what>` and a task ID: read `git diff --staged` for the task's files first, apply only the fix, then steps 5–7.
+A message that starts with `fix: <what>` and a task ID: read that task's commit first (`git log --oneline --grep '<task-ID>'` → `git show <hash>`) and anything staged, apply only the fix, then steps 5–7.
 
 ## Return blocked — stage nothing
 

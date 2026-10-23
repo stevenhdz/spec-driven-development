@@ -6,7 +6,7 @@
 [![SDD · BDD · TDD](https://img.shields.io/badge/SDD_%C2%B7_BDD_%C2%B7_TDD-8A2BE2)](#methodologies)
 [![By stevenhdz](https://img.shields.io/badge/by-stevenhdz-black)](https://github.com/stevenhdz)
 
-A copy-and-fill setup for **Claude Code** on any project. Every change follows: **spec → your approval → tests + code**. Only you commit.
+A copy-and-fill setup for **Claude Code** on any project. Every change follows: **spec → your approval → tests + code**. The agent commits only what you approved — only you push.
 
 ## Why
 AI wrote fast, working code — and also bugs, layers nobody asked for, security holes and technical debt. What worked was taking away its room to improvise: first it writes the spec, I approve it, and only then come tests and code.
@@ -38,10 +38,11 @@ Requires Claude Code v2.1.271+, Git, and lint/build/test commands. Windows: Git 
    grep -nE '\[[^]]{2,}\]' .claude/project.md docs/architecture.md .claude/gates.conf
    ```
 3. Deny secrets and bulky paths (`.env`, `dist/`, lockfiles) in `.claude/settings.json`.
-4. Open Claude Code and describe the change you want.
+4. In GitHub → Settings → General → Pull Requests: allow only squash merging — the agent commits each task, the PR lands as one commit.
+5. Open Claude Code and describe the change you want.
 
 Existing project: install, then run `/adopt` — it fills steps 2 and 3 from your code.
-- It asks once before writing, never touches source code, reports failing gates without fixing them, stages its files and proposes the commit — you commit.
+- It asks once before writing, never touches source code, reports failing gates without fixing them, stages its files and commits them on your `go`.
 - `specs/current/` starts empty: existing behavior has no FR until a change touches it — to cover it, request it as a change.
 
 ## Use it
@@ -49,42 +50,158 @@ Existing project: install, then run `/adopt` — it fills steps 2 and 3 from you
 - **Change folder**: `specs/changes/<feature>/` — the plan for one change: proposal, design, FR deltas, tasks `ID-001…`.
 - **Size**: the agent picks **inline** (at most 1 FR, 1 slice — one feature folder) or **full cycle** (anything bigger).
 
-**Full cycle**
+**Full cycle — plan**
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "-apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans, Helvetica, Arial, sans-serif", "fontSize": "14px", "lineColor": "#667085", "primaryTextColor": "#101828", "clusterBkg": "#FFFFFF", "clusterBorder": "#D0D5DD", "edgeLabelBackground": "#FFFFFF", "titleColor": "#344054"}, "flowchart": {"curve": "basis", "nodeSpacing": 22, "rankSpacing": 34, "padding": 10}}}%%
 flowchart LR
-    RS["Research<br>code as it is"] --> RA{{"You:<br>research ok?"}} -->|yes| S["Change folder<br>FRs · Approach · tasks"] --> A{{"You:<br>approve?"}}
-    A -->|"yes · go all"| W
-    subgraph T [One task — implementer]
-        W["Tests<br>per GIVEN/WHEN/THEN"] --> RED["fr ❌<br>RED recorded"] --> G["Code<br>fr ✅"] --> SC["scoped<br>gates ✅"] --> ST[Stage]
+    Q(["You: request"]):::human
+    SZ{"Size?"}:::auto
+    O["Small change<br>see Other sizes"]:::auto
+    NX["Build and close<br>next diagram"]:::auto
+    Q ==> SZ
+    SZ ==>|big| R
+    SZ -.->|small| O
+    subgraph R ["1 · Research — RPI"]
+        direction TB
+        RS["Read the code as it is<br>facts only, no proposals"]:::research
+        RA(["You: research ok?"]):::human
+        RS ==> RA
     end
-    ST --> D{{"You review<br>staged diff"}}
-    D -->|go| W
-    D -->|"fix: ID what"| G
-    D -->|last task| R["Reviewer<br>vs FRs + rules"] --> M["Merge FRs<br>full gates<br>archive"] --> K{{"You<br>commit"}}
-    R -.->|gaps: fix| G
+    subgraph P ["2 · Plan — SDD + BDD"]
+        direction TB
+        S1["SDD · proposal<br>request · scope · how to verify"]:::sdd
+        S2["BDD · requirements<br>GIVEN / WHEN / THEN"]:::bdd
+        S3["Design"]:::sdd
+        S4["Tasks"]:::sdd
+        A(["You: approve?"]):::human
+        S1 ==> S2 ==> S3 ==> S4 ==> A
+    end
+    R ==>|yes| P
+    P ==>|"yes · go all"| NX
+    classDef research fill:#EAF0FB,stroke:#3B5BA9,stroke-width:1.5px,color:#1E2A44
+    classDef sdd fill:#F3EEFC,stroke:#6B46C1,stroke-width:1.5px,color:#2E1A5E
+    classDef bdd fill:#E6F6F4,stroke:#0F766E,stroke-width:1.5px,color:#0B3B36
+    classDef red fill:#FDECEC,stroke:#B42318,stroke-width:1.5px,color:#5C1010
+    classDef green fill:#E7F6EC,stroke:#15803D,stroke-width:1.5px,color:#0B3D1E
+    classDef auto fill:#F2F4F7,stroke:#475467,stroke-width:1.5px,color:#101828
+    classDef human fill:#FFF4E0,stroke:#B54708,stroke-width:2px,color:#7A2E0E
+    classDef note fill:#FFFFFF,stroke:#B54708,stroke-width:1px,stroke-dasharray:4 3,color:#7A2E0E
 ```
 
-A task that returns `blocked`, a deviation, `RED not recorded` or a failing gate stops and waits for you · inside a batch (`go up to ID-00N` · `go all`) tasks run back to back and you review once at the end.
+**Full cycle — build and close**
+
+```mermaid
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "-apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans, Helvetica, Arial, sans-serif", "fontSize": "14px", "lineColor": "#667085", "primaryTextColor": "#101828", "clusterBkg": "#FFFFFF", "clusterBorder": "#D0D5DD", "edgeLabelBackground": "#FFFFFF", "titleColor": "#344054"}, "flowchart": {"curve": "basis", "nodeSpacing": 22, "rankSpacing": 34, "padding": 10}}}%%
+flowchart TB
+    subgraph I ["3 · Implement — TDD, one task at a time"]
+        direction LR
+        W["RED · write the tests<br>they fail"]:::red
+        G["GREEN · write the code<br>tests pass"]:::green
+        SC["Quality checks"]:::auto
+        ST["Stage"]:::auto
+        D(["You: review<br>the diff"]):::human
+        HK["Checks run again"]:::auto
+        CM["Commit the task"]:::auto
+        W ==> G ==> SC ==> ST ==> D
+        D ==>|go| HK ==> CM
+        D -.->|"fix: ID what"| G
+        CM -.->|next task| W
+        BN["Batch · go all: no stop here<br>review all commits at the end"]:::note
+        D -.- BN
+    end
+    subgraph C ["4 · Close — SDD living spec"]
+        direction LR
+        RV["Review vs<br>requirements"]:::auto
+        M["SDD · update<br>the living spec"]:::sdd
+        FG["All quality<br>checks"]:::auto
+        V["Verify<br>end to end"]:::green
+        AR["Archive<br>the plan"]:::sdd
+        K["Close commit"]:::auto
+        PU(["You: push<br>open PR"]):::human
+        SQ["Squash merge<br>into main"]:::auto
+        RV ==> M ==> FG ==> V ==> AR ==> K ==> PU ==> SQ
+    end
+    I ==>|last task| C
+    I <-.-|"↑ gaps: fix ID"| C
+    classDef research fill:#EAF0FB,stroke:#3B5BA9,stroke-width:1.5px,color:#1E2A44
+    classDef sdd fill:#F3EEFC,stroke:#6B46C1,stroke-width:1.5px,color:#2E1A5E
+    classDef bdd fill:#E6F6F4,stroke:#0F766E,stroke-width:1.5px,color:#0B3B36
+    classDef red fill:#FDECEC,stroke:#B42318,stroke-width:1.5px,color:#5C1010
+    classDef green fill:#E7F6EC,stroke:#15803D,stroke-width:1.5px,color:#0B3D1E
+    classDef auto fill:#F2F4F7,stroke:#475467,stroke-width:1.5px,color:#101828
+    classDef human fill:#FFF4E0,stroke:#B54708,stroke-width:2px,color:#7A2E0E
+    classDef note fill:#FFFFFF,stroke:#B54708,stroke-width:1px,stroke-dasharray:4 3,color:#7A2E0E
+    linkStyle 6,7,17 stroke:#B54708,stroke-width:1.5px,stroke-dasharray:6 4
+    linkStyle 8 stroke:#B54708,stroke-width:1px,stroke-dasharray:2 3
+```
+
+Colors: blue research · purple SDD · teal BDD · red → green TDD · gray automation · orange capsule = you decide · solid line = main path · dashed orange = goes back (fix, next task, gaps, next step).
+
+Terms: requirement = FR · living spec = `specs/current/` · plan = the change folder · quality checks = `gates.sh` (lint, build, tests) · checks run again = the commit hook.
+
+| | What it means here |
+|---|---|
+| **RPI** | Research → Plan → Implement — you approve between each: `research ok?`, then `approve?`, then every task |
+| **SDD** | The spec comes first and stays the source of truth — the change folder holds the deltas, the close merges them into `specs/current/` |
+| **BDD** | Every FR is `The system MUST …` with GIVEN/WHEN/THEN scenarios — one test per scenario |
+| **TDD** | Each test fails first (RED, recorded by `gates.sh fr`), then the code makes it pass (GREEN) |
+
+A task that returns `blocked`, a deviation, `RED not recorded` or a failing gate stops and waits for you · inside a batch (`go up to ID-00N` · `go all`) tasks run back to back, each one committed, and you review the batch's commits at the end.
 
 1. You: `add discount codes at checkout`.
 2. Agent: explores the code, writes `design.md` → Research — files with `path:line`, current behavior, gaps — and replies `research ok?`.
 3. You: did it understand the code? → `yes`, or say what it got wrong.
 4. Agent: writes the rest of the change folder, replies with its path and `approve?`.
-5. You: read `proposal.md`, `design.md` → Approach, `specs/*/spec.md` and `tasks.md` → `yes`, or say what to change.
+5. You: read `proposal.md` (with its Verify check), `design.md` → Approach, `specs/*/spec.md` and `tasks.md` → `yes`, or say what to change.
 6. Agent: runs one task — failing test, code, gates — stages it and stops: `[ID-001 done] … Next: ID-002 — /clear → go`.
-7. You: review `git diff --staged` → `/clear` → `go` approves it and runs the next task · `fix: <what>` redoes it.
-8. After the last task: the agent checks the diff against the FRs, merges them into `specs/current/`, archives the folder and proposes a commit message — you commit.
+7. You: review `git diff --staged` → `/clear` → `go` commits it and runs the next task · `fix: <what>` redoes it.
+8. After the last task: the agent checks the branch against the FRs, merges them into `specs/current/`, runs the proposal's Verify check, archives the folder, commits the close and replies with the PR text — you push and open the PR.
 
 **Inline**: the agent edits the FR in `specs/current/`, writes the test, then the code, and stages all three — steps 7–8 without the archive.
 
 **Other sizes**
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "-apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans, Helvetica, Arial, sans-serif", "fontSize": "14px", "lineColor": "#667085", "primaryTextColor": "#101828", "clusterBkg": "#FFFFFF", "clusterBorder": "#D0D5DD", "edgeLabelBackground": "#FFFFFF", "titleColor": "#344054"}, "flowchart": {"curve": "basis", "nodeSpacing": 22, "rankSpacing": 34, "padding": 10}}}%%
 flowchart LR
-    C{Size} -->|inline| E["FR in<br>specs/current"] --> I["Test RED<br>→ code GREEN"] --> F["full<br>gates"] --> K{{"You<br>commit"}}
-    C -->|"refactor · optimize"| RF["Plan → steps<br>tests untouched"] --> F
-    C -->|docs| DO["Re-read vs<br>doc-rules"] --> K
+    SZ{"Size?"}:::auto
+    subgraph IN ["Inline · 1 requirement · 1 slice — SDD + BDD + TDD"]
+        direction LR
+        E["Requirement in the living spec<br>GIVEN / WHEN / THEN"]:::bdd
+        TR["RED · test fails"]:::red
+        TG["GREEN · code passes"]:::green
+        F["All quality checks"]:::auto
+        FS["Stage"]:::auto
+        E ==> TR ==> TG ==> F ==> FS
+    end
+    subgraph RF ["Refactor · optimize — behavior unchanged"]
+        direction LR
+        RP(["You: approve plan"]):::human
+        RS["One step<br>tests untouched"]:::auto
+        RC["Quality checks"]:::auto
+        RK["Commit the step"]:::auto
+        RP ==> RS ==> RC ==> RK
+        RK -.->|next step| RS
+    end
+    subgraph DC ["Docs only"]
+        DO["Re-read against<br>the doc rules"]:::sdd
+    end
+    SZ ==> IN & RF & DC
+    IN ==> G(["You: go"]):::human
+    RF ==>|"last step · all checks"| G
+    DC ==> G
+    G ==> HK["Checks run again"]:::auto
+    HK ==> K["Commit"]:::auto
+    classDef research fill:#EAF0FB,stroke:#3B5BA9,stroke-width:1.5px,color:#1E2A44
+    classDef sdd fill:#F3EEFC,stroke:#6B46C1,stroke-width:1.5px,color:#2E1A5E
+    classDef bdd fill:#E6F6F4,stroke:#0F766E,stroke-width:1.5px,color:#0B3B36
+    classDef red fill:#FDECEC,stroke:#B42318,stroke-width:1.5px,color:#5C1010
+    classDef green fill:#E7F6EC,stroke:#15803D,stroke-width:1.5px,color:#0B3D1E
+    classDef auto fill:#F2F4F7,stroke:#475467,stroke-width:1.5px,color:#101828
+    classDef human fill:#FFF4E0,stroke:#B54708,stroke-width:2px,color:#7A2E0E
+    classDef note fill:#FFFFFF,stroke:#B54708,stroke-width:1px,stroke-dasharray:4 3,color:#7A2E0E
+    linkStyle 7 stroke:#B54708,stroke-width:1.5px,stroke-dasharray:6 4
 ```
 
 | Say | Effect |
@@ -92,7 +209,7 @@ flowchart LR
 | `<request>` | Starts a change — the agent picks inline or full cycle |
 | `<request>, inline` · `<request>, as a feature` | Force the size |
 | `yes` | Approve the Research, then the change folder |
-| `go` | Approve the staged task and run the next one — also resumes the active feature after `/clear` |
+| `go` | Approve the staged task — the agent commits it and runs the next one — also resumes the active feature after `/clear` |
 | `go up to ID-003` · `go all` | One approval for every task up to ID-003 or the last one — runs them back to back, stops on `blocked` or a deviation from the plan — you review the staged diff once at the end |
 | `fix: <what>` · `fix: ID-002 <what>` | Redo the staged task — after a batch, name the task |
 | `refactor: <what>` · `optimize: <what>` | Change code without changing behavior — tests untouched |
@@ -118,7 +235,7 @@ No gates: `- Gates: OFF` in the change's `proposal.md` → Scope, next to `TDD` 
 | Owner | Paths | `--update` |
 |-------|-------|------------|
 | You | `.claude/project.md` · `.claude/gates.conf` · `.claude/settings.json` · `docs/` · `specs/` | never touches them |
-| Framework | `CLAUDE.md` · `.claude/agents/` · `.claude/skills/` · `.claude/scripts/` · `.claude/hooks/` · `.claude/templates/` · `.claude/doc-rules.md` | overwrites them — list: [`sdd-core`](sdd-core) |
+| Framework | `CLAUDE.md` · `.claude/agents/` · `.claude/skills/` · `.claude/scripts/` · `.claude/hooks/` · `.claude/rules/ui.md` · `.claude/templates/` · `.claude/doc-rules.md` | overwrites them — list: [`sdd-core`](sdd-core) |
 
 Project rules go in `.claude/project.md` → Project Rules — a framework file you edit is overwritten on the next update.
 
@@ -129,18 +246,20 @@ CLAUDE.md                       Framework · rules every change follows — load
 .claude/
   project.md                    You       · product, stack, folder pattern, conventions, Project Rules
   gates.conf                    You       · format · lint · build · test · audit commands for gates.sh
-  settings.json                 You       · permissions (secrets denied, no git commit/push) and the secrets hook
+  settings.json                 You       · permissions (secrets denied, no git push), the sandbox and the hooks
   doc-rules.md                  Framework · how every .md is written
   agents/
     explore.md                  Framework · read-only code map (Haiku)
     implementer.md              Framework · runs one approved task: test RED → code GREEN → gates (Sonnet)
-    reviewer.md                 Framework · checks the staged diff against the FRs (Opus)
+    reviewer.md                 Framework · checks the branch diff since Base against the FRs (Opus)
   skills/
     create-feature/SKILL.md     Framework · the full cycle: change folder → tasks → review → archive
     adopt/SKILL.md              Framework · /adopt — fills the setup from an existing project's code
     refactor/SKILL.md           Framework · refactor: · optimize: — no behavior change, tests untouched
   scripts/gates.sh              Framework · quality gates: scoped · full · fr
   hooks/protect-secrets.sh      Framework · blocks shell commands that name a secret
+  hooks/gate-commit.sh          Framework · blocks a git commit whose files fail scoped gates
+  rules/ui.md                   Framework · UI rules, loaded only for UI files
   templates/                    Framework · copied by the agent, never edited in place
     spec.md                     living spec of one capability
     adr.md                      one project-wide decision
@@ -180,10 +299,10 @@ Run `bash .claude/scripts/gates.sh full --no-format` on every PR. In a GitHub PR
 | **English, imperative prompts** | Every `.md` follows `.claude/doc-rules.md`: English, imperative, one idea per line · uppercase `MUST` / `NEVER` / `ALWAYS` only for rules whose violation is costly, with the reason — plain imperative for the rest, no "should" or "try to" · each rule lives in one place · a line that changes nothing gets cut · every skill follows `.claude/templates/skill.md` |
 | **Refactoring** (Fowler) | Green tests first · one move per step · gates after each step · tests untouched |
 | **Measured optimization** | Baseline first · one change per step · keep a step only if the metric improves |
-| **Human in the loop** | You approve the change folder and each task or batch, review the staged diff once per task or batch — a batch stops on a deviation from the plan — and commit — the agent cannot run `git commit` or `git push` · research → approve → plan → approve → code: no code before approval |
-| **Quality gates** | `gates.sh` runs format → lint → build → tests → frs → audit, stops at the first failure and prints one line the agent copies as is — same command in CI |
+| **Human in the loop** | You approve the change folder and each task or batch, review the staged diff once per task or the commits once per batch — a batch stops on a deviation from the plan — your `go` commits the task — the agent cannot run `git push` · research → approve → plan → approve → code: no code before approval |
+| **Quality gates** | `gates.sh` runs format → lint → build → tests → frs → audit, stops at the first failure and prints one line the agent copies as is — a `PreToolUse` hook runs them on every `git commit` and blocks it on ❌ — same command in CI |
 | **Multi-agent** | `implementer` (Sonnet) runs one task — a fix that fails 3 times returns to you · `reviewer` (Opus) checks the diff in a fresh context — gaps against FRs, Hard Rules and Testing Rules only, never naming or preferences · `Explore` maps code on Haiku · every agent has a turn cap (`maxTurns`) — a run that hits it stops like a blocked task |
-| **Context engineering** | `/clear` per task or batch, state lives in the change folder · skills load on demand · search before reading · `CLAUDE.md` ≈ 1690 words, only rules every session needs — refactor and full-cycle rules load as skills · `Explore` runs without it · secrets and bulky files denied |
+| **Context engineering** | `/clear` per task or batch, state lives in the change folder · skills load on demand · `CLAUDE.md` ≈ 1643 words, only rules every session needs — refactor and full-cycle rules load as skills, UI rules only for UI files · `Explore` runs without it · secrets and bulky files denied |
 | **Security** | No hardcoded secrets — env vars documented in `.env.example` · secrets denied in `.claude/settings.json` · a `PreToolUse` hook blocks any shell command that names a secret (`python -c "open('.env')"`, `cp`, `base64`…) — the [sandbox](https://code.claude.com/docs/en/sandboxing) is on, so a script that opens one by itself is blocked too: every `Read` deny becomes an OS-level read block for shell commands (Linux and WSL2 need `bubblewrap` and `socat` — without them, `/sandbox` shows what is missing and commands run unsandboxed) · a new dependency is checked in its registry (exists, age, downloads, repo, look-alike name) and needs your approval · `audit` gate for known vulnerabilities when a manifest changes, locally and in CI |
 | **Measure** | `/usage` and `/context` for tokens · `/doctor prompt-audit` after editing rules, skills or agents |
-| **Conventional Commits** | One commit and one branch per change, typed `feat` · `refactor` · `perf` — the agent proposes the message from `.claude/project.md`, `gates.sh full` checks every subject in a PR against `COMMIT_PATTERN` |
+| **Conventional Commits** | One branch per change, one commit per approved task, squash-merged into one commit on main — typed `feat` · `refactor` · `perf`, message from `.claude/project.md`, `gates.sh full` checks every subject in a PR against `COMMIT_PATTERN` |

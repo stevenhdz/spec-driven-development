@@ -21,13 +21,13 @@ Do not load it for styling, docs or chore changes, or when the change needs an F
 |-----------|--------|
 | Covering tests missing or failing | Propose adding them as an inline change first — wait |
 | Step needs a behavior change | Stop — route it through Change Size |
-| A test fails or the metric does not improve | Revert the step — NEVER fix the test — report it |
+| A test fails or the metric does not improve | Revert to the last step's commit — NEVER fix the test — report it |
 
 ## Execution Steps
 
 1. Confirm the covering tests pass · optimize: agree the metric and its measure command, record the baseline before any code.
 2. Propose the plan — goal, scope IN/OUT, numbered steps · optimize: metric and baseline — stop and wait — approval covers every step.
-3. One step at a time → scoped Quality Gates · optimize: measure after each step.
+3. One step at a time → scoped Quality Gates · optimize: measure after each step — commit each passing step, so a failing later step reverts to the last commit.
 4. Close with the close sequence and Quality Gates in Full mode — branch and commit type `refactor` · `perf`.
 
 ## Output Contract
@@ -35,5 +35,5 @@ Do not load it for styling, docs or chore changes, or when the change needs an F
 ```
 Refactor done — <goal> | Optimize done — <metric>: <before> → <after>
 <line printed by gates.sh full>
-Commit message: <per Working Protocol, type refactor | perf>
+Commits: <N> — one per step, type refactor | perf
 ```
