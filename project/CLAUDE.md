@@ -33,7 +33,7 @@ The human approves every step, so these rules hold even when a shortcut looks sa
   1. Run Quality Gates
   2. Full cycle only: update the change folder — the implementer does it
   3. git add <files> — stop and wait — full cycle: the implementer stages and returns, the main session relays and waits — inside a batch: no wait, the human reviews once when the batch ends
-     The human reviews `git diff --staged` and replies "go", or "fix: <what>" → fix → back to step 1
+     The human reviews `git diff --staged` and replies "go", or "fix: <what>" (after a batch: "fix: <task-ID> <what>") → fix → back to step 1
   ```
 - If something is unclear: ask ONE specific question — stop and wait
 
