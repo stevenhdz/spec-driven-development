@@ -1,5 +1,30 @@
 # Changelog
 
+## v1.29.0 — 2026-10-22
+Aligned with Anthropic's [Claude Code best practices](https://code.claude.com/docs/en/best-practices): commit after verified work, hooks for rules with zero exceptions, a short `CLAUDE.md`, specs that end with an end-to-end check.
+
+### Added
+- Commit per task: the human's `go` commits the staged task — inline changes commit on the current branch — inside a batch each task commits when it passes · the description starts with the task ID · `git push` stays denied — the PR squash-merges the branch into one commit · a failing later task reverts to the last task's commit.
+- `tasks.md` → Progress → `Base:` — the commit the branch started from, written when create-feature creates the branch · the reviewer reads `git diff <Base>...HEAD` · the implementer reads a task's commit for `fix: <task-ID> <what>`.
+- `.claude/hooks/gate-commit.sh`: a `PreToolUse` hook — a `git commit` runs `gates.sh scoped --no-format` on the files it commits (staged, plus tracked changes with `-a`; `.claude/` and `.md` skipped) and is blocked on ❌ · it finds the commit wrapped in `sh -c`, quotes or `$( )`, after env vars or `xargs`, with `-C` / `-c` — a false match only runs the gates · the PR's `gates.sh full` stays the backstop.
+- `gates.sh scoped --no-format`: checks files as staged — the hook uses it.
+- `proposal.md` → `## Verify`: one end-to-end check — a command, a request or steps in the running app — confirmed in create-feature step 2, run after full gates at the close (a command: quoted output · human steps: `verified?`) · the reviewer reports it empty.
+- `.claude/rules/ui.md`: the UI rule, loaded only for `*.tsx · *.jsx · *.vue · *.svelte · *.astro · *.html`.
+- `refactor`: commits each passing step.
+- README → Setup: allow only squash merging in GitHub.
+
+### Changed
+- `CLAUDE.md` 1689 → 1643 words: Working Protocol commits per task · removed "search before reading" and "do not read other slices' internals" (default behavior, Explore and the public-API rule cover them), the status legend and "report the line as printed" (Output Contracts require it) · the UI rule moved to `.claude/rules/ui.md` · Quality Gates names the commit hook.
+- create-feature step 11: commits the close (`chore: close <feature>`) and replies with the PR title and body — the human pushes.
+- `/adopt` commits its files on `go`.
+- README: the flow as three diagrams in plain words — Full cycle · plan (request → size → 1 Research, RPI → 2 Plan, SDD + BDD) · Full cycle · build and close (3 Implement, TDD, with the batch note and the fix / next-task loops → 4 Close, SDD living spec, with the gaps loop) · Other sizes (inline, refactor, docs) — one step per box, your decisions as orange capsules, loops dashed, a legend for colors and terms, and a table that says what RPI, SDD, BDD and TDD mean here · Files, Methodologies.
+
+### Migration from v1.28
+- `--update` never touches your `.claude/settings.json`: remove `"Bash(git commit *)"` from `deny` and add the hook next to `protect-secrets.sh` in `hooks.PreToolUse`:
+  `{ "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/gate-commit.sh\"" }`
+- An active change folder: add `- Base: <commit the branch started from>` to its `tasks.md` → Progress and a `## Verify` to its `proposal.md`.
+- GitHub: allow only squash merging.
+
 ## v1.28.0 — 2026-10-22
 ### Added
 - `gates.conf` → `FORBIDDEN_EXCLUDE`: extended regex for paths `FORBIDDEN` skips — scaffold and tool config that need a forbidden form (e.g. `export default` in `vite.config.ts`) · `/adopt` fills it.
