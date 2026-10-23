@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.29.1 — 2026-10-22
+### Fixed
+- `create-feature` step 7 named the branch format at `CLAUDE.md` → Working Protocol → Branch name, an anchor gone since v1.26 — it now points at `.claude/project.md` → Branch name.
+
+### Changed
+- `explore` agent: `tools: Read, Grep, Glob` — read-only by its tools, not only by its prompt (it used no Bash in 6 live runs) · dropped "NEVER paste file contents", which its Output Contract already covers (no pasted code in live runs without it).
+
 ## v1.29.0 — 2026-10-22
 Aligned with Anthropic's [Claude Code best practices](https://code.claude.com/docs/en/best-practices): commit after verified work, hooks for rules with zero exceptions, a short `CLAUDE.md`, specs that end with an end-to-end check.
 
