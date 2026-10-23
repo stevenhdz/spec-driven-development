@@ -57,16 +57,16 @@ Existing project: install, then run `/adopt` — it fills steps 2 and 3 from you
 flowchart LR
     Q(["You: request"]):::human
     SZ{"Size?"}:::auto
-    O["Small change<br>see Other sizes"]:::auto
-    NX["Build and close<br>next diagram"]:::auto
+    O(["B ▸ continues in<br>Other sizes"]):::conn
     Q ==> SZ
-    SZ ==>|big| R
-    SZ -.->|small| O
+    SZ ==>|"2+ FRs · new slice · dependency<br>or you added: as a feature"| R
+    SZ -.->|"1 FR · 1 slice · no behavior change<br>or you added: inline"| O
     subgraph R ["1 · Research — RPI"]
         direction TB
         RS["Read the code as it is<br>facts only, no proposals"]:::research
         RA(["You: research ok?"]):::human
         RS ==> RA
+        RA -.->|"no: what is wrong"| RS
     end
     subgraph P ["2 · Plan — SDD + BDD"]
         direction TB
@@ -76,7 +76,9 @@ flowchart LR
         S4["Tasks"]:::sdd
         A(["You: approve?"]):::human
         S1 ==> S2 ==> S3 ==> S4 ==> A
+        A -.->|"change: what"| S1
     end
+    NX(["A ▸ continues in<br>Build and close"]):::conn
     R ==>|yes| P
     P ==>|"yes · go all"| NX
     classDef research fill:#EAF0FB,stroke:#3B5BA9,stroke-width:1.5px,color:#1E2A44
@@ -87,6 +89,8 @@ flowchart LR
     classDef auto fill:#F2F4F7,stroke:#475467,stroke-width:1.5px,color:#101828
     classDef human fill:#FFF4E0,stroke:#B54708,stroke-width:2px,color:#7A2E0E
     classDef note fill:#FFFFFF,stroke:#B54708,stroke-width:1px,stroke-dasharray:4 3,color:#7A2E0E
+    classDef conn fill:#344054,stroke:#344054,stroke-width:1.5px,color:#FFFFFF
+    linkStyle 2,4,9 stroke:#B54708,stroke-width:1.5px,stroke-dasharray:6 4
 ```
 
 **Full cycle — build and close**
@@ -94,6 +98,7 @@ flowchart LR
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"fontFamily": "-apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans, Helvetica, Arial, sans-serif", "fontSize": "14px", "lineColor": "#667085", "primaryTextColor": "#101828", "clusterBkg": "#FFFFFF", "clusterBorder": "#D0D5DD", "edgeLabelBackground": "#FFFFFF", "titleColor": "#344054"}, "flowchart": {"curve": "basis", "nodeSpacing": 22, "rankSpacing": 34, "padding": 10}}}%%
 flowchart TB
+    FA(["A ▸ from the plan<br>you approved it"]):::conn
     subgraph I ["3 · Implement — TDD, one task at a time"]
         direction LR
         W["RED · write the tests<br>they fail"]:::red
@@ -103,11 +108,14 @@ flowchart TB
         D(["You: review<br>the diff"]):::human
         HK["Checks run again"]:::auto
         CM["Commit the task"]:::auto
+        BL(["You decide<br>options"]):::human
+        BN["Batch · go all: no stop here<br>review all commits at the end"]:::note
         W ==> G ==> SC ==> ST ==> D
         D ==>|go| HK ==> CM
         D -.->|"fix: ID what"| G
         CM -.->|next task| W
-        BN["Batch · go all: no stop here<br>review all commits at the end"]:::note
+        HK -.->|"checks fail: fix, stage, retry"| G
+        SC -.->|"checks fail · 3 failed fixes · scope grows<br>deviation · a decision is yours"| BL
         D -.- BN
     end
     subgraph C ["4 · Close — SDD living spec"]
@@ -120,8 +128,11 @@ flowchart TB
         K["Close commit"]:::auto
         PU(["You: push<br>open PR"]):::human
         SQ["Squash merge<br>into main"]:::auto
+        VF(["You decide<br>options"]):::human
         RV ==> M ==> FG ==> V ==> AR ==> K ==> PU ==> SQ
+        V -.->|fails| VF
     end
+    FA ==> I
     I ==>|last task| C
     I <-.-|"↑ gaps: fix ID"| C
     classDef research fill:#EAF0FB,stroke:#3B5BA9,stroke-width:1.5px,color:#1E2A44
@@ -132,11 +143,12 @@ flowchart TB
     classDef auto fill:#F2F4F7,stroke:#475467,stroke-width:1.5px,color:#101828
     classDef human fill:#FFF4E0,stroke:#B54708,stroke-width:2px,color:#7A2E0E
     classDef note fill:#FFFFFF,stroke:#B54708,stroke-width:1px,stroke-dasharray:4 3,color:#7A2E0E
-    linkStyle 6,7,17 stroke:#B54708,stroke-width:1.5px,stroke-dasharray:6 4
-    linkStyle 8 stroke:#B54708,stroke-width:1px,stroke-dasharray:2 3
+    classDef conn fill:#344054,stroke:#344054,stroke-width:1.5px,color:#FFFFFF
+    linkStyle 6,7,8,9,18,21 stroke:#B54708,stroke-width:1.5px,stroke-dasharray:6 4
+    linkStyle 10 stroke:#B54708,stroke-width:1px,stroke-dasharray:2 3
 ```
 
-Colors: blue research · purple SDD · teal BDD · red → green TDD · gray automation · orange capsule = you decide · solid line = main path · dashed orange = goes back (fix, next task, gaps, next step).
+Colors: blue research · purple SDD · teal BDD · red → green TDD · gray automation · orange capsule = you decide · dark capsule A / B = the flow continues in the diagram that starts with the same letter · solid line = main path · dashed orange = goes back (fix, next task, gaps, next step).
 
 Terms: requirement = FR · living spec = `specs/current/` · plan = the change folder · quality checks = `gates.sh` (lint, build, tests) · checks run again = the commit hook.
 
@@ -164,9 +176,11 @@ A task that returns `blocked`, a deviation, `RED not recorded` or a failing gate
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"fontFamily": "-apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans, Helvetica, Arial, sans-serif", "fontSize": "14px", "lineColor": "#667085", "primaryTextColor": "#101828", "clusterBkg": "#FFFFFF", "clusterBorder": "#D0D5DD", "edgeLabelBackground": "#FFFFFF", "titleColor": "#344054"}, "flowchart": {"curve": "basis", "nodeSpacing": 22, "rankSpacing": 34, "padding": 10}}}%%
-flowchart LR
-    SZ{"Size?"}:::auto
-    subgraph IN ["Inline · 1 requirement · 1 slice — SDD + BDD + TDD"]
+flowchart TB
+    FB(["B ▸ from the plan<br>Size? said small"]):::conn
+    SZ{"Which small change?"}:::auto
+    FB ==> SZ
+    subgraph IN ["Inline · 1 requirement · 1 slice — SDD + BDD + TDD · grows past it: full cycle"]
         direction LR
         E["Requirement in the living spec<br>GIVEN / WHEN / THEN"]:::bdd
         TR["RED · test fails"]:::red
@@ -177,17 +191,23 @@ flowchart LR
     end
     subgraph RF ["Refactor · optimize — behavior unchanged"]
         direction LR
-        RP(["You: approve plan"]):::human
+        RT{"Covering tests<br>pass?"}:::auto
+        RP(["You: approve plan<br>optimize: + metric"]):::human
         RS["One step<br>tests untouched"]:::auto
-        RC["Quality checks"]:::auto
+        RC["Quality checks<br>optimize: measure"]:::auto
         RK["Commit the step"]:::auto
-        RP ==> RS ==> RC ==> RK
+        RB["Revert to the last<br>step's commit · report"]:::auto
+        RT ==>|yes| RP ==> RS ==> RC ==> RK
         RK -.->|next step| RS
+        RC -.->|"test fails or<br>metric not better"| RB
     end
     subgraph DC ["Docs only"]
         DO["Re-read against<br>the doc rules"]:::sdd
     end
-    SZ ==> IN & RF & DC
+    SZ ==>|"1 FR · 1 slice<br>or you added: inline"| IN
+    SZ ==>|"no behavior change"| RF
+    SZ ==>|"only .md files"| DC
+    RT -.->|"no: add them first<br>as an inline change"| IN
     IN ==> G(["You: go"]):::human
     RF ==>|"last step · all checks"| G
     DC ==> G
@@ -201,7 +221,8 @@ flowchart LR
     classDef auto fill:#F2F4F7,stroke:#475467,stroke-width:1.5px,color:#101828
     classDef human fill:#FFF4E0,stroke:#B54708,stroke-width:2px,color:#7A2E0E
     classDef note fill:#FFFFFF,stroke:#B54708,stroke-width:1px,stroke-dasharray:4 3,color:#7A2E0E
-    linkStyle 7 stroke:#B54708,stroke-width:1.5px,stroke-dasharray:6 4
+    classDef conn fill:#344054,stroke:#344054,stroke-width:1.5px,color:#FFFFFF
+    linkStyle 9,10,14 stroke:#B54708,stroke-width:1.5px,stroke-dasharray:6 4
 ```
 
 | Say | Effect |
