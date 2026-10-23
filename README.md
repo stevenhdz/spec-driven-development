@@ -235,7 +235,7 @@ No gates: `- Gates: OFF` in the change's `proposal.md` → Scope, next to `TDD` 
 | Owner | Paths | `--update` |
 |-------|-------|------------|
 | You | `.claude/project.md` · `.claude/gates.conf` · `.claude/settings.json` · `docs/` · `specs/` | never touches them |
-| Framework | `CLAUDE.md` · `.claude/agents/` · `.claude/skills/` · `.claude/scripts/` · `.claude/hooks/` · `.claude/rules/ui.md` · `.claude/templates/` · `.claude/doc-rules.md` | overwrites them — list: [`sdd-core`](sdd-core) |
+| Framework | `CLAUDE.md` · `.claude/agents/` · `.claude/skills/` · `.claude/scripts/` · `.claude/hooks/` · `.claude/rules/` (framework files) · `.claude/templates/` · `.claude/doc-rules.md` | overwrites them — list: [`sdd-core`](sdd-core) |
 
 Project rules go in `.claude/project.md` → Project Rules — a framework file you edit is overwritten on the next update.
 
@@ -259,7 +259,11 @@ CLAUDE.md                       Framework · rules every change follows — load
   scripts/gates.sh              Framework · quality gates: scoped · full · fr
   hooks/protect-secrets.sh      Framework · blocks shell commands that name a secret
   hooks/gate-commit.sh          Framework · blocks a git commit whose files fail scoped gates
-  rules/ui.md                   Framework · UI rules, loaded only for UI files
+  rules/                        Framework · rules loaded only for the files their paths: match
+    architecture.md             slices, layers, external data — source files
+    code.md                     KISS, no pass-throughs, errors, types, no comments — source files
+    testing.md                  behavior tests, mocks, TDD — test files
+    ui.md                       semantic, accessible UI — UI files
   templates/                    Framework · copied by the agent, never edited in place
     spec.md                     living spec of one capability
     adr.md                      one project-wide decision
@@ -290,10 +294,10 @@ Run `bash .claude/scripts/gates.sh full --no-format` on every PR. In a GitHub PR
 | **BDD** (Gherkin style) | Each FR is `The system MUST …` (RFC 2119) with inline Gherkin `GIVEN / WHEN / THEN` — one line, no `.feature` file or Cucumber — every scenario becomes a test, and `gates.sh fr` fails with fewer tests than scenarios |
 | **TDD** | Test fails first (RED), proven by `gates.sh fr` — which records `- RED: <FR-ID>` in the change's `tasks.md`, and the reviewer reports an FR without it · ON/OFF per feature, always ON inline |
 | **Traceability** | FR → task (`covers`) → test name starting with the FR ID · `frs` gate fails if an FR has no test or a duplicate ID |
-| **Vertical Slice Architecture** | One folder per feature · entry layer without business rules · logic layer independent of the transport · imports only through the public API |
+| **Vertical Slice Architecture** | `.claude/rules/architecture.md` · one folder per feature · entry layer without business rules · logic layer independent of the transport · imports only through the public API |
 | **ADRs** | Project-wide decisions in `docs/decisions/` and `docs/architecture.md` |
-| **Clean code** | KISS · YAGNI · no pass-throughs · export only what is imported · exclusive states as one tagged union · no type casts · semantic, accessible UI — enforced by the lint gate (debt rules, unused exports, a `FORBIDDEN` regex on every added line, inline changes too, scaffold paths skipped through `FORBIDDEN_EXCLUDE`) and the reviewer (every Hard Rule) |
-| **Testing practices** | Test behavior, not implementation · query like a user (Testing Library) · mock only boundaries (classic TDD) · Arrange / Act / Assert · one test per THEN variant — enforced by the lint gate (`TEST_FORBIDDEN` regex on every added test line, inline changes too, and the stack's test lint plugin) and the reviewer (every Testing Rule) |
+| **Clean code** | KISS · YAGNI · no pass-throughs · export only what is imported · exclusive states as one tagged union · no type casts · semantic, accessible UI — enforced by the lint gate (debt rules, unused exports, a `FORBIDDEN` regex on every added line, inline changes too, scaffold paths skipped through `FORBIDDEN_EXCLUDE`) and the reviewer (every rule in `.claude/rules/code.md`) |
+| **Testing practices** | Test behavior, not implementation · query like a user (Testing Library) · mock only boundaries (classic TDD) · Arrange / Act / Assert · one test per THEN variant — enforced by the lint gate (`TEST_FORBIDDEN` regex on every added test line, inline changes too, and the stack's test lint plugin) and the reviewer (every rule in `.claude/rules/testing.md`) |
 | **Low bureaucracy** | Inline changes (1 FR, 1 slice) skip the change folder and the approval round · one approval per plan or batch (`go up to ID-00N` · `go all`) · ONE question at a time · `/adopt` needs one confirmation |
 | **Low verbosity** | Short replies by default, `explain` for depth · skills reply with a fixed Output Contract and nothing around it · gates print one line, failing lines only · FRs, change folders and questions are never shortened |
 | **English, imperative prompts** | Every `.md` follows `.claude/doc-rules.md`: English, imperative, one idea per line · uppercase `MUST` / `NEVER` / `ALWAYS` only for rules whose violation is costly, with the reason — plain imperative for the rest, no "should" or "try to" · each rule lives in one place · a line that changes nothing gets cut · every skill follows `.claude/templates/skill.md` |
@@ -301,8 +305,8 @@ Run `bash .claude/scripts/gates.sh full --no-format` on every PR. In a GitHub PR
 | **Measured optimization** | Baseline first · one change per step · keep a step only if the metric improves |
 | **Human in the loop** | You approve the change folder and each task or batch, review the staged diff once per task or the commits once per batch — a batch stops on a deviation from the plan — your `go` commits the task — the agent cannot run `git push` · research → approve → plan → approve → code: no code before approval |
 | **Quality gates** | `gates.sh` runs format → lint → build → tests → frs → audit, stops at the first failure and prints one line the agent copies as is — a `PreToolUse` hook runs them on every `git commit` and blocks it on ❌ — same command in CI |
-| **Multi-agent** | `implementer` (Sonnet) runs one task — a fix that fails 3 times returns to you · `reviewer` (Opus) checks the diff in a fresh context — gaps against FRs, Hard Rules and Testing Rules only, never naming or preferences · `Explore` maps code on Haiku · every agent has a turn cap (`maxTurns`) — a run that hits it stops like a blocked task |
-| **Context engineering** | `/clear` per task or batch, state lives in the change folder · skills load on demand · `CLAUDE.md` ≈ 1643 words, only rules every session needs — refactor and full-cycle rules load as skills, UI rules only for UI files · `Explore` runs without it · secrets and bulky files denied |
+| **Multi-agent** | `implementer` (Sonnet) runs one task — a fix that fails 3 times returns to you · `reviewer` (Opus) checks the diff in a fresh context — gaps against FRs, Hard Rules and the `.claude/rules/` files only, never naming or preferences · `Explore` maps code on Haiku · every agent has a turn cap (`maxTurns`) — a run that hits it stops like a blocked task |
+| **Context engineering** | `/clear` per task or batch, state lives in the change folder · skills load on demand · `CLAUDE.md` ≈ 1198 words, only rules every session needs — refactor and full-cycle rules load as skills; architecture, code, testing and UI rules load only for the files they cover · `Explore` runs without it · secrets and bulky files denied |
 | **Security** | No hardcoded secrets — env vars documented in `.env.example` · secrets denied in `.claude/settings.json` · a `PreToolUse` hook blocks any shell command that names a secret (`python -c "open('.env')"`, `cp`, `base64`…) — the [sandbox](https://code.claude.com/docs/en/sandboxing) is on, so a script that opens one by itself is blocked too: every `Read` deny becomes an OS-level read block for shell commands (Linux and WSL2 need `bubblewrap` and `socat` — without them, `/sandbox` shows what is missing and commands run unsandboxed) · a new dependency is checked in its registry (exists, age, downloads, repo, look-alike name) and needs your approval · `audit` gate for known vulnerabilities when a manifest changes, locally and in CI |
 | **Measure** | `/usage` and `/context` for tokens · `/doctor prompt-audit` after editing rules, skills or agents |
 | **Conventional Commits** | One branch per change, one commit per approved task, squash-merged into one commit on main — typed `feat` · `refactor` · `perf`, message from `.claude/project.md`, `gates.sh full` checks every subject in a PR against `COMMIT_PATTERN` |
