@@ -11,7 +11,6 @@
       "Bash(bash .claude/scripts/gates.sh *)"
     ],
     "deny": [
-      "Bash(git commit *)",
       "Bash(git push *)",
       "Read(.env)",
       "Read(.env.*)",
@@ -53,6 +52,10 @@
           {
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect-secrets.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/gate-commit.sh\""
           }
         ]
       }

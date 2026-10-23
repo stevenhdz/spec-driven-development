@@ -5,7 +5,7 @@
 set -u
 unset GATES_BASE GITHUB_BASE_REF
 
-gates_sh="$(cd "$(dirname "$0")/.." && pwd)/project/.claude/scripts/gates.sh"
+framework="$(cd "$(dirname "$0")/.." && pwd)/project/.claude"
 dirs=""
 trap 'rm -rf $dirs' EXIT
 passed=0 failed=0
@@ -16,8 +16,9 @@ commit() { git_ add -A && git_ commit -qm "$1"; }
 new_repo() {
   dir=$(mktemp -d)
   dirs="$dirs $dir"
-  mkdir -p "$dir/.claude/scripts" "$dir/src" "$dir/tests"
-  cp "$gates_sh" "$dir/.claude/scripts/gates.sh"
+  mkdir -p "$dir/.claude/scripts" "$dir/.claude/hooks" "$dir/src" "$dir/tests"
+  cp "$framework/scripts/gates.sh" "$dir/.claude/scripts/gates.sh"
+  cp "$framework/hooks/gate-commit.sh" "$dir/.claude/hooks/gate-commit.sh"
   cat >"$dir/.claude/gates.conf" <<'EOF'
 APP_DIR="."
 FORMAT_SCOPED=""
@@ -56,6 +57,11 @@ conf() {
 
 gates() {
   out=$(cd "$dir" && bash .claude/scripts/gates.sh "$@" 2>&1)
+  code=$?
+}
+
+hook() {
+  out=$(printf '{"tool_name":"Bash","tool_input":{"command":"%s"}}' "$1" | bash "$dir/.claude/hooks/gate-commit.sh" 2>&1)
   code=$?
 }
 
@@ -144,6 +150,73 @@ expect "a path with a space reaches the lint command as one file" 0 "lint ✅"
 echo '// @ts-ignore' >"$dir/src/my file.ts"
 gates scoped "src/my file.ts"
 expect "FORBIDDEN checks a path with a space" 1 "src/my file.ts:1: // @ts-ignore"
+
+# --no-format
+new_repo
+conf FORMAT_SCOPED "'printf x >> {files}'"
+echo 'export const a = 1' >"$dir/src/a.ts"
+gates scoped --no-format src/a.ts
+if test "$(cat "$dir/src/a.ts")" = 'export const a = 1'; then code=0; else code=1; fi
+out="src/a.ts: $(cat "$dir/src/a.ts")"
+expect "scoped --no-format leaves files as they are" 0 "src/a.ts"
+
+# Commit hook
+new_repo
+echo '// @ts-ignore' >"$dir/src/bad.ts"
+git_ add src/bad.ts
+hook 'git commit -m x'
+expect "hook blocks a commit whose staged lines fail a gate" 2 "lint ❌ (FORBIDDEN)"
+
+hook 'git status'
+expect "hook ignores a command that does not commit" 0 ""
+
+hook 'npm test && git -C . commit -m x'
+expect "hook catches git -C <dir> commit after another command" 2 "Blocked"
+
+hook 'npm test \u0026\u0026 git commit -m x'
+expect "hook catches a commit after a JSON-escaped &&" 2 "Blocked"
+
+hook 'sh -c \"git commit -m x\"'
+expect "hook catches a commit wrapped in sh -c" 2 "Blocked"
+
+hook "bash -c 'git commit -m x'"
+expect "hook catches a commit in single quotes" 2 "Blocked"
+
+hook 'GIT_AUTHOR_NAME=a git commit -m x'
+expect "hook catches a commit after an env var" 2 "Blocked"
+
+hook 'xargs git commit -m x'
+expect "hook catches a commit run by xargs" 2 "Blocked"
+
+new_repo
+echo '// @ts-ignore' >"$dir/src/later.ts"
+hook 'git add src/later.ts && git commit -m x'
+expect "hook checks files added in the same command as the commit" 2 "lint ❌ (FORBIDDEN)"
+
+git_ add src/later.ts
+git_ commit -qm "chore: seed"
+echo 'export const x = 1' >>"$dir/src/later.ts"
+echo '// @ts-ignore' >"$dir/src/other.ts"
+hook 'git commit -m x'
+expect "hook ignores unstaged files when the command does not add them" 0 ""
+
+new_repo
+echo 'export const ok = 1' >"$dir/src/ok.ts"
+git_ add src/ok.ts
+hook 'git commit -m x'
+expect "hook allows a commit whose gates pass" 0 ""
+
+commit "feat: ok"
+conf LINT_SCOPED "'false'"
+git_ add .claude/gates.conf
+hook 'git commit -m x'
+expect "hook skips gates when only .claude/ files are committed" 0 ""
+
+git_ reset -q
+conf LINT_SCOPED '"true"'
+echo '// @ts-ignore' >>"$dir/src/ok.ts"
+hook 'git commit -am x'
+expect "hook checks unstaged tracked files on commit -a" 2 "lint ❌ (FORBIDDEN)"
 
 # TEST_FORBIDDEN
 new_repo

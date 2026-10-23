@@ -1,7 +1,8 @@
 #!/bin/bash
 # Spec Driven Development by stevenhdz · https://github.com/stevenhdz/spec-driven-development — framework file: `install.sh --update` overwrites it. Your commands live in .claude/gates.conf.
 # Quality Gates: format (rewrites, silent) → lint (FORBIDDEN regex on added lines outside FORBIDDEN_EXCLUDE, TEST_FORBIDDEN on added test lines, then the linter) → build → tests → frs (full only: every FR in specs/current has a test and a unique ID) → commits (full with a base only: each subject since the base matches COMMIT_PATTERN) → audit, stops at the first failure, prints one line.
-# Usage: bash .claude/scripts/gates.sh scoped <files…> | full [--no-format] | fr <FR-ID>
+# Usage: bash .claude/scripts/gates.sh scoped [--no-format] <files…> | full [--no-format] | fr <FR-ID>
+# --no-format skips the format step — the commit hook uses it so staged content is what gets checked.
 # `- Gates: OFF` in the active change's proposal.md (specs/changes/<feature>/): scoped and full print ⏭️ for every gate — fr still runs.
 # Audit runs when a manifest changed: uncommitted, or since $GATES_BASE (in a GitHub PR: origin/<base branch>) in full mode.
 # fr records RED: a failing run appends `- RED: <FR-ID>` to the active change's tasks.md (one active change only) — only while every unstaged or untracked code file is a test or a MANIFESTS file, so a failure after the code proves nothing.
@@ -17,6 +18,8 @@ if grep -qE '^[A-Z_]+="\[' "$conf"; then echo "Gates: ❌ .claude/gates.conf not
 
 mode=${1:-}
 shift || true
+no_format=""
+if test "${1:-}" = --no-format; then no_format=1; shift; fi
 app_dir=${APP_DIR:-.}
 app="$root/$app_dir"
 log=$(mktemp)
@@ -134,11 +137,11 @@ case "$mode" in
     test_cmd=$(expand "$TEST_SCOPED") || test_cmd=$TEST_FULL ;;
   full)
     format=${FORMAT_FULL:-}
-    if test "${1:-}" = --no-format; then format=""; fi
     lint=$LINT_FULL
     test_cmd=$TEST_FULL ;;
-  *) echo "usage: gates.sh scoped <files…> | full [--no-format] | fr <FR-ID>"; exit 2 ;;
+  *) echo "usage: gates.sh scoped [--no-format] <files…> | full [--no-format] | fr <FR-ID>"; exit 2 ;;
 esac
+if test -n "$no_format"; then format=""; fi
 
 changed_paths() {
   git -C "$root" status --porcelain
