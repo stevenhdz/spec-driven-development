@@ -1,0 +1,21 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  gates:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      # /bin first: macOS runs the system bash 3.2 users have, not Homebrew's bash 5.
+      - run: |
+          export PATH="/bin:$PATH"
+          bash --version | head -1
+          bash tests/gates.test.sh

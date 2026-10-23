@@ -49,17 +49,24 @@ Existing project: install, then run `/adopt` — it fills steps 2 and 3 from you
 - **Change folder**: `specs/changes/<feature>/` — the plan for one change: proposal, design, FR deltas, tasks `ID-001…`.
 - **Size**: the agent picks **inline** (at most 1 FR, 1 slice — one feature folder) or **full cycle** (anything bigger).
 
+**Full cycle**
+
 ```mermaid
 flowchart LR
-    C{Size} -->|full cycle| RS[Research] --> RA{{You: yes}} --> S[Change folder] --> A{{You: yes}} --> I[Test RED → code GREEN → gates] --> D{{You review staged diff}}
-    D -->|go| I
-    D -->|fix: what| I
-    D -->|last task| R[Review vs FRs + archive] --> K{{You commit}}
-    C -. inline .-> E[Edit FR in specs/current] -.-> I
-    D -. inline .-> K
+    RS["Research<br>code as it is"] --> RA{{"You:<br>research ok?"}} -->|yes| S["Change folder<br>FRs · Approach · tasks"] --> A{{"You:<br>approve?"}}
+    A -->|"yes · go all"| W
+    subgraph T [One task — implementer]
+        W["Tests<br>per GIVEN/WHEN/THEN"] --> RED["fr ❌<br>RED recorded"] --> G["Code<br>fr ✅"] --> SC["scoped<br>gates ✅"] --> ST[Stage]
+    end
+    ST --> D{{"You review<br>staged diff"}}
+    D -->|go| W
+    D -->|"fix: ID what"| G
+    D -->|last task| R["Reviewer<br>vs FRs + rules"] --> M["Merge FRs<br>full gates<br>archive"] --> K{{"You<br>commit"}}
+    R -.->|gaps: fix| G
 ```
 
-**Full cycle**
+A task that returns `blocked`, a deviation, `RED not recorded` or a failing gate stops and waits for you · inside a batch (`go up to ID-00N` · `go all`) tasks run back to back and you review once at the end.
+
 1. You: `add discount codes at checkout`.
 2. Agent: explores the code, writes `design.md` → Research — files with `path:line`, current behavior, gaps — and replies `research ok?`.
 3. You: did it understand the code? → `yes`, or say what it got wrong.
@@ -71,6 +78,15 @@ flowchart LR
 
 **Inline**: the agent edits the FR in `specs/current/`, writes the test, then the code, and stages all three — steps 7–8 without the archive.
 
+**Other sizes**
+
+```mermaid
+flowchart LR
+    C{Size} -->|inline| E["FR in<br>specs/current"] --> I["Test RED<br>→ code GREEN"] --> F["full<br>gates"] --> K{{"You<br>commit"}}
+    C -->|"refactor · optimize"| RF["Plan → steps<br>tests untouched"] --> F
+    C -->|docs| DO["Re-read vs<br>doc-rules"] --> K
+```
+
 | Say | Effect |
 |-----|--------|
 | `<request>` | Starts a change — the agent picks inline or full cycle |
@@ -78,7 +94,7 @@ flowchart LR
 | `yes` | Approve the Research, then the change folder |
 | `go` | Approve the staged task and run the next one — also resumes the active feature after `/clear` |
 | `go up to ID-003` · `go all` | One approval for every task up to ID-003 or the last one — runs them back to back, stops on `blocked` or a deviation from the plan — you review the staged diff once at the end |
-| `fix: <what>` | Redo the staged task |
+| `fix: <what>` · `fix: ID-002 <what>` | Redo the staged task — after a batch, name the task |
 | `refactor: <what>` · `optimize: <what>` | Change code without changing behavior — tests untouched |
 | `explain` | Replies are short by default — this gets the detailed answer |
 | `/adopt` | Fill the setup from an existing project's code (→ Setup) |
@@ -88,7 +104,7 @@ flowchart LR
 |-------|------|
 | `bash .claude/scripts/gates.sh scoped <files…>` | Changed files only — each task close |
 | `bash .claude/scripts/gates.sh full [--no-format]` | Whole project, plus `frs` — and in a PR, `commits`: each subject matches `COMMIT_PATTERN` — feature close, inline change, CI |
-| `bash .claude/scripts/gates.sh fr <FR-ID>` | Tests of one FR — proves RED before the code · fails with fewer tests than GIVEN/WHEN/THEN scenarios |
+| `bash .claude/scripts/gates.sh fr <FR-ID>` | Tests of one FR — proves RED before the code: records it only while the unstaged code files are tests or manifests · fails with fewer tests than GIVEN/WHEN/THEN scenarios — counts the runner lines that name the FR: a lower bound |
 
 No gates: `- Gates: OFF` in the change's `proposal.md` → Scope, next to `TDD` — `scoped` and `full` print `⏭️` for every gate, `fr` still runs so TDD keeps working · inline: always ON.
 
@@ -146,7 +162,7 @@ specs/
 Overwrites the framework files (→ Files) and deletes the ones a new version no longer ships — then review `git diff`. Migration steps per version: [CHANGELOG](CHANGELOG.md). Coming from v1.5 or earlier: the first `--update` only adds `.claude/project.md` — move your values from `CLAUDE.md` into it, then run `--update` again.
 
 ## CI
-Run `bash .claude/scripts/gates.sh full --no-format` on every PR. In a GitHub PR, `audit` runs when the PR changes a manifest — check out with `fetch-depth: 0`, or it runs on every PR. If two branches add the same FR ID, `frs` fails after the merge — ask the agent to renumber the FR your branch added.
+Run `bash .claude/scripts/gates.sh full --no-format` on every PR. In a GitHub PR, check out with `fetch-depth: 0` — `full` fails when the base branch is missing · `audit` runs only when the PR changes a manifest. If two branches add the same FR ID, `frs` fails after the merge — ask the agent to renumber the FR your branch added.
 
 ## Methodologies
 | Methodology | How this setup applies it |
@@ -157,7 +173,7 @@ Run `bash .claude/scripts/gates.sh full --no-format` on every PR. In a GitHub PR
 | **Traceability** | FR → task (`covers`) → test name starting with the FR ID · `frs` gate fails if an FR has no test or a duplicate ID |
 | **Vertical Slice Architecture** | One folder per feature · entry layer without business rules · logic layer independent of the transport · imports only through the public API |
 | **ADRs** | Project-wide decisions in `docs/decisions/` and `docs/architecture.md` |
-| **Clean code** | KISS · YAGNI · no pass-throughs · export only what is imported · exclusive states as one tagged union · no type casts · semantic, accessible UI — enforced by the lint gate (debt rules, unused exports, a `FORBIDDEN` regex on every added line, inline changes too) and the reviewer (every Hard Rule) |
+| **Clean code** | KISS · YAGNI · no pass-throughs · export only what is imported · exclusive states as one tagged union · no type casts · semantic, accessible UI — enforced by the lint gate (debt rules, unused exports, a `FORBIDDEN` regex on every added line, inline changes too, scaffold paths skipped through `FORBIDDEN_EXCLUDE`) and the reviewer (every Hard Rule) |
 | **Testing practices** | Test behavior, not implementation · query like a user (Testing Library) · mock only boundaries (classic TDD) · Arrange / Act / Assert · one test per THEN variant — enforced by the lint gate (`TEST_FORBIDDEN` regex on every added test line, inline changes too, and the stack's test lint plugin) and the reviewer (every Testing Rule) |
 | **Low bureaucracy** | Inline changes (1 FR, 1 slice) skip the change folder and the approval round · one approval per plan or batch (`go up to ID-00N` · `go all`) · ONE question at a time · `/adopt` needs one confirmation |
 | **Low verbosity** | Short replies by default, `explain` for depth · skills reply with a fixed Output Contract and nothing around it · gates print one line, failing lines only · FRs, change folders and questions are never shortened |
