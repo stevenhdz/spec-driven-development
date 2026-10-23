@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.30.1 — 2026-10-22
+### Changed
+- README → Use it: the three flow diagrams show every side path, and each size route names its criterion and the words that force it (`as a feature` · `inline`) · connectors A and B show where each diagram continues: the plan → Build and close, a small change → Other sizes. Full cycle · plan: research corrected, plan changed. Full cycle · build and close: a task that fails its checks, fails 3 fixes, grows in scope, deviates or needs your decision; the commit hook blocking a commit; Verify failing; review gaps. Other sizes: refactor without covering tests (add them first as an inline change), the optimize metric, a failing step reverted, inline that grows into a full cycle — and it reads top to bottom.
+
 ## v1.30.0 — 2026-10-22
 ### Changed
 - `CLAUDE.md` 1643 → 1198 words: Architecture, Code and Testing Rules move to `.claude/rules/architecture.md`, `code.md` and `testing.md`, each with a `paths:` frontmatter for source or test files — sessions that plan, research or edit docs no longer carry them · one line in Hard Rules says where they live · "Do not use the patterns in Forbidden" dropped: the `FORBIDDEN` gate and `.claude/project.md` → Forbidden cover it.
