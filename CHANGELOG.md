@@ -1,5 +1,26 @@
 # Changelog
 
+## v1.28.0 — 2026-10-22
+### Added
+- `gates.conf` → `FORBIDDEN_EXCLUDE`: extended regex for paths `FORBIDDEN` skips — scaffold and tool config that need a forbidden form (e.g. `export default` in `vite.config.ts`) · `/adopt` fills it.
+- `tests/gates.test.sh`: 23 regression tests for `gates.sh`, each in a throwaway git repo — run `bash tests/gates.test.sh` · `.github/workflows/test.yml` runs them on Linux and on macOS with the system bash 3.2, for every PR and push to main.
+- `fix: <task-ID> <what>`: after a batch the staged diff spans several tasks — the fix names its task · `CLAUDE.md`, create-feature, implementer, README.
+
+### Changed
+- README → Use it: the flow becomes two horizontal diagrams — full cycle (Research, approvals, one task's RED → GREEN → gates → stage, review, fix, reviewer, merge) and the other sizes (inline, refactor · optimize, docs).
+
+### Fixed
+- `gates.sh full` with a base (`$GATES_BASE`, or the PR base in CI) that does not resolve fails with `Gates: ❌ base <ref> not found` — before, `FORBIDDEN` / `TEST_FORBIDDEN` scanned every line of the repo as added and `commits` passed as `✅ (0)` without checking a subject.
+- `gates.sh fr` records `- RED` only while every unstaged or untracked code file is a test or a `MANIFESTS` file — a failure after the code was written proved nothing · otherwise it prints `RED not recorded` and the implementer returns blocked.
+- `gates.sh fr` on macOS: `wc -l` pads its count with spaces — RED was never recorded, and a run whose output named no test skipped the `no test named` check.
+- `gates.sh scoped` ran `FORBIDDEN` on `.claude/` files — now skipped, as in full.
+- Paths with spaces: `{files}`, `{tests}` and `{dirs}` are shell-quoted, and `FORBIDDEN` reads each path whole.
+- `gates.conf` → `FORBIDDEN` example: `: any([^[:alnum:]_]|$)` instead of `\b`, which BSD grep on macOS lacks.
+
+### Migration from v1.27.1
+- CI with `GITHUB_BASE_REF`: `actions/checkout` MUST fetch the base — `fetch-depth: 0` — or `gates.sh full` now fails. README → CI says so.
+- `--update` never touches your `gates.conf`: add a `FORBIDDEN_EXCLUDE='…'` line (single quotes, empty = off) when `FORBIDDEN` blocks a scaffold file · replace `\b` in your `FORBIDDEN` with `([^[:alnum:]_]|$)` on macOS.
+
 ## v1.27.1 — 2026-10-21
 ### Changed
 - `CLAUDE.md` → Working Protocol: the task close sequence rule is a plain imperative.
