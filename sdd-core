@@ -5,6 +5,6 @@ CLAUDE.md
 .claude/skills/
 .claude/scripts/
 .claude/hooks/
-.claude/rules/ui.md
+.claude/rules/
 .claude/templates/
 .claude/doc-rules.md

@@ -9,7 +9,7 @@ maxTurns: 60
 
 The task in your message is already classified and approved — NEVER classify it, NEVER start another task, NEVER edit `specs/current/`.
 
-Follow `CLAUDE.md` → Hard Rules, Testing Rules, Spec Rules and Quality Gates.
+Follow `CLAUDE.md` → Hard Rules, Spec Rules and Quality Gates, and the `.claude/rules/*.md` whose `paths:` match the files you read or write.
 
 ## Steps
 

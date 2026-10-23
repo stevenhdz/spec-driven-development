@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.30.0 — 2026-10-22
+### Changed
+- `CLAUDE.md` 1643 → 1198 words: Architecture, Code and Testing Rules move to `.claude/rules/architecture.md`, `code.md` and `testing.md`, each with a `paths:` frontmatter for source or test files — sessions that plan, research or edit docs no longer carry them · one line in Hard Rules says where they live · "Do not use the patterns in Forbidden" dropped: the `FORBIDDEN` gate and `.claude/project.md` → Forbidden cover it.
+- `implementer` follows the `.claude/rules/*.md` whose `paths:` match the files it reads or writes · `reviewer` reads each matching rules file and names it in a gap · `/adopt` and `gates.conf` point `TEST_FORBIDDEN` at `.claude/rules/testing.md`.
+- `sdd-core`: `.claude/rules/` — `--update` overwrites the framework's rule files and keeps yours.
+- README: Files, Methodologies and Context engineering name the rule files.
+
+Tested live with `claude -p`, a canary line in each rule file: inline (main session) and full cycle (implementer subagent) both wrote it into new source and test files; the main session, the implementer and the reviewer each read the rule files before writing or reviewing.
+
+### Migration from v1.29
+- `--update` adds the three rule files and the shorter `CLAUDE.md` — a rule you added to `CLAUDE.md` → Hard Rules or Testing Rules moves to your own file in `.claude/rules/`.
+
 ## v1.29.1 — 2026-10-22
 ### Fixed
 - `create-feature` step 7 named the branch format at `CLAUDE.md` → Working Protocol → Branch name, an anchor gone since v1.26 — it now points at `.claude/project.md` → Branch name.

@@ -18,11 +18,11 @@ Review only — NEVER edit, stage, run gates or classify. Bash only for `git dif
    - A REMOVED FR that still has tests
    - TDD ON: an ADDED or MODIFIED FR with no `- RED: <FR-ID>` line in `tasks.md` — `gates.sh fr` writes it when the test fails before the code
    - A change outside Scope IN
-   - A violation of `CLAUDE.md` → Hard Rules or Testing Rules, or of a `.claude/rules/*.md` whose `paths:` match a changed file — check every rule against the diff, one by one
+   - A violation of `CLAUDE.md` → Hard Rules, or of a `.claude/rules/*.md` whose `paths:` match a changed file — read each of those files, then check every rule against the diff, one by one
    - `proposal.md` → Verify empty or a placeholder
    - A new source file not listed in Approach → Files — config, manifests and scaffold are exempt — a pass-through, or unreachable code (Hard Rules)
    - A bug that makes an FR's THEN false
-4. NEVER report style, naming, refactors or improvements — a gap MUST break the Request, an FR, the scope, a Hard Rule or a Testing Rule.
+4. NEVER report style, naming, refactors or improvements — a gap MUST break the Request, an FR, the scope, a Hard Rule or a rule in `.claude/rules/`.
 
 ## Output Contract
 
@@ -32,5 +32,5 @@ Review: <feature> — no gaps
 or
 ```
 Review: <feature> — N gaps
-- <FR-ID | Scope | Hard Rule | Testing Rule>: <gap> — <file:line>
+- <FR-ID | Scope | Hard Rule | .claude/rules/<file>>: <gap> — <file:line>
 ```

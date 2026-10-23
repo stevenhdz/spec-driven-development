@@ -53,22 +53,7 @@ The human approves every step, so these rules hold even when a shortcut looks sa
 
 ## Hard Rules
 
-### Architecture
-- Import another slice only through its public API — never its internal files
-- Keep business rules out of the entry layer — extract them to the logic layer
-- Keep the transport (DOM, HTTP, terminal) out of the logic layer — it takes and returns plain data
-- Check the shape of external data (parsed JSON, request body, file content) in the entry layer — data of the wrong shape becomes the error path, never an unhandled exception
-
-### Code
-- Do not use the patterns in `.claude/project.md` → Forbidden
-- Do not over-engineer (KISS · YAGNI): the simplest solution that works — a function before a class, no abstraction or layer for a use case that does not exist yet
-- Do not create a pass-through: a wrapper around a single call (e.g. a hook around one `useState`, a service around one query), a component that only renders another, a re-export other than the public API, a type used in one place — and do not write code no FR or caller can reach
-- Export only what another file imports — types included
-- Do not reimplement what the standard library, the framework or an approved dependency already does (e.g. argument parsing, date math, JSON schema checks) — configure it instead
-- Do not signal an error with a sentinel value (`None`, `-1`, `""`) — raise or return the language's error type, with a message that names the bad input
-- Model states that exclude each other as one tagged union — not separate fields that can contradict each other (e.g. `isLoading` next to `error` and `data`)
-- Do not silence the type checker — no casts, non-null assertions or ignore comments: fix the type — scaffold files exempt
-- Do not add comments to the code you write or change — names and small functions must explain the intent; leave existing comments as they are
+- Architecture, code and testing rules live in `.claude/rules/` — each loads when you read or edit a file its `paths:` match.
 
 ### Dependencies and secrets
 - NEVER add a dependency without explicit approval — supply-chain risk — first check it in its registry (`npm view` · `pip index versions`) and show name, version, publish date, weekly downloads, repo — flag one not found, under 30 days old, rarely downloaded or named like a popular one, and propose a known alternative
@@ -78,15 +63,6 @@ The human approves every step, so these rules hold even when a shortcut looks sa
 
 ### Docs
 - Every `.md` follows `.claude/doc-rules.md` — new docs start from their template
-
-## Testing Rules
-- Test observable behavior only — what a user sees, what an API returns — not implementation details.
-- UI tests: find elements as a user does: role + accessible name, then visible text — not by index, CSS class or test id.
-- Mock only external boundaries (network, database, clock, file system) — use the real code everywhere else.
-- One test = one behavior, structured Arrange / Act / Assert.
-- Every variant a THEN names gets its own test — e.g. "pays by card, PayPal or bank transfer" = 3 tests.
-- When TDD is ON — full cycle: the change's `proposal.md` → Scope · inline: always ON — NEVER keep a test that did not fail first — it proves nothing.
-- A test fails because of a bug in the code: fix the code, NEVER the test.
 
 ## Quality Gates — Run in every task close
 Run gates only through `bash .claude/scripts/gates.sh`, from the repo root — except the single failing test while fixing it — commands live in `.claude/gates.conf` — it stops at the first failure and prints one line.
