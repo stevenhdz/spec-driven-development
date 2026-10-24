@@ -14,6 +14,7 @@
 - Run locally: [e.g. `npm run dev` · `uvicorn app.main:app --reload`]
 
 ## Layer Structure — Vertical Slice
+<!-- Suggested structure — replace it with your project's architecture (layered, hexagonal, MVC, …) and rename the heading. Keep the Module line: Change Size, Approach and the rules count modules. -->
 ```
 [src]/
   [features]/          ← create with the second slice — until then the only slice folder lives in [src]/
@@ -29,6 +30,7 @@
 ```
 - Layers are responsibilities, not files — create an optional file only when its condition is true.
 - One feature = one folder in `[features]/` — in `[src]/` while there is only one slice
+- Module: one `[feature-name]/` folder
 
 ## Conventions
 - Naming: [e.g. PascalCase components, camelCase functions · snake_case modules and functions]

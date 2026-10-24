@@ -2,7 +2,7 @@
 <!-- Yours — `install.sh --update` never overwrites this file. -->
 
 Project-wide map and the *why*. Behavior (FRs): `specs/current/`. Rules: `CLAUDE.md`. Folder pattern: `.claude/project.md`. Per-change design: `specs/changes/<feature>/design.md`.
-Updated at each feature close — a new slice goes in §2, a project-wide decision in §5.
+Updated at each feature close — a new module goes in §2, a project-wide decision in §5.
 
 ## 1. Context
 | Item | Value |
@@ -13,10 +13,10 @@ Updated at each feature close — a new slice goes in §2, a project-wide decisi
 | Outbound | [External systems it calls — e.g. none · PostgreSQL · Stripe API] |
 | Persistence | [e.g. none — memory only · PostgreSQL · local JSON file] |
 
-## 2. Slices
-| Slice | Responsibility | Public API |
+## 2. Modules
+| Module | Responsibility | Public API |
 |-------|----------------|------------|
-| [slice-name — or "none yet"] | [What it owns, in one line] | [What it exports — e.g. `OrderList` · `ordersRouter` · `runImport`] |
+| [module-name — or "none yet"] | [What it owns, in one line] | [What it exports — e.g. `OrderList` · `ordersRouter` · `runImport`] |
 
 ## 3. Layers in this stack
 | Layer | This stack |
@@ -35,7 +35,7 @@ Updated at each feature close — a new slice goes in §2, a project-wide decisi
 ## 5. Decisions
 | Decision | Why | Discarded alternative |
 |----------|-----|-----------------------|
-| Vertical Slice per feature | A feature changes inside one folder | Folders per type (`components/`, `controllers/`, `services/`) |
+| [Structure — e.g. Vertical Slice per feature, the suggested one · layered · hexagonal] | [Why — e.g. a feature changes inside one folder] | [Alternative and why not — e.g. folders per type (`components/`, `controllers/`, `services/`)] |
 | Business rules in the logic layer | One home per rule, testable without the transport | Rules inside components, routes or handlers |
 | [Project decision] | [Why] | [Alternative and why not] |
 

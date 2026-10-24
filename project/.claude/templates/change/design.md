@@ -6,7 +6,7 @@
 - Gaps: [what the request expects that the code lacks — or none]
 
 ## Approach
-- Slices: [touched or created]
+- Modules: [touched or created]
 - Files: [each new source file — config and scaffold excluded] — [why it cannot live in an existing file] — or none
 - Types: [new or changed types and where they live — or none]
 - State: [what is stored, what is derived — or none]
