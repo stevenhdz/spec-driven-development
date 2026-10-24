@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.31.2 — 2026-10-24
+### Changed
+- README names RPI (Research → Plan → Implement) as a methodology: badge `RPI · SDD · BDD · TDD` · Why → It guesses what to build · Methodologies → RPI row, first.
+
 ## v1.31.1 — 2026-10-24
 ### Changed
 - README → Use it: the flow diagrams show who runs each step — a box per actor inside each phase: plain = main session · dashed = a subagent in its own context — `Explore` (Haiku) in Research when the code spans 2+ modules · `implementer` (Sonnet) around RED → GREEN → checks → stage · `reviewer` (Opus) around the review · Other sizes: main session.
