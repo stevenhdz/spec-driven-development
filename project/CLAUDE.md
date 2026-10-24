@@ -42,8 +42,8 @@ The human approves every step, so these rules hold even when a shortcut looks sa
 - FR ID: `<PREFIX>-NN` (e.g. `ORDER-01`) — prefix unique per spec file, number taken from its `Next ID`.
 - NEVER reuse or renumber an FR ID — tests and history point at it — except a duplicate the `frs` gate reports after a merge: renumber the FR your branch added, with its tests, from the file's `Next ID`.
 - FRs describe behavior observable from outside: what a user sees, what an API returns, what a command prints.
-- FRs cover everything the request makes visible — layout (e.g. "a list sorted by date"), messages and controls — not only the logic.
-- A broad request (e.g. "any error", "invalid input") must become one scenario per input it names and per way that input can be wrong: wrong type, wrong shape, missing field, boundary value — never only the cases it lists as examples.
+- FRs cover everything the request makes visible — layout (e.g. "a list sorted by date"), messages and controls — not only the logic — and nothing it does not.
+- A broad request (e.g. "any error", "invalid input") must become one scenario per input it names and per way that input can be wrong: wrong type, wrong shape, missing field, boundary value — never only the cases it lists as examples, never an input it does not name.
 - NEVER change observable behavior before its FR is written — the FR is what the human approves:
   - Full cycle: the FR goes in the change folder's delta spec (`specs/<capability>/spec.md`) — approved before any code.
   - Inline: add or edit the FR in `specs/current/<capability>/spec.md` first — a new FR takes the file's `Next ID` and advances it — then test, then code — stage all three together.
@@ -54,6 +54,11 @@ The human approves every step, so these rules hold even when a shortcut looks sa
 ## Hard Rules
 
 - Architecture, code and testing rules live in `.claude/rules/` — each loads when you read or edit a file its `paths:` match.
+
+### Scope
+- Build only what the request names — no feature, screen, field, option, setting or message it does not ask for — anything else goes in Scope OUT, or in ONE question
+- Simple, never fragile — not extra: every input the requested behavior takes gets one error path, never a crash (one FR, one scenario per way the input can be wrong) · existing behavior and data keep working
+- The simplest solution that works (KISS · YAGNI) — in FRs, Approach and code: no layer, file, type or abstraction no FR needs yet
 
 ### Dependencies and secrets
 - NEVER add a dependency without explicit approval — supply-chain risk — first check it in its registry (`npm view` · `pip index versions`) and show name, version, publish date, weekly downloads, repo — flag one not found, under 30 days old, rarely downloaded or named like a popular one, and propose a known alternative

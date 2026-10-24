@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.30.2 — 2026-10-24
+### Fixed
+- Scope crept unless the request said "keep it simple": since v1.30.0 KISS · YAGNI lived only in `.claude/rules/code.md`, loaded for source files — FRs, Scope IN and Approach are written before any source file is read, and the always-loaded Spec Rules only pushed to widen.
+- `CLAUDE.md` → Hard Rules → Scope: build only what the request names · simple, never fragile: every input the requested behavior takes gets one error path, existing behavior and data keep working — not extra · the simplest solution in FRs, Approach and code · Spec Rules: FRs cover what the request makes visible and nothing it does not · a broad request never adds an input it does not name.
+- `create-feature`: NEVER narrow or widen the Request — the rest goes in Scope OUT · Approach is the simplest design, every file, type and layer maps to an FR · step 6 flags `⚠️ Not in the Request: <FR-ID | Scope IN item>` — only for an error path or existing behavior kept working, anything else goes in Scope OUT.
+- `reviewer`: reports an FR, Scope IN item, file or abstraction the Request does not ask for — checked against the Request, not Scope IN — and an input of the requested behavior with no error path.
+- `templates/change/design.md` → Approach: Files, Types, State and Decision accept `none`.
+- README: Why and Methodologies → Clean code.
+
 ## v1.30.1 — 2026-10-22
 ### Changed
 - README → Use it: the three flow diagrams show every side path, and each size route names its criterion and the words that force it (`as a feature` · `inline`) · connectors A and B show where each diagram continues: the plan → Build and close, a small change → Other sizes. Full cycle · plan: research corrected, plan changed. Full cycle · build and close: a task that fails its checks, fails 3 fixes, grows in scope, deviates or needs your decision; the commit hook blocking a commit; Verify failing; review gaps. Other sizes: refactor without covering tests (add them first as an inline change), the optimize metric, a failing step reverted, inline that grows into a full cycle — and it reads top to bottom.

@@ -15,7 +15,7 @@ Do not load it for inline work — follow Spec Rules and still run Quality Gates
 - NEVER edit `specs/current/` before the feature closes — deltas live in `specs/changes/<feature>/specs/` until the merge.
 - NEVER write code in Approach — names, types and responsibilities only.
 - NEVER expand scope without explicit user authorization.
-- NEVER narrow the Request — anything it asks for goes in Scope IN and in an FR — when it conflicts with a rule, ask ONE question before creating the change folder.
+- NEVER narrow or widen the Request — anything it asks for goes in Scope IN and in an FR, anything it does not goes in Scope OUT — when it conflicts with a rule, ask ONE question before creating the change folder.
 - ALWAYS follow Working Protocol — NEVER restate or shorten it.
 
 ## Decision Gates
@@ -42,10 +42,10 @@ Do not load it for inline work — follow Spec Rules and still run Quality Gates
 
 1. Read `docs/architecture.md`, the `specs/current/<capability>/spec.md` files the feature touches, and the related code — when the code spans more than one slice, explore it with the `Explore` subagent (`.claude/agents/explore.md`) and keep only its summary — from `.claude/templates/change/` write `specs/changes/<feature-name>/proposal.md` → Request verbatim only, and `design.md` → Research only, from what you found: the code as it is, with `path:line`, no proposals · Approach stays as the template — end the turn: reply with the file path and `research ok?` — NEVER start step 2 in the same turn — "yes": continue from step 2 · anything else: correct Research — stop and wait.
 2. Confirm goal, scope IN/OUT, TDD ON/OFF, Gates ON/OFF, FR deltas (ADDED / MODIFIED / REMOVED — `<FR-ID> — The system MUST …` + GIVEN/WHEN/THEN), constraints and Verify: one end-to-end check that proves the change works from outside.
-3. Design Approach from the FR deltas and the explored code: slices, types, state, logic placement, non-obvious decisions — every ADDED or MODIFIED FR maps to a line.
+3. Design Approach from the FR deltas and the explored code: the simplest design that covers them — slices, types, state, logic placement, non-obvious decisions — every ADDED or MODIFIED FR maps to a line, every file, type and layer maps to an FR.
 4. Derive the tasks from Approach — every task lists the FRs it `covers`, every ADDED or MODIFIED FR is covered by a task — the fewest tasks that each leave a working, reviewable diff: group FRs owned by the same rule or component, NEVER one task per FR by default.
 5. Create the folder `specs/changes/<feature-name>/` from `.claude/templates/change/`: `proposal.md` (Goal, Scope, Constraints, Verify — Request is already written) · `design.md` (Approach — Research is already written) · `tasks.md` (Tasks, Progress) · one `specs/<capability>/spec.md` with the FR deltas per capability touched.
-6. End the turn: reply with the change folder path, then `⚠️ Request not covered: <quote>` per part of the Request no FR covers, then `approve?` — NEVER dispatch a task in the same turn that wrote the change folder.
+6. End the turn: reply with the change folder path, then `⚠️ Request not covered: <quote>` per part of the Request no FR covers, then `⚠️ Not in the Request: <FR-ID | Scope IN item>` per FR or Scope IN item the Request does not ask for — only an error path or existing behavior and data kept working (Hard Rules → Scope) — anything else goes in Scope OUT, never in an FR — then `approve?` — NEVER dispatch a task in the same turn that wrote the change folder.
 7. Create the branch per `.claude/project.md` → Branch name, type `feat`, before the first staged change, unless there is no repo — write `- Base: <git rev-parse HEAD>` in `tasks.md` → Progress.
 8. Dispatch ONE task to the `implementer` subagent (`.claude/agents/implementer.md`) — message: the change folder path and the task ID, or `fix: <what>` and the task ID it names, else the last task ID — run it in the foreground and wait for its result — NEVER implement a task yourself.
    - Relay its contract verbatim, then — outside a batch — `Next: <Next step> — /clear → go` — the implementer already ran the close sequence up to staging.

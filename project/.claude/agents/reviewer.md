@@ -18,6 +18,8 @@ Review only — NEVER edit, stage, run gates or classify. Bash only for `git dif
    - A REMOVED FR that still has tests
    - TDD ON: an ADDED or MODIFIED FR with no `- RED: <FR-ID>` line in `tasks.md` — `gates.sh fr` writes it when the test fails before the code
    - A change outside Scope IN
+   - An FR, Scope IN item, file or abstraction the Request does not ask for — quote it (`CLAUDE.md` → Hard Rules → Scope)
+   - An input of the requested behavior with no error path (`CLAUDE.md` → Hard Rules → Scope)
    - A violation of `CLAUDE.md` → Hard Rules, or of a `.claude/rules/*.md` whose `paths:` match a changed file — read each of those files, then check every rule against the diff, one by one
    - `proposal.md` → Verify empty or a placeholder
    - A new source file not listed in Approach → Files — config, manifests and scaffold are exempt — a pass-through, or unreachable code (Hard Rules)
