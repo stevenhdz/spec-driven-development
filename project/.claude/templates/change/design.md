@@ -7,8 +7,8 @@
 
 ## Approach
 - Slices: [touched or created]
-- Files: [each new source file — config and scaffold excluded] — [why it cannot live in an existing file]
-- Types: [new or changed types and where they live]
-- State: [what is stored, what is derived]
+- Files: [each new source file — config and scaffold excluded] — [why it cannot live in an existing file] — or none
+- Types: [new or changed types and where they live — or none]
+- State: [what is stored, what is derived — or none]
 - Logic: [which logic-layer unit owns which rule — what the entry layer only calls]
-- Decision: [non-obvious choice] — discarded: [alternative and why]
+- Decision: [non-obvious choice] — discarded: [alternative and why] — or none
