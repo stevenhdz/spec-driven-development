@@ -6,6 +6,7 @@
 - Plan diagram adds what was missing: ONE question when the goal is unclear · scope IN / OUT · requirements only for what the request names · the simplest design · the `⚠️ Request not covered` / `⚠️ Not in the Request` flags before `approve?`.
 - Build and close diagram adds: the main session relays the implementer's result · `/clear → go` before the next task · the commit hook named · review gaps go to you — fix (back to GREEN) or accept (on to the specs merge).
 - Build and close and Other sizes read left to right: each phase or size is a column, side by side.
+- README → Methodologies 984 → 595 words, 20 → 18 rows: Refactoring and Measured optimization in one row · Measure folded into Context engineering · details the flow, Say table and Files already give are cut · the stale `CLAUDE.md` word count dropped.
 
 ## v1.31.0 — 2026-10-24
 ### Changed
