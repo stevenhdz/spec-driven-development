@@ -56,26 +56,40 @@ Existing project: install, then run `/adopt` — it fills steps 2 and 3 from you
 %%{init: {"theme": "base", "themeVariables": {"fontFamily": "-apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans, Helvetica, Arial, sans-serif", "fontSize": "14px", "lineColor": "#667085", "primaryTextColor": "#101828", "clusterBkg": "#FFFFFF", "clusterBorder": "#D0D5DD", "edgeLabelBackground": "#FFFFFF", "titleColor": "#344054"}, "flowchart": {"curve": "basis", "nodeSpacing": 22, "rankSpacing": 34, "padding": 10}}}%%
 flowchart LR
     Q(["You: request"]):::human
-    SZ{"Size?"}:::auto
+    SZ{"Size?<br>main session"}:::auto
     O(["B ▸ continues in<br>Other sizes"]):::conn
     Q ==> SZ
     SZ ==>|"2+ FRs · new module · dependency<br>or you added: as a feature"| R
     SZ -.->|"1 FR · 1 module · no behavior change<br>or you added: inline"| O
     subgraph R ["1 · Research — RPI"]
         direction TB
-        RS["Read the code as it is<br>facts only, no proposals"]:::research
+        subgraph RX ["Explore · Haiku — only when the code spans 2+ modules"]
+            EX["Map files · public API<br>current behavior"]:::research
+        end
+        subgraph RM ["main session"]
+            RS["design.md → Research<br>the code as it is · path:line<br>facts only, no proposals"]:::research
+        end
         RA(["You: research ok?"]):::human
+        EX -.->|summary| RS
         RS ==> RA
         RA -.->|"no: what is wrong"| RS
     end
     subgraph P ["2 · Plan — SDD + BDD"]
         direction TB
-        S1["SDD · proposal<br>request · scope · how to verify"]:::sdd
-        S2["BDD · requirements<br>GIVEN / WHEN / THEN"]:::bdd
-        S3["Design"]:::sdd
-        S4["Tasks"]:::sdd
+        subgraph PM ["main session"]
+            direction TB
+            UQ{"Goal clear?"}:::auto
+            S1["SDD · proposal<br>request verbatim · scope IN / OUT<br>how to verify"]:::sdd
+            S2["BDD · requirements<br>GIVEN / WHEN / THEN<br>only what the request names"]:::bdd
+            S3["Design · the simplest approach<br>every file maps to an FR"]:::sdd
+            S4["Tasks"]:::sdd
+            FL["⚠️ Request not covered<br>⚠️ Not in the Request:<br>error path · existing data only"]:::note
+        end
+        QQ(["You: answer<br>ONE question"]):::human
         A(["You: approve?"]):::human
-        S1 ==> S2 ==> S3 ==> S4 ==> A
+        UQ ==>|yes| S1 ==> S2 ==> S3 ==> S4 ==> FL ==> A
+        UQ -.->|no| QQ
+        QQ -.-> UQ
         A -.->|"change: what"| S1
     end
     NX(["A ▸ continues in<br>Build and close"]):::conn
@@ -90,51 +104,70 @@ flowchart LR
     classDef human fill:#FFF4E0,stroke:#B54708,stroke-width:2px,color:#7A2E0E
     classDef note fill:#FFFFFF,stroke:#B54708,stroke-width:1px,stroke-dasharray:4 3,color:#7A2E0E
     classDef conn fill:#344054,stroke:#344054,stroke-width:1.5px,color:#FFFFFF
-    linkStyle 2,4,9 stroke:#B54708,stroke-width:1.5px,stroke-dasharray:6 4
+    linkStyle 2,5,12,13,14 stroke:#B54708,stroke-width:1.5px,stroke-dasharray:6 4
+    style RX fill:#FAFAFB,stroke:#475467,stroke-width:1.5px,stroke-dasharray:5 3
+    style RM fill:#FFFFFF,stroke:#98A2B3,stroke-width:1px
+    style PM fill:#FFFFFF,stroke:#98A2B3,stroke-width:1px
 ```
 
 **Full cycle — build and close**
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"fontFamily": "-apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans, Helvetica, Arial, sans-serif", "fontSize": "14px", "lineColor": "#667085", "primaryTextColor": "#101828", "clusterBkg": "#FFFFFF", "clusterBorder": "#D0D5DD", "edgeLabelBackground": "#FFFFFF", "titleColor": "#344054"}, "flowchart": {"curve": "basis", "nodeSpacing": 22, "rankSpacing": 34, "padding": 10}}}%%
-flowchart TB
+flowchart LR
     FA(["A ▸ from the plan<br>you approved it"]):::conn
     subgraph I ["3 · Implement — TDD, one task at a time"]
-        direction LR
-        W["RED · write the tests<br>they fail"]:::red
-        G["GREEN · write the code<br>tests pass"]:::green
-        SC["Quality checks"]:::auto
-        ST["Stage"]:::auto
+        direction TB
+        subgraph IM ["implementer · Sonnet · own context, one per task"]
+            direction TB
+            W["RED · write the tests<br>they fail"]:::red
+            G["GREEN · write the code<br>tests pass"]:::green
+            SC["Quality checks"]:::auto
+            ST["Stage"]:::auto
+        end
+        subgraph IS ["main session"]
+            direction TB
+            RL["Relay the result"]:::auto
+            CM["Commit the task"]:::auto
+            CL["/clear → go<br>next task"]:::auto
+        end
         D(["You: review<br>the diff"]):::human
-        HK["Checks run again"]:::auto
-        CM["Commit the task"]:::auto
+        HK["Checks run again<br>commit hook"]:::auto
         BL(["You decide<br>options"]):::human
         BN["Batch · go all: no stop here<br>review all commits at the end"]:::note
-        W ==> G ==> SC ==> ST ==> D
-        D ==>|go| HK ==> CM
+        W ==> G ==> SC ==> ST ==> RL ==> D
+        D ==>|go| HK ==> CM ==> CL
+        CL -.->|next task| W
         D -.->|"fix: ID what"| G
-        CM -.->|next task| W
         HK -.->|"checks fail: fix, stage, retry"| G
         SC -.->|"checks fail · 3 failed fixes · scope grows<br>deviation · a decision is yours"| BL
         D -.- BN
     end
     subgraph C ["4 · Close — SDD living spec"]
-        direction LR
-        RV["Review vs<br>requirements"]:::auto
-        M["SDD · update<br>the living spec"]:::sdd
-        FG["All quality<br>checks"]:::auto
-        V["Verify<br>end to end"]:::green
-        AR["Archive<br>the plan"]:::sdd
-        K["Close commit"]:::auto
+        direction TB
+        subgraph CR ["reviewer · Opus · fresh context, once"]
+            RV["Review vs<br>request · FRs · rules"]:::auto
+        end
+        subgraph CS ["main session"]
+            direction TB
+            M["SDD · update<br>the living spec"]:::sdd
+            FG["All quality<br>checks"]:::auto
+            V["Verify<br>end to end"]:::green
+            AR["Archive<br>the plan"]:::sdd
+            K["Close commit"]:::auto
+        end
+        GP(["You: gaps<br>fix or accept"]):::human
         PU(["You: push<br>open PR"]):::human
         SQ["Squash merge<br>into main"]:::auto
         VF(["You decide<br>options"]):::human
-        RV ==> M ==> FG ==> V ==> AR ==> K ==> PU ==> SQ
+        RV ==>|no gaps| M ==> FG ==> V ==> AR ==> K ==> PU ==> SQ
+        RV -.->|gaps| GP
+        GP -.->|accept| M
         V -.->|fails| VF
     end
     FA ==> I
     I ==>|last task| C
-    I <-.-|"↑ gaps: fix ID"| C
+    GP -.->|"fix: ID what"| G
     classDef research fill:#EAF0FB,stroke:#3B5BA9,stroke-width:1.5px,color:#1E2A44
     classDef sdd fill:#F3EEFC,stroke:#6B46C1,stroke-width:1.5px,color:#2E1A5E
     classDef bdd fill:#E6F6F4,stroke:#0F766E,stroke-width:1.5px,color:#0B3B36
@@ -144,11 +177,17 @@ flowchart TB
     classDef human fill:#FFF4E0,stroke:#B54708,stroke-width:2px,color:#7A2E0E
     classDef note fill:#FFFFFF,stroke:#B54708,stroke-width:1px,stroke-dasharray:4 3,color:#7A2E0E
     classDef conn fill:#344054,stroke:#344054,stroke-width:1.5px,color:#FFFFFF
-    linkStyle 6,7,8,9,18,21 stroke:#B54708,stroke-width:1.5px,stroke-dasharray:6 4
-    linkStyle 10 stroke:#B54708,stroke-width:1px,stroke-dasharray:2 3
+    linkStyle 8,9,10,11,20,21,22,25 stroke:#B54708,stroke-width:1.5px,stroke-dasharray:6 4
+    linkStyle 12 stroke:#B54708,stroke-width:1px,stroke-dasharray:2 3
+    style IM fill:#FAFAFB,stroke:#475467,stroke-width:1.5px,stroke-dasharray:5 3
+    style CR fill:#FAFAFB,stroke:#475467,stroke-width:1.5px,stroke-dasharray:5 3
+    style IS fill:#FFFFFF,stroke:#98A2B3,stroke-width:1px
+    style CS fill:#FFFFFF,stroke:#98A2B3,stroke-width:1px
 ```
 
 Colors: blue research · purple SDD · teal BDD · red → green TDD · gray automation · orange capsule = you decide · dark capsule A / B = the flow continues in the diagram that starts with the same letter · solid line = main path · dashed orange = goes back (fix, next task, gaps, next step).
+
+Who runs each step: the box around it — plain = main session · dashed = a subagent in its own context: `Explore` (Haiku) maps code that spans 2+ modules · `implementer` (Sonnet) runs one task · `reviewer` (Opus) checks the branch once.
 
 Terms: requirement = FR · living spec = `specs/current/` · plan = the change folder · quality checks = `gates.sh` (lint, build, tests) · checks run again = the commit hook.
 
@@ -176,12 +215,12 @@ A task that returns `blocked`, a deviation, `RED not recorded` or a failing gate
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"fontFamily": "-apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans, Helvetica, Arial, sans-serif", "fontSize": "14px", "lineColor": "#667085", "primaryTextColor": "#101828", "clusterBkg": "#FFFFFF", "clusterBorder": "#D0D5DD", "edgeLabelBackground": "#FFFFFF", "titleColor": "#344054"}, "flowchart": {"curve": "basis", "nodeSpacing": 22, "rankSpacing": 34, "padding": 10}}}%%
-flowchart TB
+flowchart LR
     FB(["B ▸ from the plan<br>Size? said small"]):::conn
     SZ{"Which small change?"}:::auto
     FB ==> SZ
-    subgraph IN ["Inline · 1 requirement · 1 module — SDD + BDD + TDD · grows past it: full cycle"]
-        direction LR
+    subgraph IN ["Inline · main session · 1 requirement · 1 module — SDD + BDD + TDD · grows past it: full cycle"]
+        direction TB
         E["Requirement in the living spec<br>GIVEN / WHEN / THEN"]:::bdd
         TR["RED · test fails"]:::red
         TG["GREEN · code passes"]:::green
@@ -189,8 +228,8 @@ flowchart TB
         FS["Stage"]:::auto
         E ==> TR ==> TG ==> F ==> FS
     end
-    subgraph RF ["Refactor · optimize — behavior unchanged"]
-        direction LR
+    subgraph RF ["Refactor · optimize · main session — behavior unchanged"]
+        direction TB
         RT{"Covering tests<br>pass?"}:::auto
         RP(["You: approve plan<br>optimize: + metric"]):::human
         RS["One step<br>tests untouched"]:::auto
@@ -201,7 +240,7 @@ flowchart TB
         RK -.->|next step| RS
         RC -.->|"test fails or<br>metric not better"| RB
     end
-    subgraph DC ["Docs only"]
+    subgraph DC ["Docs only · main session"]
         DO["Re-read against<br>the doc rules"]:::sdd
     end
     SZ ==>|"1 FR · 1 module<br>or you added: inline"| IN
@@ -311,23 +350,21 @@ Run `bash .claude/scripts/gates.sh full --no-format` on every PR. In a GitHub PR
 ## Methodologies
 | Methodology | How this setup applies it |
 |-------------|---------------------------|
-| **Spec-Driven Development** (OpenSpec style) | Living spec per capability in `specs/current/` · each change in `specs/changes/` as proposal → design → delta spec (ADDED / MODIFIED / REMOVED) → tasks · archived when closed |
-| **BDD** (Gherkin style) | Each FR is `The system MUST …` (RFC 2119) with inline Gherkin `GIVEN / WHEN / THEN` — one line, no `.feature` file or Cucumber — every scenario becomes a test, and `gates.sh fr` fails with fewer tests than scenarios |
-| **TDD** | Test fails first (RED), proven by `gates.sh fr` — which records `- RED: <FR-ID>` in the change's `tasks.md`, and the reviewer reports an FR without it · ON/OFF per feature, always ON inline |
-| **Traceability** | FR → task (`covers`) → test name starting with the FR ID · `frs` gate fails if an FR has no test or a duplicate ID |
-| **Your architecture** (Vertical Slice suggested) | `.claude/project.md` → Layer Structure defines the modules — Vertical Slice by default, one folder per feature, replace it with yours · `.claude/rules/architecture.md` · entry layer without business rules · logic layer independent of the transport · imports only through the public API |
+| **Spec-Driven Development** (OpenSpec style) | Living spec per capability in `specs/current/` · each change as proposal → design → delta spec → tasks in `specs/changes/`, archived when closed |
+| **BDD** (Gherkin style) | Each FR is `The system MUST …` with inline `GIVEN / WHEN / THEN` — no `.feature` files — one test per scenario, enforced by `gates.sh fr` |
+| **TDD** | The test fails first (RED) — `gates.sh fr` records it, the reviewer reports an FR without it · ON/OFF per feature, always ON inline |
+| **Traceability** | FR → task → test named with the FR ID · the `frs` gate fails on an FR without a test or a duplicate ID |
+| **Your architecture** (Vertical Slice suggested) | `.claude/project.md` → Layer Structure defines the modules — replace the suggested one with yours · `.claude/rules/architecture.md`: public API between modules, business rules out of the entry layer, logic independent of the transport |
 | **ADRs** | Project-wide decisions in `docs/decisions/` and `docs/architecture.md` |
-| **Clean code** | KISS · YAGNI — also in FRs and Approach (`CLAUDE.md` → Hard Rules → Scope): only what the request names, extras flagged `⚠️ Not in the Request` · no pass-throughs · export only what is imported · exclusive states as one tagged union · no type casts · semantic, accessible UI — enforced by the lint gate (debt rules, unused exports, a `FORBIDDEN` regex on every added line, inline changes too, scaffold paths skipped through `FORBIDDEN_EXCLUDE`) and the reviewer (every rule in `.claude/rules/code.md`) |
-| **Testing practices** | Test behavior, not implementation · query like a user (Testing Library) · mock only boundaries (classic TDD) · Arrange / Act / Assert · one test per THEN variant — enforced by the lint gate (`TEST_FORBIDDEN` regex on every added test line, inline changes too, and the stack's test lint plugin) and the reviewer (every rule in `.claude/rules/testing.md`) |
-| **Low bureaucracy** | Inline changes (1 FR, 1 module) skip the change folder and the approval round · one approval per plan or batch (`go up to ID-00N` · `go all`) · ONE question at a time · `/adopt` needs one confirmation |
-| **Low verbosity** | Short replies by default, `explain` for depth · skills reply with a fixed Output Contract and nothing around it · gates print one line, failing lines only · FRs, change folders and questions are never shortened |
-| **English, imperative prompts** | Every `.md` follows `.claude/doc-rules.md`: English, imperative, one idea per line · uppercase `MUST` / `NEVER` / `ALWAYS` only for rules whose violation is costly, with the reason — plain imperative for the rest, no "should" or "try to" · each rule lives in one place · a line that changes nothing gets cut · every skill follows `.claude/templates/skill.md` |
-| **Refactoring** (Fowler) | Green tests first · one move per step · gates after each step · tests untouched |
-| **Measured optimization** | Baseline first · one change per step · keep a step only if the metric improves |
-| **Human in the loop** | You approve the change folder and each task or batch, review the staged diff once per task or the commits once per batch — a batch stops on a deviation from the plan — your `go` commits the task — the agent cannot run `git push` · research → approve → plan → approve → code: no code before approval |
-| **Quality gates** | `gates.sh` runs format → lint → build → tests → frs → audit, stops at the first failure and prints one line the agent copies as is — a `PreToolUse` hook runs them on every `git commit` and blocks it on ❌ — same command in CI |
-| **Multi-agent** | `implementer` (Sonnet) runs one task — a fix that fails 3 times returns to you · `reviewer` (Opus) checks the diff in a fresh context — gaps against FRs, Hard Rules and the `.claude/rules/` files only, never naming or preferences · `Explore` maps code on Haiku · every agent has a turn cap (`maxTurns`) — a run that hits it stops like a blocked task |
-| **Context engineering** | `/clear` per task or batch, state lives in the change folder · skills load on demand · `CLAUDE.md` ≈ 1198 words, only rules every session needs — refactor and full-cycle rules load as skills; architecture, code, testing and UI rules load only for the files they cover · `Explore` runs without it · secrets and bulky files denied |
-| **Security** | No hardcoded secrets — env vars documented in `.env.example` · secrets denied in `.claude/settings.json` · a `PreToolUse` hook blocks any shell command that names a secret (`python -c "open('.env')"`, `cp`, `base64`…) — the [sandbox](https://code.claude.com/docs/en/sandboxing) is on, so a script that opens one by itself is blocked too: every `Read` deny becomes an OS-level read block for shell commands (Linux and WSL2 need `bubblewrap` and `socat` — without them, `/sandbox` shows what is missing and commands run unsandboxed) · a new dependency is checked in its registry (exists, age, downloads, repo, look-alike name) and needs your approval · `audit` gate for known vulnerabilities when a manifest changes, locally and in CI |
-| **Measure** | `/usage` and `/context` for tokens · `/doctor prompt-audit` after editing rules, skills or agents |
-| **Conventional Commits** | One branch per change, one commit per approved task, squash-merged into one commit on main — typed `feat` · `refactor` · `perf`, message from `.claude/project.md`, `gates.sh full` checks every subject in a PR against `COMMIT_PATTERN` |
+| **Clean code** | KISS · YAGNI from FRs to code — only what the request names, never fragile · no pass-throughs, unused exports, type casts or contradicting state fields — enforced by the lint gate (`FORBIDDEN` regex on added lines) and the reviewer (`.claude/rules/code.md`) |
+| **Testing practices** | Behavior, not implementation · query like a user · mock only boundaries · Arrange / Act / Assert · one test per THEN variant — enforced by `TEST_FORBIDDEN`, the test lint plugin and the reviewer (`.claude/rules/testing.md`) |
+| **Refactoring and optimization** (Fowler) | Green tests first · one step at a time, gates after each, tests untouched · optimize: baseline first, keep a step only if the metric improves |
+| **Human in the loop** | No code before approval: research → approve → plan → approve → code · you approve each task or batch, your `go` commits it · the agent cannot `git push` |
+| **Low bureaucracy** | Inline changes (1 FR, 1 module) skip the change folder · one approval per plan or batch · ONE question at a time |
+| **Low verbosity** | Short replies, fixed Output Contracts, gates print one line · FRs, change folders and questions are never shortened |
+| **Quality gates** | `gates.sh`: format → lint → build → tests → frs → audit — stops at the first failure, prints one line · same command in the commit hook and CI |
+| **Multi-agent** | `Explore` (Haiku) maps code · `implementer` (Sonnet) runs one task · `reviewer` (Opus) checks the diff in a fresh context, only against FRs and rules · every agent has a turn cap |
+| **Context engineering** | `/clear` per task or batch, state lives in the change folder · `CLAUDE.md` holds only rules every session needs — skills and path rules load on demand · measure with `/usage`, `/context`, `/doctor prompt-audit` |
+| **English, imperative prompts** | Every `.md` follows `.claude/doc-rules.md`: one idea per line, uppercase `MUST` / `NEVER` only for costly rules, each rule in one place |
+| **Security** | Secrets denied and never hardcoded (`.env.example`) · a hook blocks shell commands that name a secret, the [sandbox](https://code.claude.com/docs/en/sandboxing) blocks scripts that open one (Linux and WSL2 need `bubblewrap` and `socat`) · new dependencies checked in their registry and approved by you · `audit` gate |
+| **Conventional Commits** | One branch per change, one commit per task, squash-merged · `gates.sh full` checks each subject against `COMMIT_PATTERN` |
