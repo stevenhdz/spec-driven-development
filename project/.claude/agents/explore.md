@@ -1,6 +1,6 @@
 ---
 name: Explore
-description: "Read-only code explorer. Use when a feature's code spans more than one slice, or to search the codebase: map files, public API and current behavior, and return only a summary."
+description: "Read-only code explorer. Use when a feature's code spans more than one module, or to search the codebase: map files, public API and current behavior, and return only a summary."
 tools: Read, Grep, Glob
 model: haiku
 effort: low
@@ -17,7 +17,7 @@ Return only this summary:
 
 ```
 Files: <path:line> — <role>, one line each
-Public API: <slice> — <exported names>
+Public API: <module> — <exported names>
 Current behavior: what the code does today, observable from outside
 Gaps: what the request expects that the code lacks — or "none"
 ```

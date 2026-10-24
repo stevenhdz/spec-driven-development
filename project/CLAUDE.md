@@ -10,11 +10,12 @@ Classify every request before touching code.
 |----------------------------------------------------------------------|------------------------|
 | Removes an FR | Adds or modifies at most one FR, in an existing spec file — or none |
 | Adds or modifies more than one FR | Removes no FR |
-| Needs a new spec file | Touches one slice only |
-| Touches more than one slice | Creates no slice |
-| Creates a slice | Adds no dependency |
+| Needs a new spec file | Touches one module only |
+| Touches more than one module | Creates no module |
+| Creates a module | Adds no dependency |
 | Adds a dependency | |
 
+- Module: the unit `.claude/project.md` → Layer Structure defines (e.g. a slice, a layer, a package).
 - The human's word wins: "as a feature" or "inline" overrides the table.
 - If inline work grows past the table: stop, report, switch to the full cycle.
 - No observable behavior change in code: skip the table — load `.claude/skills/refactor/SKILL.md`.

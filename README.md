@@ -13,7 +13,7 @@ AI wrote fast, working code — and also bugs, layers nobody asked for, security
 
 - **It guesses what to build** → SDD + BDD: a written, approved spec with concrete GIVEN / WHEN / THEN examples comes first.
 - **Bugs and unproven "it works"** → TDD + deterministic gates: a test fails first, a script prints the result.
-- **Layers nobody asked for, technical debt** → KISS · YAGNI from the spec to the code — only what the request names, never fragile · vertical slices + a reviewer that checks the diff against the spec and the request.
+- **Layers nobody asked for, technical debt** → KISS · YAGNI from the spec to the code — only what the request names, never fragile · your architecture (vertical slices suggested) + a reviewer that checks the diff against the spec and the request.
 - **Security holes and fake packages** → secrets denied and never hardcoded, every new dependency checked in its registry and approved by you, `audit` gate.
 - **Spec and code drift apart** → living specs + traceability: every FR keeps a test, checked in CI.
 
@@ -48,7 +48,7 @@ Existing project: install, then run `/adopt` — it fills steps 2 and 3 from you
 ## Use it
 - **FR**: one behavior the system MUST have, with GIVEN / WHEN / THEN examples — lives in `specs/current/`, each with a test.
 - **Change folder**: `specs/changes/<feature>/` — the plan for one change: proposal, design, FR deltas, tasks `ID-001…`.
-- **Size**: the agent picks **inline** (at most 1 FR, 1 slice — one feature folder) or **full cycle** (anything bigger).
+- **Size**: the agent picks **inline** (at most 1 FR, 1 module — e.g. one feature folder) or **full cycle** (anything bigger).
 
 **Full cycle — plan**
 
@@ -59,8 +59,8 @@ flowchart LR
     SZ{"Size?"}:::auto
     O(["B ▸ continues in<br>Other sizes"]):::conn
     Q ==> SZ
-    SZ ==>|"2+ FRs · new slice · dependency<br>or you added: as a feature"| R
-    SZ -.->|"1 FR · 1 slice · no behavior change<br>or you added: inline"| O
+    SZ ==>|"2+ FRs · new module · dependency<br>or you added: as a feature"| R
+    SZ -.->|"1 FR · 1 module · no behavior change<br>or you added: inline"| O
     subgraph R ["1 · Research — RPI"]
         direction TB
         RS["Read the code as it is<br>facts only, no proposals"]:::research
@@ -180,7 +180,7 @@ flowchart TB
     FB(["B ▸ from the plan<br>Size? said small"]):::conn
     SZ{"Which small change?"}:::auto
     FB ==> SZ
-    subgraph IN ["Inline · 1 requirement · 1 slice — SDD + BDD + TDD · grows past it: full cycle"]
+    subgraph IN ["Inline · 1 requirement · 1 module — SDD + BDD + TDD · grows past it: full cycle"]
         direction LR
         E["Requirement in the living spec<br>GIVEN / WHEN / THEN"]:::bdd
         TR["RED · test fails"]:::red
@@ -204,7 +204,7 @@ flowchart TB
     subgraph DC ["Docs only"]
         DO["Re-read against<br>the doc rules"]:::sdd
     end
-    SZ ==>|"1 FR · 1 slice<br>or you added: inline"| IN
+    SZ ==>|"1 FR · 1 module<br>or you added: inline"| IN
     SZ ==>|"no behavior change"| RF
     SZ ==>|"only .md files"| DC
     RT -.->|"no: add them first<br>as an inline change"| IN
@@ -281,7 +281,7 @@ CLAUDE.md                       Framework · rules every change follows — load
   hooks/protect-secrets.sh      Framework · blocks shell commands that name a secret
   hooks/gate-commit.sh          Framework · blocks a git commit whose files fail scoped gates
   rules/                        Framework · rules loaded only for the files their paths: match
-    architecture.md             slices, layers, external data — source files
+    architecture.md             modules, layers, external data — source files
     code.md                     KISS, no pass-throughs, errors, types, no comments — source files
     testing.md                  behavior tests, mocks, TDD — test files
     ui.md                       semantic, accessible UI — UI files
@@ -315,11 +315,11 @@ Run `bash .claude/scripts/gates.sh full --no-format` on every PR. In a GitHub PR
 | **BDD** (Gherkin style) | Each FR is `The system MUST …` (RFC 2119) with inline Gherkin `GIVEN / WHEN / THEN` — one line, no `.feature` file or Cucumber — every scenario becomes a test, and `gates.sh fr` fails with fewer tests than scenarios |
 | **TDD** | Test fails first (RED), proven by `gates.sh fr` — which records `- RED: <FR-ID>` in the change's `tasks.md`, and the reviewer reports an FR without it · ON/OFF per feature, always ON inline |
 | **Traceability** | FR → task (`covers`) → test name starting with the FR ID · `frs` gate fails if an FR has no test or a duplicate ID |
-| **Vertical Slice Architecture** | `.claude/rules/architecture.md` · one folder per feature · entry layer without business rules · logic layer independent of the transport · imports only through the public API |
+| **Your architecture** (Vertical Slice suggested) | `.claude/project.md` → Layer Structure defines the modules — Vertical Slice by default, one folder per feature, replace it with yours · `.claude/rules/architecture.md` · entry layer without business rules · logic layer independent of the transport · imports only through the public API |
 | **ADRs** | Project-wide decisions in `docs/decisions/` and `docs/architecture.md` |
 | **Clean code** | KISS · YAGNI — also in FRs and Approach (`CLAUDE.md` → Hard Rules → Scope): only what the request names, extras flagged `⚠️ Not in the Request` · no pass-throughs · export only what is imported · exclusive states as one tagged union · no type casts · semantic, accessible UI — enforced by the lint gate (debt rules, unused exports, a `FORBIDDEN` regex on every added line, inline changes too, scaffold paths skipped through `FORBIDDEN_EXCLUDE`) and the reviewer (every rule in `.claude/rules/code.md`) |
 | **Testing practices** | Test behavior, not implementation · query like a user (Testing Library) · mock only boundaries (classic TDD) · Arrange / Act / Assert · one test per THEN variant — enforced by the lint gate (`TEST_FORBIDDEN` regex on every added test line, inline changes too, and the stack's test lint plugin) and the reviewer (every rule in `.claude/rules/testing.md`) |
-| **Low bureaucracy** | Inline changes (1 FR, 1 slice) skip the change folder and the approval round · one approval per plan or batch (`go up to ID-00N` · `go all`) · ONE question at a time · `/adopt` needs one confirmation |
+| **Low bureaucracy** | Inline changes (1 FR, 1 module) skip the change folder and the approval round · one approval per plan or batch (`go up to ID-00N` · `go all`) · ONE question at a time · `/adopt` needs one confirmation |
 | **Low verbosity** | Short replies by default, `explain` for depth · skills reply with a fixed Output Contract and nothing around it · gates print one line, failing lines only · FRs, change folders and questions are never shortened |
 | **English, imperative prompts** | Every `.md` follows `.claude/doc-rules.md`: English, imperative, one idea per line · uppercase `MUST` / `NEVER` / `ALWAYS` only for rules whose violation is costly, with the reason — plain imperative for the rest, no "should" or "try to" · each rule lives in one place · a line that changes nothing gets cut · every skill follows `.claude/templates/skill.md` |
 | **Refactoring** (Fowler) | Green tests first · one move per step · gates after each step · tests untouched |
