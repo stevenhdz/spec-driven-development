@@ -215,12 +215,12 @@ A task that returns `blocked`, a deviation, `RED not recorded` or a failing gate
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"fontFamily": "-apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans, Helvetica, Arial, sans-serif", "fontSize": "14px", "lineColor": "#667085", "primaryTextColor": "#101828", "clusterBkg": "#FFFFFF", "clusterBorder": "#D0D5DD", "edgeLabelBackground": "#FFFFFF", "titleColor": "#344054"}, "flowchart": {"curve": "basis", "nodeSpacing": 22, "rankSpacing": 34, "padding": 10}}}%%
-flowchart TB
+flowchart LR
     FB(["B ▸ from the plan<br>Size? said small"]):::conn
     SZ{"Which small change?"}:::auto
     FB ==> SZ
     subgraph IN ["Inline · main session · 1 requirement · 1 module — SDD + BDD + TDD · grows past it: full cycle"]
-        direction LR
+        direction TB
         E["Requirement in the living spec<br>GIVEN / WHEN / THEN"]:::bdd
         TR["RED · test fails"]:::red
         TG["GREEN · code passes"]:::green
@@ -229,7 +229,7 @@ flowchart TB
         E ==> TR ==> TG ==> F ==> FS
     end
     subgraph RF ["Refactor · optimize · main session — behavior unchanged"]
-        direction LR
+        direction TB
         RT{"Covering tests<br>pass?"}:::auto
         RP(["You: approve plan<br>optimize: + metric"]):::human
         RS["One step<br>tests untouched"]:::auto

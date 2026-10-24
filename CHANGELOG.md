@@ -5,6 +5,7 @@
 - README → Use it: the flow diagrams show who runs each step — a box per actor inside each phase: plain = main session · dashed = a subagent in its own context — `Explore` (Haiku) in Research when the code spans 2+ modules · `implementer` (Sonnet) around RED → GREEN → checks → stage · `reviewer` (Opus) around the review · Other sizes: main session.
 - Plan diagram adds what was missing: ONE question when the goal is unclear · scope IN / OUT · requirements only for what the request names · the simplest design · the `⚠️ Request not covered` / `⚠️ Not in the Request` flags before `approve?`.
 - Build and close diagram adds: the main session relays the implementer's result · `/clear → go` before the next task · the commit hook named · review gaps go to you — fix (back to GREEN) or accept (on to the specs merge).
+- Build and close and Other sizes read left to right: each phase or size is a column, side by side.
 
 ## v1.31.0 — 2026-10-24
 ### Changed
