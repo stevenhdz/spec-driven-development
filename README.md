@@ -56,26 +56,40 @@ Existing project: install, then run `/adopt` — it fills steps 2 and 3 from you
 %%{init: {"theme": "base", "themeVariables": {"fontFamily": "-apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans, Helvetica, Arial, sans-serif", "fontSize": "14px", "lineColor": "#667085", "primaryTextColor": "#101828", "clusterBkg": "#FFFFFF", "clusterBorder": "#D0D5DD", "edgeLabelBackground": "#FFFFFF", "titleColor": "#344054"}, "flowchart": {"curve": "basis", "nodeSpacing": 22, "rankSpacing": 34, "padding": 10}}}%%
 flowchart LR
     Q(["You: request"]):::human
-    SZ{"Size?"}:::auto
+    SZ{"Size?<br>main session"}:::auto
     O(["B ▸ continues in<br>Other sizes"]):::conn
     Q ==> SZ
     SZ ==>|"2+ FRs · new module · dependency<br>or you added: as a feature"| R
     SZ -.->|"1 FR · 1 module · no behavior change<br>or you added: inline"| O
     subgraph R ["1 · Research — RPI"]
         direction TB
-        RS["Read the code as it is<br>facts only, no proposals"]:::research
+        subgraph RX ["Explore · Haiku — only when the code spans 2+ modules"]
+            EX["Map files · public API<br>current behavior"]:::research
+        end
+        subgraph RM ["main session"]
+            RS["design.md → Research<br>the code as it is · path:line<br>facts only, no proposals"]:::research
+        end
         RA(["You: research ok?"]):::human
+        EX -.->|summary| RS
         RS ==> RA
         RA -.->|"no: what is wrong"| RS
     end
     subgraph P ["2 · Plan — SDD + BDD"]
         direction TB
-        S1["SDD · proposal<br>request · scope · how to verify"]:::sdd
-        S2["BDD · requirements<br>GIVEN / WHEN / THEN"]:::bdd
-        S3["Design"]:::sdd
-        S4["Tasks"]:::sdd
+        subgraph PM ["main session"]
+            direction TB
+            UQ{"Goal clear?"}:::auto
+            S1["SDD · proposal<br>request verbatim · scope IN / OUT<br>how to verify"]:::sdd
+            S2["BDD · requirements<br>GIVEN / WHEN / THEN<br>only what the request names"]:::bdd
+            S3["Design · the simplest approach<br>every file maps to an FR"]:::sdd
+            S4["Tasks"]:::sdd
+            FL["⚠️ Request not covered<br>⚠️ Not in the Request:<br>error path · existing data only"]:::note
+        end
+        QQ(["You: answer<br>ONE question"]):::human
         A(["You: approve?"]):::human
-        S1 ==> S2 ==> S3 ==> S4 ==> A
+        UQ ==>|yes| S1 ==> S2 ==> S3 ==> S4 ==> FL ==> A
+        UQ -.->|no| QQ
+        QQ -.-> UQ
         A -.->|"change: what"| S1
     end
     NX(["A ▸ continues in<br>Build and close"]):::conn
@@ -90,7 +104,10 @@ flowchart LR
     classDef human fill:#FFF4E0,stroke:#B54708,stroke-width:2px,color:#7A2E0E
     classDef note fill:#FFFFFF,stroke:#B54708,stroke-width:1px,stroke-dasharray:4 3,color:#7A2E0E
     classDef conn fill:#344054,stroke:#344054,stroke-width:1.5px,color:#FFFFFF
-    linkStyle 2,4,9 stroke:#B54708,stroke-width:1.5px,stroke-dasharray:6 4
+    linkStyle 2,5,12,13,14 stroke:#B54708,stroke-width:1.5px,stroke-dasharray:6 4
+    style RX fill:#FAFAFB,stroke:#475467,stroke-width:1.5px,stroke-dasharray:5 3
+    style RM fill:#FFFFFF,stroke:#98A2B3,stroke-width:1px
+    style PM fill:#FFFFFF,stroke:#98A2B3,stroke-width:1px
 ```
 
 **Full cycle — build and close**
@@ -101,40 +118,56 @@ flowchart TB
     FA(["A ▸ from the plan<br>you approved it"]):::conn
     subgraph I ["3 · Implement — TDD, one task at a time"]
         direction LR
-        W["RED · write the tests<br>they fail"]:::red
-        G["GREEN · write the code<br>tests pass"]:::green
-        SC["Quality checks"]:::auto
-        ST["Stage"]:::auto
+        subgraph IM ["implementer · Sonnet · own context, one per task"]
+            direction LR
+            W["RED · write the tests<br>they fail"]:::red
+            G["GREEN · write the code<br>tests pass"]:::green
+            SC["Quality checks"]:::auto
+            ST["Stage"]:::auto
+        end
+        subgraph IS ["main session"]
+            direction LR
+            RL["Relay the result"]:::auto
+            CM["Commit the task"]:::auto
+            CL["/clear → go<br>next task"]:::auto
+        end
         D(["You: review<br>the diff"]):::human
-        HK["Checks run again"]:::auto
-        CM["Commit the task"]:::auto
+        HK["Checks run again<br>commit hook"]:::auto
         BL(["You decide<br>options"]):::human
         BN["Batch · go all: no stop here<br>review all commits at the end"]:::note
-        W ==> G ==> SC ==> ST ==> D
-        D ==>|go| HK ==> CM
+        W ==> G ==> SC ==> ST ==> RL ==> D
+        D ==>|go| HK ==> CM ==> CL
+        CL -.->|next task| W
         D -.->|"fix: ID what"| G
-        CM -.->|next task| W
         HK -.->|"checks fail: fix, stage, retry"| G
         SC -.->|"checks fail · 3 failed fixes · scope grows<br>deviation · a decision is yours"| BL
         D -.- BN
     end
     subgraph C ["4 · Close — SDD living spec"]
         direction LR
-        RV["Review vs<br>requirements"]:::auto
-        M["SDD · update<br>the living spec"]:::sdd
-        FG["All quality<br>checks"]:::auto
-        V["Verify<br>end to end"]:::green
-        AR["Archive<br>the plan"]:::sdd
-        K["Close commit"]:::auto
+        subgraph CR ["reviewer · Opus · fresh context, once"]
+            RV["Review vs<br>request · FRs · rules"]:::auto
+        end
+        subgraph CS ["main session"]
+            direction LR
+            M["SDD · update<br>the living spec"]:::sdd
+            FG["All quality<br>checks"]:::auto
+            V["Verify<br>end to end"]:::green
+            AR["Archive<br>the plan"]:::sdd
+            K["Close commit"]:::auto
+        end
+        GP(["You: gaps<br>fix or accept"]):::human
         PU(["You: push<br>open PR"]):::human
         SQ["Squash merge<br>into main"]:::auto
         VF(["You decide<br>options"]):::human
-        RV ==> M ==> FG ==> V ==> AR ==> K ==> PU ==> SQ
+        RV ==>|no gaps| M ==> FG ==> V ==> AR ==> K ==> PU ==> SQ
+        RV -.->|gaps| GP
+        GP -.->|accept| M
         V -.->|fails| VF
     end
     FA ==> I
     I ==>|last task| C
-    I <-.-|"↑ gaps: fix ID"| C
+    GP -.->|"fix: ID what"| G
     classDef research fill:#EAF0FB,stroke:#3B5BA9,stroke-width:1.5px,color:#1E2A44
     classDef sdd fill:#F3EEFC,stroke:#6B46C1,stroke-width:1.5px,color:#2E1A5E
     classDef bdd fill:#E6F6F4,stroke:#0F766E,stroke-width:1.5px,color:#0B3B36
@@ -144,11 +177,17 @@ flowchart TB
     classDef human fill:#FFF4E0,stroke:#B54708,stroke-width:2px,color:#7A2E0E
     classDef note fill:#FFFFFF,stroke:#B54708,stroke-width:1px,stroke-dasharray:4 3,color:#7A2E0E
     classDef conn fill:#344054,stroke:#344054,stroke-width:1.5px,color:#FFFFFF
-    linkStyle 6,7,8,9,18,21 stroke:#B54708,stroke-width:1.5px,stroke-dasharray:6 4
-    linkStyle 10 stroke:#B54708,stroke-width:1px,stroke-dasharray:2 3
+    linkStyle 8,9,10,11,20,21,22,25 stroke:#B54708,stroke-width:1.5px,stroke-dasharray:6 4
+    linkStyle 12 stroke:#B54708,stroke-width:1px,stroke-dasharray:2 3
+    style IM fill:#FAFAFB,stroke:#475467,stroke-width:1.5px,stroke-dasharray:5 3
+    style CR fill:#FAFAFB,stroke:#475467,stroke-width:1.5px,stroke-dasharray:5 3
+    style IS fill:#FFFFFF,stroke:#98A2B3,stroke-width:1px
+    style CS fill:#FFFFFF,stroke:#98A2B3,stroke-width:1px
 ```
 
 Colors: blue research · purple SDD · teal BDD · red → green TDD · gray automation · orange capsule = you decide · dark capsule A / B = the flow continues in the diagram that starts with the same letter · solid line = main path · dashed orange = goes back (fix, next task, gaps, next step).
+
+Who runs each step: the box around it — plain = main session · dashed = a subagent in its own context: `Explore` (Haiku) maps code that spans 2+ modules · `implementer` (Sonnet) runs one task · `reviewer` (Opus) checks the branch once.
 
 Terms: requirement = FR · living spec = `specs/current/` · plan = the change folder · quality checks = `gates.sh` (lint, build, tests) · checks run again = the commit hook.
 
@@ -180,7 +219,7 @@ flowchart TB
     FB(["B ▸ from the plan<br>Size? said small"]):::conn
     SZ{"Which small change?"}:::auto
     FB ==> SZ
-    subgraph IN ["Inline · 1 requirement · 1 module — SDD + BDD + TDD · grows past it: full cycle"]
+    subgraph IN ["Inline · main session · 1 requirement · 1 module — SDD + BDD + TDD · grows past it: full cycle"]
         direction LR
         E["Requirement in the living spec<br>GIVEN / WHEN / THEN"]:::bdd
         TR["RED · test fails"]:::red
@@ -189,7 +228,7 @@ flowchart TB
         FS["Stage"]:::auto
         E ==> TR ==> TG ==> F ==> FS
     end
-    subgraph RF ["Refactor · optimize — behavior unchanged"]
+    subgraph RF ["Refactor · optimize · main session — behavior unchanged"]
         direction LR
         RT{"Covering tests<br>pass?"}:::auto
         RP(["You: approve plan<br>optimize: + metric"]):::human
@@ -201,7 +240,7 @@ flowchart TB
         RK -.->|next step| RS
         RC -.->|"test fails or<br>metric not better"| RB
     end
-    subgraph DC ["Docs only"]
+    subgraph DC ["Docs only · main session"]
         DO["Re-read against<br>the doc rules"]:::sdd
     end
     SZ ==>|"1 FR · 1 module<br>or you added: inline"| IN
