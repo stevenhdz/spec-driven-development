@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.31.1 — 2026-10-24
+### Changed
+- README → Use it: the flow diagrams show who runs each step — a box per actor inside each phase: plain = main session · dashed = a subagent in its own context — `Explore` (Haiku) in Research when the code spans 2+ modules · `implementer` (Sonnet) around RED → GREEN → checks → stage · `reviewer` (Opus) around the review · Other sizes: main session.
+- Plan diagram adds what was missing: ONE question when the goal is unclear · scope IN / OUT · requirements only for what the request names · the simplest design · the `⚠️ Request not covered` / `⚠️ Not in the Request` flags before `approve?`.
+- Build and close diagram adds: the main session relays the implementer's result · `/clear → go` before the next task · the commit hook named · review gaps go to you — fix (back to GREEN) or accept (on to the specs merge).
+
 ## v1.31.0 — 2026-10-24
 ### Changed
 - Any architecture, Vertical Slice suggested: the framework counts **modules** — the unit `.claude/project.md` → Layer Structure defines (a slice, a layer, a package) — instead of slices · `CLAUDE.md` → Change Size: touches one module, creates no module · `create-feature`, `explore`, `adopt` and `templates/change/design.md` → Modules.
