@@ -114,19 +114,19 @@ flowchart LR
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"fontFamily": "-apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans, Helvetica, Arial, sans-serif", "fontSize": "14px", "lineColor": "#667085", "primaryTextColor": "#101828", "clusterBkg": "#FFFFFF", "clusterBorder": "#D0D5DD", "edgeLabelBackground": "#FFFFFF", "titleColor": "#344054"}, "flowchart": {"curve": "basis", "nodeSpacing": 22, "rankSpacing": 34, "padding": 10}}}%%
-flowchart TB
+flowchart LR
     FA(["A ▸ from the plan<br>you approved it"]):::conn
     subgraph I ["3 · Implement — TDD, one task at a time"]
-        direction LR
+        direction TB
         subgraph IM ["implementer · Sonnet · own context, one per task"]
-            direction LR
+            direction TB
             W["RED · write the tests<br>they fail"]:::red
             G["GREEN · write the code<br>tests pass"]:::green
             SC["Quality checks"]:::auto
             ST["Stage"]:::auto
         end
         subgraph IS ["main session"]
-            direction LR
+            direction TB
             RL["Relay the result"]:::auto
             CM["Commit the task"]:::auto
             CL["/clear → go<br>next task"]:::auto
@@ -144,12 +144,12 @@ flowchart TB
         D -.- BN
     end
     subgraph C ["4 · Close — SDD living spec"]
-        direction LR
+        direction TB
         subgraph CR ["reviewer · Opus · fresh context, once"]
             RV["Review vs<br>request · FRs · rules"]:::auto
         end
         subgraph CS ["main session"]
-            direction LR
+            direction TB
             M["SDD · update<br>the living spec"]:::sdd
             FG["All quality<br>checks"]:::auto
             V["Verify<br>end to end"]:::green
