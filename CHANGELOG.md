@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.31.0 — 2026-10-24
+### Changed
+- Any architecture, Vertical Slice suggested: the framework counts **modules** — the unit `.claude/project.md` → Layer Structure defines (a slice, a layer, a package) — instead of slices · `CLAUDE.md` → Change Size: touches one module, creates no module · `create-feature`, `explore`, `adopt` and `templates/change/design.md` → Modules.
+- `.claude/project.md` → Layer Structure: Vertical Slice stays as the suggested structure — a comment says to replace it with yours and keep its `Module:` line.
+- `.claude/rules/architecture.md`: `.claude/project.md` → Layer Structure wins where it differs from a rule · public API between modules.
+- `docs/architecture.md`: §2 Modules · §5 Decisions → the structure row is a placeholder — the suggested Vertical Slice, or yours.
+- README: Size, flow diagrams, Files and Methodologies say module · Methodologies → Your architecture (Vertical Slice suggested).
+
+### Migration from v1.30
+- `--update` overwrites the framework files · `.claude/project.md` and `docs/architecture.md` are yours: add `- Module: <your unit>` under Layer Structure, and rename §2 Slices to Modules if you want.
+
 ## v1.30.2 — 2026-10-24
 ### Fixed
 - Scope crept unless the request said "keep it simple": since v1.30.0 KISS · YAGNI lived only in `.claude/rules/code.md`, loaded for source files — FRs, Scope IN and Approach are written before any source file is read, and the always-loaded Spec Rules only pushed to widen.
