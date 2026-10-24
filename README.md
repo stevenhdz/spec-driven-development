@@ -3,7 +3,7 @@
 [![Version](https://img.shields.io/github/v/tag/stevenhdz/spec-driven-development?label=version&color=blue)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-v2.1.271%2B-D97757)](https://claude.com/claude-code)
-[![SDD · BDD · TDD](https://img.shields.io/badge/SDD_%C2%B7_BDD_%C2%B7_TDD-8A2BE2)](#methodologies)
+[![RPI · SDD · BDD · TDD](https://img.shields.io/badge/RPI_%C2%B7_SDD_%C2%B7_BDD_%C2%B7_TDD-8A2BE2)](#methodologies)
 [![By stevenhdz](https://img.shields.io/badge/by-stevenhdz-black)](https://github.com/stevenhdz)
 
 A copy-and-fill setup for **Claude Code** on any project. Every change follows: **spec → your approval → tests + code**. The agent commits only what you approved — only you push.
@@ -11,7 +11,7 @@ A copy-and-fill setup for **Claude Code** on any project. Every change follows: 
 ## Why
 AI wrote fast, working code — and also bugs, layers nobody asked for, security holes and technical debt. What worked was taking away its room to improvise: first it writes the spec, I approve it, and only then come tests and code.
 
-- **It guesses what to build** → SDD + BDD: a written, approved spec with concrete GIVEN / WHEN / THEN examples comes first.
+- **It guesses what to build** → RPI + SDD + BDD: it reads the code first and you confirm it understood, then a written, approved spec with concrete GIVEN / WHEN / THEN examples comes before any code.
 - **Bugs and unproven "it works"** → TDD + deterministic gates: a test fails first, a script prints the result.
 - **Layers nobody asked for, technical debt** → KISS · YAGNI from the spec to the code — only what the request names, never fragile · your architecture (vertical slices suggested) + a reviewer that checks the diff against the spec and the request.
 - **Security holes and fake packages** → secrets denied and never hardcoded, every new dependency checked in its registry and approved by you, `audit` gate.
@@ -350,6 +350,7 @@ Run `bash .claude/scripts/gates.sh full --no-format` on every PR. In a GitHub PR
 ## Methodologies
 | Methodology | How this setup applies it |
 |-------------|---------------------------|
+| **RPI** (Research → Plan → Implement) | Research: the code as it is, facts only, no proposals — you confirm `research ok?` · Plan: the change folder — you `approve?` · Implement: one task at a time — you approve each task or batch |
 | **Spec-Driven Development** (OpenSpec style) | Living spec per capability in `specs/current/` · each change as proposal → design → delta spec → tasks in `specs/changes/`, archived when closed |
 | **BDD** (Gherkin style) | Each FR is `The system MUST …` with inline `GIVEN / WHEN / THEN` — no `.feature` files — one test per scenario, enforced by `gates.sh fr` |
 | **TDD** | The test fails first (RED) — `gates.sh fr` records it, the reviewer reports an FR without it · ON/OFF per feature, always ON inline |
