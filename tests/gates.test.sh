@@ -404,26 +404,26 @@ gates scoped Order/OrderService.cs
 expect "a C# source file is not a test" 0 "lint ✅"
 
 mkdir -p "$dir/Order.UnitTests"
-echo 'ORD-01' >"$dir/Order.UnitTests/Extra.cs"
-if [[ Order.UnitTests/Extra.cs =~ $(sed -n "s/^test_path='\(.*\)'$/\1/p" "$dir/.claude/scripts/gates.sh") ]]; then code=0; else code=1; fi
-out="Order.UnitTests/Extra.cs"
-expect "a *.UnitTests project folder holds tests" 0 "Order.UnitTests"
+echo 'x' >"$dir/Order.UnitTests/Extra.cs"
+gates test-paths
+expect "a *.UnitTests project folder holds tests" 0 "Order.UnitTests/Extra.cs"
 
 # TEST_PATH
 new_repo
 two_scenario_spec
-mkdir -p "$dir/Tests/AppTests"
-echo 'func test_ORD_01_sums() {} func test_ORD_01_empty() {}' >"$dir/Tests/AppTests/OrderSpecs.swift"
+# UITests/, not Tests/: macOS file systems ignore case, so Tests/ would land in the fixture's tests/.
+mkdir -p "$dir/UITests/AppTests"
+echo 'func test_ORD_01_sums() {} func test_ORD_01_empty() {}' >"$dir/UITests/AppTests/OrderSpecs.swift"
 conf TEST_FR "'printf \"ok ORD_01_sums\nok ORD_01_empty\n\"'"
 gates fr ORD-01
 expect "a test outside the built-in paths is not found" 3 "no test named ORD-01"
 
-conf TEST_PATH "'(^|/)Tests/'"
+conf TEST_PATH "'(^|/)UITests/'"
 gates fr ORD-01
 expect "TEST_PATH sets the project's test paths" 0 "FR ORD-01: ✅ (2 tests)"
 
-echo 'getByTestId("x")' >"$dir/Tests/AppTests/OrderSpecs.swift"
-gates scoped Tests/AppTests/OrderSpecs.swift
+echo 'getByTestId("x")' >"$dir/UITests/AppTests/OrderSpecs.swift"
+gates scoped UITests/AppTests/OrderSpecs.swift
 expect "TEST_FORBIDDEN follows TEST_PATH" 1 "lint ❌ (TEST_FORBIDDEN)"
 
 echo 'getByTestId("x")' >"$dir/tests/page.test.ts"
@@ -440,19 +440,19 @@ expect "test-paths passes built-in tests and ignores vitest, latest" 0 "Test pat
 [[ $out == *src/cart.test.ts* ]] || code=9
 expect "test-paths lists the test files it found" 0 "src/cart.test.ts"
 
-mkdir -p "$dir/Tests/AppTests" "$dir/.github/workflows"
-echo 'x' >"$dir/Tests/AppTests/OrderServiceTests.swift"
+mkdir -p "$dir/UITests/AppTests" "$dir/.github/workflows"
+echo 'x' >"$dir/UITests/AppTests/OrderServiceTests.swift"
 echo 'x' >"$dir/.github/workflows/test.yml"
 gates test-paths
-expect "test-paths fails on a test-like file the regex misses" 1 "Tests/AppTests/OrderServiceTests.swift"
+expect "test-paths fails on a test-like file the regex misses" 1 "UITests/AppTests/OrderServiceTests.swift"
 [[ $out != *test.yml* ]] || code=9
 expect "test-paths skips hidden folders" 1 "❌ 1 missed"
 
-conf TEST_PATH "'(^|/)Tests/|\.test\.ts\$'"
+conf TEST_PATH "'(^|/)UITests/|\.test\.ts\$'"
 gates test-paths
 expect "test-paths catches what a narrow TEST_PATH drops" 1 "tests/run.sh"
 
-conf TEST_PATH "'(^|/)[Tt]ests/|\.test\.ts\$'"
+conf TEST_PATH "'(^|/)(UI)?[Tt]ests/|\.test\.ts\$'"
 gates test-paths
 expect "test-paths passes once TEST_PATH matches" 0 "Test paths: ✅ 3 test files"
 
