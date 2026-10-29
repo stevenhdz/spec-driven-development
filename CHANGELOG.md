@@ -1,5 +1,33 @@
 # Changelog
 
+## v1.32.0 — 2026-10-28
+### Added
+- `.claude/hooks/gate-stop.sh`: a `Stop` hook, and a `SubagentStop` hook for `implementer` — ending a turn with code changed since the last gates run is blocked once, listing the files to run `gates.sh scoped` on · it asks for the evidence, not a pass: a ❌ is quoted and the agent stops, as before · `stop_hook_active` lets the next stop through, so it never loops · `.claude/` and `.md` skipped · gates.conf not configured: never blocks.
+- `gates.sh pending`: prints the changed code files whose content no `scoped` or `full` run checked — `scoped` and `full` now record each file they check as `<hash> <ok:<gates.conf hash>|fail> <path>` in `.git/sdd-gates` (untracked, inside `.git`) · the commit hook's run counts.
+- `gates.sh passed [--staged] <files…>`: exit 0 when every changed code file passed with its current content and the current `gates.conf` — `--staged`: each given file is also staged as checked.
+- The commit hook skips its gates run when `gates.sh passed` holds — the task's `scoped` run already checked that content, so each task runs the gates once instead of twice (a 2 s test suite: 4.1 s → 2.1 s per task) · a failed run, content changed after the pass, partial staging, a changed `gates.conf` or other unchecked code: it runs them as before.
+- `gates.sh fr` records the changed test files no run checked yet as `fr` — a RED paused for a question is not pending, so the stop hook does not force a `scoped` run that can only fail · an `fr` record never counts as passed.
+- C# tests: `gates.sh` and `.claude/rules/testing.md` treat `*.Tests/` · `*.UnitTests/` (any `<name>.<…>Tests/` project folder) and `*Tests.cs` · `*Test.cs` as test files — `fr`, `frs`, RED, `TEST_FORBIDDEN` and `{tests}` work for xUnit, NUnit and MSTest projects · the FR search skips `bin/` and `obj/`.
+- `gates.conf` → `TEST_PATH`: extended regex for this project's test files — it replaces the built-in paths, so each project sets its own (e.g. Swift `'(^|/)Tests/'`, a .NET solution `'(^|/)Order\.Tests/'`) · empty or missing: the built-in paths · `/adopt` fills it from the repo's test files and checks that `git ls-files | grep -E` lists every test file and no source file.
+- `gates.sh test-paths`: classifies the repo's files with the test path regex — `Test paths: ✅ <N> test files` and the first five, or `❌ <M> missed` with the test-like names it does not match (a `test`/`spec` word between separators or a CamelCase `Test`/`Spec` suffix — not `pytest`, `vitest`, `latest`; hidden folders skipped).
+- `gates.conf` → `TEST_PATH_EXCLUDE`: extended regex for source files that look like tests and are not (e.g. `LoadTest.cs`) — never treated as tests, never reported by `test-paths` · empty: none.
+- `/adopt` step 7 runs `gates.sh test-paths` until it prints ✅ and lists only test files — a missed test → `TEST_PATH`, a source file → `TEST_PATH_EXCLUDE` — its Output Contract adds `Tests: <that line> — TEST_PATH: <value, or built-in>`.
+- `.claude/rules/testing.md` also loads for `Tests/`, `*.*Tests/`, `*Tests.*` and `*Test.*` files.
+- `tests/gates.test.sh`: 45 cases for C# test paths, `TEST_PATH`, `TEST_PATH_EXCLUDE`, `test-paths`, `.gitignore` in the FR search, the stop hook, `pending`, `fr` records, the commit hook's reuse and audit.
+
+### Fixed
+- `audit` never ran outside CI: changed paths came from `git status --porcelain`, whose `?? ` / ` M ` prefix kept every manifest from matching — now read from `git diff --name-only` (unstaged and staged) and untracked files · `scoped`, `full` and the commit hook run `AUDIT` when a manifest changed, as documented.
+
+### Changed
+- `CLAUDE.md` → Quality Gates names the stop hook.
+- `fr` and `frs` find an FR's test with `git grep` over tracked and untracked files — each project's `.gitignore` decides what is skipped (`vendor/`, `.build/`, `build/`, `Pods/`…) instead of a fixed list of six folders.
+
+### Migration from v1.31
+- `--update` never touches your `.claude/gates.conf`: `TEST_PATH` missing works as empty (the built-in paths) — set it when your test files sit outside them, or to drop a source file they match.
+- `--update` never touches your `.claude/settings.json`: add next to `hooks.PreToolUse`:
+  `"Stop": [{ "hooks": [{ "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/gate-stop.sh\"" }] }],`
+  `"SubagentStop": [{ "matcher": "^implementer$", "hooks": [{ "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/gate-stop.sh\"" }] }]`
+
 ## v1.31.2 — 2026-10-24
 ### Changed
 - README names RPI (Research → Plan → Implement) as a methodology: badge `RPI · SDD · BDD · TDD` · Why → It guesses what to build · Methodologies → RPI row, first.
