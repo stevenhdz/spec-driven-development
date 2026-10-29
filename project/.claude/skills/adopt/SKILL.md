@@ -31,10 +31,10 @@ Do not load it for a new, empty project — the human fills the placeholders by 
 1. Ask "Adapt `.claude/project.md`, `docs/architecture.md`, `.claude/gates.conf` and `.claude/settings.json` to this code? yes / no" — stop and wait. Anything but "yes": stop.
 2. Read only manifests and tool config: scripts, dependencies, lint, test and build settings.
 3. Map the code structure: folders, entry points, modules, outbound systems, persistence.
-4. Fill every `[placeholder]` in `.claude/project.md` and `.claude/gates.conf` — every command in `gates.conf` MUST exist in the repo — no formatter in the repo: leave `FORMAT_*` empty, NEVER add one — `FORBIDDEN` from `.claude/project.md` → Forbidden plus the stack's ignore comments — `FORBIDDEN_EXCLUDE` from the scaffold and tool config files that need a forbidden form — `COMMIT_PATTERN` from `.claude/project.md` → Commit message — `TEST_FORBIDDEN` from the test runner and `.claude/rules/testing.md`.
+4. Fill every `[placeholder]` in `.claude/project.md` and `.claude/gates.conf` — every command in `gates.conf` MUST exist in the repo — no formatter in the repo: leave `FORMAT_*` empty, NEVER add one — `FORBIDDEN` from `.claude/project.md` → Forbidden plus the stack's ignore comments — `FORBIDDEN_EXCLUDE` from the scaffold and tool config files that need a forbidden form — `COMMIT_PATTERN` from `.claude/project.md` → Commit message — `TEST_FORBIDDEN` from the test runner and `.claude/rules/testing.md` — `TEST_PATH` from the repo's own test file paths — no test files yet: from the test runner's default naming.
 5. Fill every `[placeholder]` in `docs/architecture.md`.
 6. Update `deny` in `.claude/settings.json`.
-7. Run `grep -nE '\[[^]]{2,}\]' .claude/project.md docs/architecture.md .claude/gates.conf` — it MUST print nothing — re-read the edited files against `.claude/doc-rules.md`.
+7. Run `grep -nE '\[[^]]{2,}\]' .claude/project.md docs/architecture.md .claude/gates.conf` — it MUST print nothing — re-read the edited files against `.claude/doc-rules.md`. Then run `bash .claude/scripts/gates.sh test-paths` — it MUST print `✅` and list only test files — `❌` or a source file listed: a test file → fix `TEST_PATH` · a source file → add it to `TEST_PATH_EXCLUDE` — rerun.
 8. Run `bash .claude/scripts/gates.sh full --no-format` — report the line it prints — a failing gate is reported, NEVER fixed.
 9. Stage the edited files — stop and wait — "go": commit them as `chore: adopt spec-driven development`.
 
@@ -44,6 +44,7 @@ Do not load it for a new, empty project — the human fills the placeholders by 
 [Adopted] <project name>
 Stack: <language · framework · test runner · lint>
 Gates: <line printed by gates.sh full>
+Tests: <first line printed by gates.sh test-paths> — TEST_PATH: <value, or built-in> · TEST_PATH_EXCLUDE: <value, or none>
 Structure: <pattern> — modules: <names>
 Denied: <paths added>
 Staged: <files>

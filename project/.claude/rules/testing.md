@@ -6,6 +6,10 @@ paths:
   - "**/*_spec.*"
   - "**/test_*"
   - "**/{test,tests,spec,__tests__}/**"
+  - "**/Tests/**"
+  - "**/*.*Tests/**"
+  - "**/*Tests.*"
+  - "**/*Test.*"
 ---
 # Testing Rules
 <!-- Spec Driven Development by stevenhdz · https://github.com/stevenhdz/spec-driven-development — framework file: `install.sh --update` overwrites it. Your own path rules go in other files of .claude/rules/. -->

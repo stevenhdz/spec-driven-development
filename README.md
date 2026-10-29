@@ -282,6 +282,8 @@ flowchart LR
 | `bash .claude/scripts/gates.sh scoped <files…>` | Changed files only — each task close |
 | `bash .claude/scripts/gates.sh full [--no-format]` | Whole project, plus `frs` — and in a PR, `commits`: each subject matches `COMMIT_PATTERN` — feature close, inline change, CI |
 | `bash .claude/scripts/gates.sh fr <FR-ID>` | Tests of one FR — proves RED before the code: records it only while the unstaged code files are tests or manifests · fails with fewer tests than GIVEN/WHEN/THEN scenarios — counts the runner lines that name the FR: a lower bound |
+| `bash .claude/scripts/gates.sh test-paths` | Which files count as tests — `TEST_PATH` in `gates.conf`, or the built-in paths · ❌ lists test-like names it misses (`OrderTests.swift`, `Order.Tests/`) · `/adopt` runs it until ✅ |
+| `bash .claude/scripts/gates.sh pending` | Changed code files no `scoped` or `full` run checked since their last change — `scoped` and `full` record each file they check, pass or fail, in `.git/sdd-gates` · the stop hook uses it: ending a turn or an `implementer` run with pending files is blocked once |
 
 No gates: `- Gates: OFF` in the change's `proposal.md` → Scope, next to `TDD` — `scoped` and `full` print `⏭️` for every gate, `fr` still runs so TDD keeps working · inline: always ON.
 
@@ -305,7 +307,7 @@ CLAUDE.md                       Framework · rules every change follows — load
 .gitattributes                  You       · keeps *.sh with LF endings so the gates run on Windows
 .claude/
   project.md                    You       · product, stack, folder pattern, conventions, Project Rules
-  gates.conf                    You       · format · lint · build · test · audit commands for gates.sh
+  gates.conf                    You       · format · lint · build · test · audit commands for gates.sh · extra test paths
   settings.json                 You       · permissions (secrets denied, no git push), the sandbox and the hooks
   doc-rules.md                  Framework · how every .md is written
   agents/
@@ -316,9 +318,10 @@ CLAUDE.md                       Framework · rules every change follows — load
     create-feature/SKILL.md     Framework · the full cycle: change folder → tasks → review → archive
     adopt/SKILL.md              Framework · /adopt — fills the setup from an existing project's code
     refactor/SKILL.md           Framework · refactor: · optimize: — no behavior change, tests untouched
-  scripts/gates.sh              Framework · quality gates: scoped · full · fr
+  scripts/gates.sh              Framework · quality gates: scoped · full · fr · pending · passed · test-paths
   hooks/protect-secrets.sh      Framework · blocks shell commands that name a secret
-  hooks/gate-commit.sh          Framework · blocks a git commit whose files fail scoped gates
+  hooks/gate-commit.sh          Framework · blocks a git commit whose files fail scoped gates — skips the run when the same content already passed
+  hooks/gate-stop.sh            Framework · blocks ending a turn with code no gates run checked
   rules/                        Framework · rules loaded only for the files their paths: match
     architecture.md             modules, layers, external data — source files
     code.md                     KISS, no pass-throughs, errors, types, no comments — source files
@@ -363,7 +366,7 @@ Run `bash .claude/scripts/gates.sh full --no-format` on every PR. In a GitHub PR
 | **Human in the loop** | No code before approval: research → approve → plan → approve → code · you approve each task or batch, your `go` commits it · the agent cannot `git push` |
 | **Low bureaucracy** | Inline changes (1 FR, 1 module) skip the change folder · one approval per plan or batch · ONE question at a time |
 | **Low verbosity** | Short replies, fixed Output Contracts, gates print one line · FRs, change folders and questions are never shortened |
-| **Quality gates** | `gates.sh`: format → lint → build → tests → frs → audit — stops at the first failure, prints one line · same command in the commit hook and CI |
+| **Quality gates** | `gates.sh`: format → lint → build → tests → frs → audit — stops at the first failure, prints one line · same command in the commit hook and CI · a stop hook blocks ending a turn with code no gates run checked |
 | **Multi-agent** | `Explore` (Haiku) maps code · `implementer` (Sonnet) runs one task · `reviewer` (Opus) checks the diff in a fresh context, only against FRs and rules · every agent has a turn cap |
 | **Context engineering** | `/clear` per task or batch, state lives in the change folder · `CLAUDE.md` holds only rules every session needs — skills and path rules load on demand · measure with `/usage`, `/context`, `/doctor prompt-audit` |
 | **English, imperative prompts** | Every `.md` follows `.claude/doc-rules.md`: one idea per line, uppercase `MUST` / `NEVER` only for costly rules, each rule in one place |

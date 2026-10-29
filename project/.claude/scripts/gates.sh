@@ -1,30 +1,43 @@
 #!/bin/bash
 # Spec Driven Development by stevenhdz · https://github.com/stevenhdz/spec-driven-development — framework file: `install.sh --update` overwrites it. Your commands live in .claude/gates.conf.
 # Quality Gates: format (rewrites, silent) → lint (FORBIDDEN regex on added lines outside FORBIDDEN_EXCLUDE, TEST_FORBIDDEN on added test lines, then the linter) → build → tests → frs (full only: every FR in specs/current has a test and a unique ID) → commits (full with a base only: each subject since the base matches COMMIT_PATTERN) → audit, stops at the first failure, prints one line.
-# Usage: bash .claude/scripts/gates.sh scoped [--no-format] <files…> | full [--no-format] | fr <FR-ID>
+# Usage: bash .claude/scripts/gates.sh scoped [--no-format] <files…> | full [--no-format] | fr <FR-ID> | pending | passed [--staged] <files…> | test-paths
 # --no-format skips the format step — the commit hook uses it so staged content is what gets checked.
+# scoped and full record each code file they check as `<hash> <ok:<gates.conf hash>|fail> <path>` in .git/sdd-gates — fr records the changed test files no run checked yet as `fr`, so a RED paused for a question is not pending, but never counts as passed — pending prints the changed code files (.claude/ and .md skipped) whose content no run checked since its last change, pass or fail — the stop hook uses it · gates.conf missing or not configured: pending prints nothing.
+# test-paths: classifies the repo's files with the test path regex — ❌ lists test-like names it misses — /adopt uses it to check TEST_PATH.
+# passed: exit 0 when every changed code file passed with its current content and the current gates.conf · --staged: each given file is also staged as checked — the commit hook uses it to skip a second run.
 # `- Gates: OFF` in the active change's proposal.md (specs/changes/<feature>/): scoped and full print ⏭️ for every gate — fr still runs.
 # Audit runs when a manifest changed: uncommitted, or since $GATES_BASE (in a GitHub PR: origin/<base branch>) in full mode.
 # fr records RED: a failing run appends `- RED: <FR-ID>` to the active change's tasks.md (one active change only) — only while every unstaged or untracked code file is a test or a MANIFESTS file, so a failure after the code proves nothing.
 # fr fails when it finds fewer tests than the FR's GIVEN lines — read from the active change's delta spec, else from specs/current — tests = the runner's output lines that name the FR, so a parametrized test counts each case — a lower bound, not proof: a suite header that names the FR also counts.
-# Exit: 0 pass · 1 gate or test failed · 2 usage · 3 no test named <FR-ID>
+# Exit: 0 pass · 1 gate or test failed, or pending files · 2 usage · 3 no test named <FR-ID>
 set -u
 
 root=$(cd "$(dirname "$0")/../.." && pwd)
 conf="$root/.claude/gates.conf"
-if ! test -f "$conf"; then echo "Gates: ❌ missing .claude/gates.conf"; exit 1; fi
-if grep -qE '^[A-Z_]+="\[' "$conf"; then echo "Gates: ❌ .claude/gates.conf not configured — run /adopt or fill its [placeholders]"; exit 1; fi
+if ! test -f "$conf"; then test "${1:-}" = pending && exit 0; echo "Gates: ❌ missing .claude/gates.conf"; exit 1; fi
+if grep -qE '^[A-Z_]+="\[' "$conf"; then test "${1:-}" = pending && exit 0; echo "Gates: ❌ .claude/gates.conf not configured — run /adopt or fill its [placeholders]"; exit 1; fi
 . "$conf"
 
 mode=${1:-}
 shift || true
 no_format=""
 if test "${1:-}" = --no-format; then no_format=1; shift; fi
+staged=""
+if test "${1:-}" = --staged; then staged=1; shift; fi
 app_dir=${APP_DIR:-.}
 app="$root/$app_dir"
 log=$(mktemp)
-trap 'rm -f "$log"' EXIT
-test_path='(^|/)(__tests__|tests?|spec)/|(^|/)test_[^/]*$|[._](test|spec)\.[^/]*$'
+stamp=$(git -C "$root" rev-parse --absolute-git-dir 2>/dev/null) && stamp="$stamp/sdd-gates"
+conf_hash=$(git -C "$root" hash-object -- "$conf" 2>/dev/null)
+trap 'st=$?; rm -f "$log"; record "$st"' EXIT
+# TEST_PATH in gates.conf: the project's own test paths — empty or missing: these built-in ones.
+test_path=${TEST_PATH:-'(^|/)(__tests__|tests?|spec)/|(^|/)test_[^/]*$|[._](test|spec)\.[^/]*$|(^|/)[^/]*\.[^/]*Tests?/|Tests?\.cs$'}
+# TEST_PATH_EXCLUDE in gates.conf: paths never treated as tests — a source file a test path or the missed check matches (e.g. LoadTest.cs).
+test_exclude=${TEST_PATH_EXCLUDE:-}
+excluded() { test -n "$test_exclude" && [[ $1 =~ $test_exclude ]]; }
+is_test() { [[ $1 =~ $test_path ]] && ! excluded "$1"; }
+tests_only() { local f; while IFS= read -r f; do if is_test "$f"; then printf '%s\n' "$f"; fi; done; }
 
 files="" tests="" dirs="" file_list="" code=0
 for f in "$@"; do
@@ -39,7 +52,7 @@ for f in "$@"; do
 "
   q=$(printf '%q' "$f")
   files="$files $q"
-  if [[ $f =~ $test_path ]]; then tests="$tests $q"; fi
+  if is_test "$f"; then tests="$tests $q"; fi
   d=$(printf '%q' "$(dirname "$f")")
   case " $dirs " in *" $d "*) ;; *) dirs="$dirs $d" ;; esac
 done
@@ -80,13 +93,67 @@ only_tests_unstaged() {
   while IFS= read -r f; do
     test -n "$f" || continue
     case " ${MANIFESTS:-} " in *" ${f##*/} "*) continue ;; esac
-    if ! [[ $f =~ $test_path ]]; then return 1; fi
+    if ! is_test "$f"; then return 1; fi
   done < <( { git -C "$app" -c core.quotePath=false diff --name-only --relative; git -C "$app" -c core.quotePath=false ls-files --others --exclude-standard; } 2>/dev/null | grep -vE '\.md$|^\.claude/|^specs/')
 }
 
+changed_code() {
+  local f
+  { git -C "$root" -c core.quotePath=false diff --name-only --relative
+    git -C "$root" -c core.quotePath=false diff --staged --name-only --relative
+    git -C "$root" -c core.quotePath=false ls-files --others --exclude-standard; } 2>/dev/null | grep -vE '\.md$|^\.claude/' | awk '!seen[$0]++' | while IFS= read -r f; do
+    test -n "$f" && test -f "$root/$f" || continue
+    if test "$app_dir" != "."; then case "$f" in "$app_dir"/*) ;; *) continue ;; esac; fi
+    printf '%s\n' "$f"
+  done
+}
+
+hashed() {
+  local f
+  while IFS= read -r f; do
+    test -n "$f" && test -f "$root/$f" && printf '%s %s\n' "$(git -C "$root" hash-object -- "$f")" "$f"
+  done
+}
+
+record() {
+  local new f status=fail
+  case "$mode" in scoped|full|fr) ;; *) return 0 ;; esac
+  test -n "$stamp" || return 0
+  if test "$1" = 0; then status="ok:$conf_hash"; fi
+  if test "$mode" = fr; then
+    status=fr
+    new=$(unchecked "" | tests_only | hashed)
+  elif test "$mode" = full; then
+    new=$(changed_code | hashed)
+  else
+    new=$(printf '%s' "$file_list" | while IFS= read -r f; do
+      test -n "$f" || continue
+      if test "$app_dir" = "."; then printf '%s\n' "$f"; else printf '%s/%s\n' "$app_dir" "$f"; fi
+    done | hashed)
+  fi
+  test -n "$new" || return 0
+  new=$(printf '%s\n' "$new" | awk -v s="$status" '{ i = index($0, " "); print substr($0, 1, i) s " " substr($0, i + 1) }')
+  { if test -f "$stamp"; then
+      printf '%s\n' "$new" | cut -d' ' -f3- | awk 'NR == FNR { drop[$0]; next } { p = $0; sub(/^[^ ]+ [^ ]+ /, "", p) } !(p in drop)' - "$stamp"
+    fi
+    printf '%s\n' "$new"; } >"$stamp.tmp" && mv "$stamp.tmp" "$stamp"
+}
+
+# Changed code files with no record of their current content — with a status, no record with that status.
+unchecked() {
+  changed_code | hashed | awk -v stamp="$stamp" -v want="$1" '
+    BEGIN {
+      while (stamp != "" && (getline l < stamp) > 0) {
+        h = l; sub(/ .*/, "", h)
+        s = l; sub(/^[^ ]+ /, "", s); p = s; sub(/^[^ ]+ /, "", p); sub(/ .*/, "", s)
+        if (want == "" || s == want) seen[h " " p]
+      }
+    }
+    !($0 in seen) { print substr($0, index($0, " ") + 1) }'
+}
+
 has_test() {
-  (cd "$app" && grep -rIliE "$(fr_pattern "$1")" . --exclude='*.md' \
-    --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist --exclude-dir=.venv --exclude-dir=target) | grep -qE "$test_path"
+  git -C "$app" -c core.quotePath=false grep --untracked -lIiE "$(fr_pattern "$1")" -- . ':(exclude)*.md' 2>/dev/null | tests_only | grep -q .
 }
 
 scenario_count() {
@@ -106,6 +173,40 @@ record_red() {
   if ! only_tests_unstaged; then echo "RED not recorded: unstaged code besides tests — run fr before writing the code"; return 0; fi
   grep -qxF -- "- RED: $1" "$tasks" || printf -- '- RED: %s\n' "$1" >>"$tasks"
 }
+
+if test "$mode" = test-paths; then
+  all=$(git -C "$app" -c core.quotePath=false ls-files --cached --others --exclude-standard 2>/dev/null | grep -vE '\.md$|(^|/)\.')
+  found=$(printf '%s\n' "$all" | tests_only)
+  # A test-like name the regex misses: a test/spec word between separators, or a CamelCase Test/Spec suffix — not pytest, vitest, latest.
+  missed=$(printf '%s\n' "$all" | grep -E '(^|[/._-])([Tt]ests?|[Ss]pecs?)([/._-]|$)|[a-z0-9](Tests?|Specs?)([/._-]|$)' | while IFS= read -r f; do
+    is_test "$f" || excluded "$f" || printf '%s\n' "$f"
+  done)
+  if test -n "$missed"; then
+    echo "Test paths: ❌ $(printf '%s\n' "$missed" | grep -c .) missed — set TEST_PATH in .claude/gates.conf to match the tests, TEST_PATH_EXCLUDE for source files"
+    printf '%s\n' "$missed" | head -10
+    exit 1
+  fi
+  echo "Test paths: ✅ $(printf '%s' "$found" | grep -c .) test files"
+  printf '%s\n' "$found" | head -5 | awk 'NF'
+  exit 0
+fi
+
+if test "$mode" = pending; then
+  pending=$(unchecked "")
+  test -z "$pending" && exit 0
+  printf '%s\n' "$pending"
+  exit 1
+fi
+
+if test "$mode" = passed; then
+  if test -n "$staged"; then
+    while IFS= read -r f; do
+      test -z "$f" || git -C "$app" diff --quiet -- "$f" || exit 1
+    done <<<"$file_list"
+  fi
+  test -n "$conf_hash" && test -z "$(unchecked "ok:$conf_hash")"
+  exit
+fi
 
 if test "$mode" = fr; then
   fr=${1:-}
@@ -139,12 +240,14 @@ case "$mode" in
     format=${FORMAT_FULL:-}
     lint=$LINT_FULL
     test_cmd=$TEST_FULL ;;
-  *) echo "usage: gates.sh scoped [--no-format] <files…> | full [--no-format] | fr <FR-ID>"; exit 2 ;;
+  *) echo "usage: gates.sh scoped [--no-format] <files…> | full [--no-format] | fr <FR-ID> | pending | passed [--staged] <files…> | test-paths"; exit 2 ;;
 esac
 if test -n "$no_format"; then format=""; fi
 
 changed_paths() {
-  git -C "$root" status --porcelain
+  git -C "$root" -c core.quotePath=false diff --name-only --relative
+  git -C "$root" -c core.quotePath=false diff --staged --name-only --relative
+  git -C "$root" -c core.quotePath=false ls-files --others --exclude-standard
   if test "$mode" = full && test -n "$base"; then
     git -C "$root" diff --name-only "$base...HEAD" 2>/dev/null || printf '%s\n' $MANIFESTS
   fi
@@ -222,7 +325,7 @@ added_lines() {
 test_lines() {
   local l
   while IFS= read -r l; do
-    if [[ ${l%%:*} =~ $test_path ]]; then printf '%s\n' "$l"; fi
+    if is_test "${l%%:*}"; then printf '%s\n' "$l"; fi
   done
 }
 
