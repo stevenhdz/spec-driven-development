@@ -14,6 +14,7 @@
 - `/adopt` step 7 runs `gates.sh test-paths` until it prints ✅ and lists only test files — a missed test → `TEST_PATH`, a source file → `TEST_PATH_EXCLUDE` — its Output Contract adds `Tests: <that line> — TEST_PATH: <value, or built-in>`.
 - `.claude/rules/testing.md` also loads for `Tests/`, `*.*Tests/`, `*Tests.*` and `*Test.*` files.
 - `tests/gates.test.sh`: 45 cases for C# test paths, `TEST_PATH`, `TEST_PATH_EXCLUDE`, `test-paths`, `.gitignore` in the FR search, the stop hook, `pending`, `fr` records, the commit hook's reuse and audit.
+- CI runs `tests/gates.test.sh` on Windows too, in Git Bash — the shell the README names · a root `.gitattributes` keeps `*.sh` with LF endings, so the test script runs there.
 
 ### Fixed
 - `audit` never ran outside CI: changed paths came from `git status --porcelain`, whose `?? ` / ` M ` prefix kept every manifest from matching — now read from `git diff --name-only` (unstaged and staged) and untracked files · `scoped`, `full` and the commit hook run `AUDIT` when a manifest changed, as documented.
