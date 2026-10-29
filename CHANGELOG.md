@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.32.1 — 2026-10-28
+### Added
+- CI runs `tests/gates.test.sh` on Windows too, in Git Bash — the shell the README names · a root `.gitattributes` keeps `*.sh` with LF endings, so the test script runs there.
+
+### Fixed
+- `tests/gates.test.sh` failed on macOS: its fixtures made `Tests/` next to `tests/`, one folder on a case-insensitive file system — they use `UITests/` now · the `*.UnitTests` case read the test regex out of `gates.sh` with `sed`, which matched nothing after v1.32.0 and passed on Linux only because an empty regex matches everything — it runs `gates.sh test-paths` instead · `gates.sh` itself was right: it matches paths as git prints them.
+
 ## v1.32.0 — 2026-10-28
 ### Added
 - `.claude/hooks/gate-stop.sh`: a `Stop` hook, and a `SubagentStop` hook for `implementer` — ending a turn with code changed since the last gates run is blocked once, listing the files to run `gates.sh scoped` on · it asks for the evidence, not a pass: a ❌ is quoted and the agent stops, as before · `stop_hook_active` lets the next stop through, so it never loops · `.claude/` and `.md` skipped · gates.conf not configured: never blocks.
@@ -14,7 +21,6 @@
 - `/adopt` step 7 runs `gates.sh test-paths` until it prints ✅ and lists only test files — a missed test → `TEST_PATH`, a source file → `TEST_PATH_EXCLUDE` — its Output Contract adds `Tests: <that line> — TEST_PATH: <value, or built-in>`.
 - `.claude/rules/testing.md` also loads for `Tests/`, `*.*Tests/`, `*Tests.*` and `*Test.*` files.
 - `tests/gates.test.sh`: 45 cases for C# test paths, `TEST_PATH`, `TEST_PATH_EXCLUDE`, `test-paths`, `.gitignore` in the FR search, the stop hook, `pending`, `fr` records, the commit hook's reuse and audit.
-- CI runs `tests/gates.test.sh` on Windows too, in Git Bash — the shell the README names · a root `.gitattributes` keeps `*.sh` with LF endings, so the test script runs there.
 
 ### Fixed
 - `audit` never ran outside CI: changed paths came from `git status --porcelain`, whose `?? ` / ` M ` prefix kept every manifest from matching — now read from `git diff --name-only` (unstaged and staged) and untracked files · `scoped`, `full` and the commit hook run `AUDIT` when a manifest changed, as documented.
