@@ -79,6 +79,7 @@ Run gates only through `bash .claude/scripts/gates.sh`, from the repo root — e
 | Full | `bash .claude/scripts/gates.sh full` — adds `frs`: every FR in `specs/current/` has a test and a unique ID · in a PR, `commits`: each subject matches `COMMIT_PATTERN` | feature close · inline change |
 
 - A `git commit` runs `gates.sh scoped` on the files it commits through a hook (`.claude/hooks/gate-commit.sh`) — blocked on ❌.
+- Ending a turn with code changed since the last gates run is blocked once (`.claude/hooks/gate-stop.sh`) — run `gates.sh scoped` on the files it lists and report the line.
 - `❌`: stop, quote the lines the script printed, propose options — NEVER continue with a failing gate, NEVER self-fix silently.
 - Docs-only change (`.md` files): re-read the edited files against `.claude/doc-rules.md` — `gates.sh scoped` prints `⏭️` for every gate.
 

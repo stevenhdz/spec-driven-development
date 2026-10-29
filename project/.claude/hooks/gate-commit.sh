@@ -3,6 +3,7 @@
 # PreToolUse hook for Bash: a `git commit` runs scoped Quality Gates on the files it commits and is blocked on ❌ — CLAUDE.md asks for gates, this enforces them.
 # Detects git commit anywhere in the command — wrapped in sh -c, after env vars or xargs, with -C / -c options; a false match only runs the gates.
 # Files: the staged ones, plus every uncommitted change when the same command runs git add / git stage or commit -a / --all (the hook runs before the command, so those are not staged yet) — .claude/ and .md files skipped; none left: the commit passes. Gates run with --no-format, so they check what gets committed.
+# Skips the run when every changed code file already passed with its current content and the same gates.conf (`gates.sh passed`) — and, without add / -a, each committed file is staged as checked.
 # Exit: 0 allowed · 2 blocked (the gates output goes to Claude on stderr)
 set -u
 
@@ -36,11 +37,14 @@ add_files() {
   done
 }
 add_files < <(git -C "$root" diff --staged --name-only -z)
+staged=--staged
 if printf '%s' "$cmd" | grep -qE '(^|[^[:alnum:]_.-])git[[:space:]]([^;&|]*[[:space:]])?(add|stage)([^[:alnum:]_-]|$)|[[:space:]](-[A-Za-z]*a[A-Za-z]*|--all)([[:space:]]|$)'; then
+  staged=""
   add_files < <(git -C "$root" diff --name-only -z)
   add_files < <(git -C "$root" ls-files --others --exclude-standard -z)
 fi
 test "${#files[@]}" -gt 0 || exit 0
+if (cd "$root" && bash .claude/scripts/gates.sh passed $staged "${files[@]}") >/dev/null 2>&1; then exit 0; fi
 
 out=$(cd "$root" && bash .claude/scripts/gates.sh scoped --no-format "${files[@]}" 2>&1)
 status=$?

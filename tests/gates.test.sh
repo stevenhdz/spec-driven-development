@@ -19,6 +19,7 @@ new_repo() {
   mkdir -p "$dir/.claude/scripts" "$dir/.claude/hooks" "$dir/src" "$dir/tests"
   cp "$framework/scripts/gates.sh" "$dir/.claude/scripts/gates.sh"
   cp "$framework/hooks/gate-commit.sh" "$dir/.claude/hooks/gate-commit.sh"
+  cp "$framework/hooks/gate-stop.sh" "$dir/.claude/hooks/gate-stop.sh"
   cat >"$dir/.claude/gates.conf" <<'EOF'
 APP_DIR="."
 FORMAT_SCOPED=""
@@ -62,6 +63,11 @@ gates() {
 
 hook() {
   out=$(printf '{"tool_name":"Bash","tool_input":{"command":"%s"}}' "$1" | bash "$dir/.claude/hooks/gate-commit.sh" 2>&1)
+  code=$?
+}
+
+stop_hook() {
+  out=$(printf '{"hook_event_name":"Stop","stop_hook_active":%s}' "${1:-false}" | bash "$dir/.claude/hooks/gate-stop.sh" 2>&1)
   code=$?
 }
 
@@ -217,6 +223,273 @@ conf LINT_SCOPED '"true"'
 echo '// @ts-ignore' >>"$dir/src/ok.ts"
 hook 'git commit -am x'
 expect "hook checks unstaged tracked files on commit -a" 2 "lint ❌ (FORBIDDEN)"
+
+# Stop hook
+new_repo
+stop_hook
+expect "stop hook allows a clean tree" 0 ""
+
+echo 'export const a = 1' >"$dir/src/a.ts"
+stop_hook
+expect "stop hook blocks code no gates checked" 2 "src/a.ts"
+
+stop_hook true
+expect "stop hook allows a stop it already sent back" 0 ""
+
+conf LINT_SCOPED "'false'"
+gates scoped src/a.ts
+stop_hook
+expect "stop hook allows code whose gates ran and failed" 0 ""
+
+echo 'export const b = 2' >>"$dir/src/a.ts"
+stop_hook
+expect "stop hook blocks code changed after its gates ran" 2 "src/a.ts"
+
+conf LINT_SCOPED '"true"'
+echo '# notes' >"$dir/notes.md"
+mkdir -p "$dir/.claude/skills"
+echo 'x' >"$dir/.claude/skills/x.sh"
+gates full
+stop_hook
+expect "full records every changed code file · .md and .claude/ never pending" 0 ""
+
+new_repo
+two_scenario_spec
+echo 'ORD-01 sums two items|false' >"$dir/tests/ord.test.txt"
+gates fr ORD-01
+stop_hook
+expect "fr records the test files it ran: a paused RED is not pending" 0 ""
+
+echo 'export const total = 0' >"$dir/src/total.ts"
+gates fr ORD-01
+stop_hook
+expect "fr records only test files" 2 "src/total.ts"
+
+new_repo
+two_scenario_spec
+cnt=$(mktemp -u); dirs="$dirs $cnt"
+conf LINT_SCOPED "'echo run >>$cnt'"
+echo 'ORD-01 sums two items|true' >"$dir/tests/ord.test.txt"
+git_ add tests/ord.test.txt
+gates fr ORD-01
+hook 'git commit -m x'
+out="$out runs=$(grep -c . "$cnt" 2>/dev/null)"
+expect "an fr record never lets the commit hook skip its gates" 0 "runs=1"
+
+new_repo
+echo 'export const ok = 1' >"$dir/src/ok.ts"
+git_ add src/ok.ts
+hook 'git commit -m x'
+stop_hook
+expect "the commit hook's gates run counts" 0 ""
+
+new_repo
+conf APP_DIR '"app"'
+mkdir -p "$dir/app"
+echo 'export const a = 1' >"$dir/app/a.ts"
+echo 'x' >"$dir/root.ts"
+stop_hook
+expect "stop hook blocks code inside APP_DIR" 2 "app/a.ts"
+[[ $out != *root.ts* ]] || { code=1; out="root.ts listed: $out"; }
+expect "stop hook lists only files inside APP_DIR" 2 "app/a.ts"
+
+gates scoped app/a.ts
+stop_hook
+expect "scoped records a path inside APP_DIR" 0 ""
+
+new_repo
+conf APP_DIR '"[e.g. app]"'
+echo 'export const a = 1' >"$dir/src/a.ts"
+stop_hook
+expect "stop hook allows when gates.conf is not configured" 0 ""
+
+# Commit hook reuses a pass
+runs() { if test -f "$cnt"; then grep -c . "$cnt"; else echo 0; fi; }
+counting_repo() {
+  new_repo
+  cnt=$(mktemp -u)
+  dirs="$dirs $cnt"
+  conf LINT_SCOPED "'echo run >>$cnt'"
+  echo 'export const a = 1' >"$dir/src/a.ts"
+  git_ add src/a.ts
+}
+
+counting_repo
+gates scoped src/a.ts
+hook 'git commit -m x'
+out="$out runs=$(runs)"
+expect "hook skips gates the same content already passed" 0 "runs=1"
+
+counting_repo
+conf LINT_SCOPED "'echo run >>$cnt; false'"
+gates scoped src/a.ts
+hook 'git commit -m x'
+expect "hook runs gates after a failed run" 2 "Blocked"
+
+counting_repo
+gates scoped src/a.ts
+echo 'export const b = 2' >>"$dir/src/a.ts"
+hook 'git commit -am x'
+out="$out runs=$(runs)"
+expect "hook runs gates on content changed after the pass" 0 "runs=2"
+
+counting_repo
+echo 'export const b = 2' >>"$dir/src/a.ts"
+gates scoped src/a.ts
+hook 'git commit -m x'
+out="$out runs=$(runs)"
+expect "hook runs gates when the staged content is not what passed" 0 "runs=2"
+
+hook 'git commit -am x'
+out="$out runs=$(runs)"
+expect "hook skips gates on commit -a of the content that passed" 0 "runs=2"
+
+counting_repo
+gates scoped src/a.ts
+conf BUILD '"true"'
+hook 'git commit -m x'
+out="$out runs=$(runs)"
+expect "hook runs gates when gates.conf changed after the pass" 0 "runs=2"
+
+counting_repo
+gates scoped src/a.ts
+echo 'export const c = 3' >"$dir/src/c.ts"
+hook 'git commit -m x'
+out="$out runs=$(runs)"
+expect "hook runs gates while other code is unchecked" 0 "runs=2"
+
+counting_repo
+conf LINT_SCOPED "'false'"
+gates scoped src/a.ts
+stop_hook
+expect "pending counts a failed run as checked" 0 ""
+
+# Audit
+new_repo
+conf AUDIT '"echo audited"'
+echo 'export const a = 1' >"$dir/src/a.ts"
+gates scoped src/a.ts
+expect "audit skips when no manifest changed" 0 "audit ⏭️"
+
+echo '{}' >"$dir/package.json"
+gates scoped src/a.ts
+expect "audit runs on an untracked manifest" 0 "audit ✅"
+
+commit "chore: manifest"
+echo '{ "a": 1 }' >"$dir/package.json"
+conf AUDIT '"false"'
+gates scoped src/a.ts
+expect "audit fails on a modified manifest" 1 "audit ❌"
+
+git_ add package.json
+gates full
+expect "audit runs in full on a staged manifest" 1 "audit ❌"
+
+# C# test projects
+new_repo
+two_scenario_spec
+mkdir -p "$dir/Order.Tests" "$dir/Order"
+echo 'public class OrderService { }' >"$dir/Order/OrderService.cs"
+echo 'public class OrderTests { [Fact] public void ORD_01_sums() { } [Fact] public void ORD_01_empty() { } }' >"$dir/Order.Tests/OrderTests.cs"
+conf TEST_FR "'printf \"ok ORD_01_sums\nok ORD_01_empty\n\"'"
+gates fr ORD-01
+expect "fr finds a test in a C# *.Tests project" 0 "FR ORD-01: ✅ (2 tests)"
+
+echo 'getByTestId("x")' >>"$dir/Order.Tests/OrderTests.cs"
+gates scoped Order.Tests/OrderTests.cs
+expect "TEST_FORBIDDEN checks a C# test file" 1 "lint ❌ (TEST_FORBIDDEN)"
+
+echo 'getByTestId("x")' >>"$dir/Order/OrderService.cs"
+gates scoped Order/OrderService.cs
+expect "a C# source file is not a test" 0 "lint ✅"
+
+mkdir -p "$dir/Order.UnitTests"
+echo 'ORD-01' >"$dir/Order.UnitTests/Extra.cs"
+if [[ Order.UnitTests/Extra.cs =~ $(sed -n "s/^test_path='\(.*\)'$/\1/p" "$dir/.claude/scripts/gates.sh") ]]; then code=0; else code=1; fi
+out="Order.UnitTests/Extra.cs"
+expect "a *.UnitTests project folder holds tests" 0 "Order.UnitTests"
+
+# TEST_PATH
+new_repo
+two_scenario_spec
+mkdir -p "$dir/Tests/AppTests"
+echo 'func test_ORD_01_sums() {} func test_ORD_01_empty() {}' >"$dir/Tests/AppTests/OrderSpecs.swift"
+conf TEST_FR "'printf \"ok ORD_01_sums\nok ORD_01_empty\n\"'"
+gates fr ORD-01
+expect "a test outside the built-in paths is not found" 3 "no test named ORD-01"
+
+conf TEST_PATH "'(^|/)Tests/'"
+gates fr ORD-01
+expect "TEST_PATH sets the project's test paths" 0 "FR ORD-01: ✅ (2 tests)"
+
+echo 'getByTestId("x")' >"$dir/Tests/AppTests/OrderSpecs.swift"
+gates scoped Tests/AppTests/OrderSpecs.swift
+expect "TEST_FORBIDDEN follows TEST_PATH" 1 "lint ❌ (TEST_FORBIDDEN)"
+
+echo 'getByTestId("x")' >"$dir/tests/page.test.ts"
+gates scoped tests/page.test.ts
+expect "TEST_PATH replaces the built-in paths" 0 "lint ✅"
+
+# test-paths
+new_repo
+echo 'x' >"$dir/src/cart.test.ts"
+printf '%s\n' 'x' >"$dir/vitest.config.ts"
+printf '%s\n' 'x' >"$dir/src/latest.ts"
+gates test-paths
+expect "test-paths passes built-in tests and ignores vitest, latest" 0 "Test paths: ✅"
+[[ $out == *src/cart.test.ts* ]] || code=9
+expect "test-paths lists the test files it found" 0 "src/cart.test.ts"
+
+mkdir -p "$dir/Tests/AppTests" "$dir/.github/workflows"
+echo 'x' >"$dir/Tests/AppTests/OrderServiceTests.swift"
+echo 'x' >"$dir/.github/workflows/test.yml"
+gates test-paths
+expect "test-paths fails on a test-like file the regex misses" 1 "Tests/AppTests/OrderServiceTests.swift"
+[[ $out != *test.yml* ]] || code=9
+expect "test-paths skips hidden folders" 1 "❌ 1 missed"
+
+conf TEST_PATH "'(^|/)Tests/|\.test\.ts\$'"
+gates test-paths
+expect "test-paths catches what a narrow TEST_PATH drops" 1 "tests/run.sh"
+
+conf TEST_PATH "'(^|/)[Tt]ests/|\.test\.ts\$'"
+gates test-paths
+expect "test-paths passes once TEST_PATH matches" 0 "Test paths: ✅ 3 test files"
+
+new_repo
+mkdir -p "$dir/Order" "$dir/Order.Tests"
+echo 'x' >"$dir/Order/LoadTest.cs"
+echo 'x' >"$dir/Order.Tests/OrderTests.cs"
+conf TEST_PATH "'(^|/)Order\.Tests/|(^|/)tests/'"
+gates test-paths
+expect "test-paths reports a source file named like a test" 1 "Order/LoadTest.cs"
+
+conf TEST_PATH_EXCLUDE "'(^|/)LoadTest\.cs\$'"
+gates test-paths
+expect "TEST_PATH_EXCLUDE silences it" 0 "Test paths: ✅"
+
+conf TEST_PATH '""'
+gates test-paths
+[[ $out != *LoadTest* ]] || code=9
+expect "TEST_PATH_EXCLUDE drops a built-in match" 0 "Order.Tests/OrderTests.cs"
+
+echo 'getByTestId("x")' >"$dir/Order/LoadTest.cs"
+gates scoped Order/LoadTest.cs
+expect "an excluded file skips TEST_FORBIDDEN" 0 "lint ✅"
+
+# has_test follows .gitignore
+new_repo
+two_scenario_spec
+conf TEST_FR "'printf \"ok ORD_01_sums\nok ORD_01_empty\n\"'"
+mkdir -p "$dir/vendor/lib/tests"
+echo 'ORD_01' >"$dir/vendor/lib/tests/x_test.go"
+echo 'vendor/' >"$dir/.gitignore"
+gates fr ORD-01
+expect "has_test ignores a test in a gitignored folder" 3 "no test named ORD-01"
+
+echo 'ORD_01 sums · ORD_01 empty' >"$dir/tests/ord_test.go"
+gates fr ORD-01
+expect "has_test finds an untracked test" 0 "FR ORD-01: ✅ (2 tests)"
 
 # TEST_FORBIDDEN
 new_repo
